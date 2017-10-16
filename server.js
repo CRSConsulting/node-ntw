@@ -48,14 +48,14 @@ const app = express();
 /**
  * Connect to MongoDB.
  */
+// mongoose
 mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI, { userMongoClient: true });
-mongoose.connection.on('error', (err) => {
-  console.error(err);
-  console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'));
-  process.exit();
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI, { useMongoClient: true });
+process.on('SIGNT', () => {
+  mongoose.connection.close(() => {
+    console.log('Mongoose default connection disonnected through application termination');
+  });
 });
-
 /**
  * Express configuration.
  */
@@ -136,6 +136,10 @@ app.post('/account/password', passportConfig.isAuthenticated, userController.pos
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
 
+// routes from mean-stack
+// const routes = require('./app/routes/index');
+
+// app.use('/api', routes);
 /**
  * API examples routes.
  */
