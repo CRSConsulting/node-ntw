@@ -31,6 +31,7 @@ dotenv.load({ path: '.env' });
  * Controllers (route handlers).
  */
 const homeController = require('./controllers/home');
+const mobileController = require('./controllers/mobile');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
@@ -60,7 +61,7 @@ process.on('SIGNT', () => {
  * Express configuration.
  */
 app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
-app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
+app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(expressStatusMonitor());
@@ -136,13 +137,12 @@ app.post('/account/password', passportConfig.isAuthenticated, userController.pos
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
 
-// routes from mean-stack
-// const routes = require('./app/routes/index');
-
-// app.use('/api', routes);
 /**
  * API examples routes.
  */
+app.get('/api/mobile', mobileController.getAll);
+app.get('/api/mobile/keyword', mobileController.getKeywordAndInsert);
+app.get('/api/mobile/sms', mobileController.insertSMS);
 app.get('/api', apiController.getApi);
 app.get('/api/twilio', apiController.getTwilio);
 app.post('/api/twilio', apiController.postTwilio);
