@@ -46,5 +46,6 @@
     "billing_response_code": "1000",
     "parent_name": "",
     "payment_gateway": "McBraintree",
-    "are_you_a_veteran": null
+    "are_you_a_veteran": null,
+    "raffle_count": "0"
 }]
