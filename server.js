@@ -32,6 +32,7 @@ dotenv.load({ path: '.env' });
  */
 const homeController = require('./controllers/home');
 const mobileController = require('./controllers/mobile');
+const tangoController = require('./controllers/tango');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
@@ -87,13 +88,13 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use((req, res, next) => {
-  if (req.path === '/api/upload') {
-    next();
-  } else {
-    lusca.csrf()(req, res, next);
-  }
-});
+// app.use((req, res, next) => {
+//   if (req.path === '/api/upload') {
+//     next();
+//   } else {
+//     lusca.csrf()(req, res, next);
+//   }
+// });
 app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
 app.use((req, res, next) => {
@@ -143,6 +144,8 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword', mobileController.getKeywordAndInsert);
 app.get('/api/mobile/sms', mobileController.insertSMS);
+app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.post('/api/tango', tangoController.insertTango);
 app.get('/api', apiController.getApi);
 app.get('/api/twilio', apiController.getTwilio);
 app.post('/api/twilio', apiController.postTwilio);

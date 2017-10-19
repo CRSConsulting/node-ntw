@@ -9,7 +9,7 @@ const getAsync = Promise.promisify(cmd.get, {
   multiArgs: true,
   context: cmd,
 });
-
+const randy = require('randy');
 const { ReadPreference } = require('mongodb');
 
 const mobileJSON = require('./test.single.json');
@@ -91,5 +91,16 @@ exports.insertSMS = (req, res) =>
           res.status(500).send(err);
         });
     }).catch((err) => {
+      res.status(500).send(err);
+    });
+
+exports.getRaffleWinner = (req, res) =>
+  mobilesService.getAll()
+    .then((mobiles) => {
+      const shuffle = randy.shuffle(mobiles);
+      const winner = randy.choice(shuffle);
+      res.json(winner);
+    })
+    .catch((err) => {
       res.status(500).send(err);
     });
