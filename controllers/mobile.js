@@ -10,8 +10,9 @@ const getAsync = Promise.promisify(cmd.get, {
   context: cmd,
 });
 const randy = require('randy');
+const schedule = require('node-schedule');
 const { ReadPreference } = require('mongodb');
-
+const delay = require('delay');
 const mobileJSON = require('./test.single.json');
 // const mobileJSON = require('./test.data.json');
 // const mobileJSON = require('./mobile.many.data.json');
@@ -26,55 +27,60 @@ exports.getAll = (req, res) =>
     });
 
 exports.getKeywordAndInsert = (req, res) =>
-  getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":""}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
-    .then((mobiles) => {
-      const body = JSON.parse(mobiles[0].slice(958));
-      const { id } = body;
-      function delay(t) {
-        return new Promise(((resolve) => {
-          setTimeout(resolve, t);
-        }));
-      }
-      return delay(1000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
-        res.status(404).send('err', err);
-      });
-    })
-    .then((mobiles) => {
-      // const jsonData = mobileJSON;
-      const jsonData = JSON.parse(mobiles[0].slice(958));
-      const data = [];
-
-      for (let i = 0, n = jsonData.length; i < n; i++) {
-        const mobile = new Mobile(jsonData[i]);
-        data.push(mobile);
-      }
-
-      return Mobile.insertMany(data);
-    })
-    .then((mobiles) => {
-      const transactionsObj = mobiles;
-      const transactionsId = [];
-      const transactions = transactionsObj.map(cur => transactionsId.push(cur.transaction_id));
-      const dupsFound = mobilesService.getDups().then((value) => {
-        const transObj = value;
-        const dupsTransactionId = [];
-        transObj.forEach(cur => dupsTransactionId.push(cur._id.transaction_id));
-        return dupsTransactionId;
-      }).catch((err) => {
-        console.log('err', err);
-      });
-      return Promise.all([dupsFound, transactionsId]);
-    })
-    .then((mobiles) => {
-      const dupsFound = mobiles[0].sort();
-      const transactionsId = mobiles[1].sort();
-      console.log('dupsFound', dupsFound);
-      console.log('transactiondsId', transactionsId);
-      res.status(200).json(mobiles);
-    })
-    .catch((err) => {
-      res.status(404).send(err);
+  console.log(req);
+  console.log('start');
+getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":""}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+  .then((mobiles) => {
+    console.log('end');
+    const body = JSON.parse(mobiles[0].slice(958));
+    console.log('body', body);
+    const { id } = body;
+    function delay(t) {
+      return new Promise(((resolve) => {
+        setTimeout(resolve, t);
+      }));
+    }
+    return delay(1000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+      res.status(404).send('err', err);
     });
+  })
+  .then((mobiles) => {
+    // const jsonData = mobileJSON;
+    const jsonData = JSON.parse(mobiles[0].slice(958));
+    const data = [];
+
+    for (let i = 0, n = jsonData.length; i < n; i++) {
+      const mobile = new Mobile(jsonData[i]);
+      data.push(mobile);
+    }
+
+    return Mobile.insertMany(data);
+  })
+  .then((mobiles) => {
+    const transactionsObj = mobiles;
+    const transactionsId = [];
+    const transactions = transactionsObj.map(cur => transactionsId.push(cur.transaction_id));
+    const dupsFound = mobilesService.getDups().then((value) => {
+      const transObj = value;
+      const dupsTransactionId = [];
+      transObj.forEach(cur => dupsTransactionId.push(cur._id.transaction_id));
+      return dupsTransactionId;
+    }).catch((err) => {
+      console.log('err', err);
+    });
+    return Promise.all([dupsFound, transactionsId]);
+  })
+  .then((mobiles) => {
+    const dupsFound = mobiles[0].sort();
+    const transactionsId = mobiles[1].sort();
+    console.log('dupsFound', dupsFound);
+    console.log('transactiondsId', transactionsId);
+    // res.status(200).json(mobiles);
+  })
+  .catch((err) => {
+    // res.status(404).send(err);
+    console.log('err', err);
+  });
 
 exports.insertSMS = (req, res) =>
   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`)
@@ -104,3 +110,33 @@ exports.getRaffleWinner = (req, res) =>
     .catch((err) => {
       res.status(500).send(err);
     });
+
+// exports.getEntries = (req, res) =>
+//   // Insert base keyword
+//   // use that keyword to get all transaction in that location
+//   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":""}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+//     .then((mobiles) => {
+//       const body = JSON.parse(mobiles[0].slice(958));
+//       const { id } = body;
+//       function delay(t) {
+//         return new Promise(((resolve) => {
+//           setTimeout(resolve, t);
+//         }));
+//       }
+//       return delay(1000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+//         res.status(404).send('err', err);
+//       });
+//     }).then((mobiles) => {
+//       const jsonData = JSON.parse(mobiles[0].slice(958));
+//       const entries = jsonData.length;
+//       if (entries === 20) {
+//         console.log('20 entries');
+//       } else { res.status(404).send('err') }
+//     })
+//     .then((mobiles) => {
+//       console.log('mobiles', mobiles);
+//       res.json(mobiles);
+//     })
+//     .catch((err) => {
+//       console.log('err', err);
+//     });

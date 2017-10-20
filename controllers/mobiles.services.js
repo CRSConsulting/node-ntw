@@ -1,7 +1,7 @@
 const {
   ReadPreference,
 } = require('mongodb');
-
+const schedule = require('node-schedule');
 
 module.exports = mobilesService;
 
@@ -20,6 +20,7 @@ function mobilesService(options) {
     delay,
     getDups,
     removeOne,
+    cronJob
   };
 
   function getAll() {
@@ -49,6 +50,25 @@ function mobilesService(options) {
 
   function removeOne(queryCondition) {
     return Mobile.findOneAndRemove(queryCondition);
+  }
+
+  function cronJob(jsonData) {
+    // start time = 0 seconds
+    // end time = 10 seconds
+    const startTime = new Date(Date.now());
+    const endTime = new Date(startTime.getTime() + 5000);
+    const job = schedule.scheduleJob({ start: startTime, end: endTime, rule: '*/1 * * * * *' }, () => {
+      console.log('start');
+      const data = jsonData;
+      console.log('--=-=-=-==-=--=-=', jsonData.length);
+      data.forEach((cur) => {
+        console.log('cur', cur.keyword);
+      });
+      console.log('end');
+
+      return data;
+    });
+    return Promise.all([job]);
   }
 }
 

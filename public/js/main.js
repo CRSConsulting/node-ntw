@@ -1,5 +1,9 @@
-$(document).ready(function() {
-
-  // Place JavaScript code here...
-
+$(document).ready(() => {
+  - var title = "On Dogs: Man's Best Friend";
+  - var author = "enlore";
+  - var theGreat = "<span>escape!</span>";
+  
+  h1= title
+  p Written with love by #{author}
+  p This will be safe: #{theGreat}
 });

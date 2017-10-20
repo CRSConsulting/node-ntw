@@ -145,6 +145,7 @@ app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword', mobileController.getKeywordAndInsert);
 app.get('/api/mobile/sms', mobileController.insertSMS);
 app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.get('/api/mobile/entries', mobileController.getEntries);
 app.post('/api/tango', tangoController.insertTango);
 app.get('/api', apiController.getApi);
 app.get('/api/twilio', apiController.getTwilio);
