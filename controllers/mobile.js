@@ -5,16 +5,15 @@ const mobilesService = require('./mobiles.services')({
   modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our serivce
 });
 
+const tangoController = require('./tango');
+
 const getAsync = Promise.promisify(cmd.get, {
   multiArgs: true,
   context: cmd,
 });
 const randy = require('randy');
-const { ReadPreference } = require('mongodb');
+const fetch = require('node-fetch');
 
-const mobileJSON = require('./test.single.json');
-// const mobileJSON = require('./test.data.json');
-// const mobileJSON = require('./mobile.many.data.json');
 
 exports.getAll = (req, res) =>
   mobilesService.getAll()
@@ -76,12 +75,23 @@ exports.getKeywordAndInsert = (req, res) =>
       res.status(404).send(err);
     });
 
-exports.insertSMS = (req, res) =>
-  getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`)
+exports.insertWinnerSMS = (req, res) =>
+  mobilesService.getAll()
     .then((mobiles) => {
-      const body = JSON.parse(mobiles[0].slice(867));
+      const shuffle = randy.shuffle(mobiles);
+      const winner = randy.choice(shuffle);
+      return winner;
+    })
+    .then((mobiles) => {
+      const winner = mobiles;
+      const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`);
+      return Promise.all([call, winner]);
+    })
+    .then((mobiles) => {
+      const winner = mobiles[1];
+      const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      const phoneNumber = '6178204019';
+      const phoneNumber = winner.phone;
       const message = 'Congrats you have won!';
       getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)
         .then((mobiles) => {
@@ -90,17 +100,45 @@ exports.insertSMS = (req, res) =>
         }).catch((err) => {
           res.status(500).send(err);
         });
-    }).catch((err) => {
+    })
+    .catch((err) => {
       res.status(500).send(err);
     });
 
 exports.getRaffleWinner = (req, res) =>
   mobilesService.getAll()
     .then((mobiles) => {
-      const shuffle = randy.shuffle(mobiles);
+      const raffleArr = mobiles.reduce((r, a) => {
+        if (a.collected_amount !== null) {
+          const currency = a.collected_amount;
+          const number = Number(currency.replace(/[^0-9\.-]+/g, ''));
+          const chances = 1 + Math.floor(number / 10);
+          for (let i = 0; i < chances; i++) {
+            r.push(a);
+          }
+        }
+        return r;
+      }
+        , []);
+      const shuffle = randy.shuffle(raffleArr);
       const winner = randy.choice(shuffle);
       res.json(winner);
     })
     .catch((err) => {
       res.status(500).send(err);
+    });
+
+exports.test = (req, res) =>
+  fetch('http://localhost:3000/api/mobile/keyword')
+    .then(res => res.json()).then((json) => {
+      console.log('json1', json);
+      return fetch('http://localhost:3000/api/mobile/sms');
+    })
+    .then(res => res.json())
+    .then((json) => {
+      console.log('json2', json);
+      return tangoController.insertTango({ message: 'helloworld' }, res);
+    })
+    .catch((err) => {
+      console.log('err', err);
     });
