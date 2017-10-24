@@ -6,11 +6,12 @@ exports.insertTango = (req, res) => {
     user: process.env.TANGO_USER,
     password: process.env.TANGO_PASSWORD,
   };
+
   const client = new Client(optionsAuth);
   const args = {
     data: {
       accountIdentifier: 'ntw-one',
-      amount: 10,
+      amount: 1,
       customerIdentifier: 'test-customer',
       emailSubject: 'New Order',
       message: 'testing',
@@ -28,11 +29,12 @@ exports.insertTango = (req, res) => {
     },
     headers: {
       'Content-Type': 'application/json',
-    },
+    }
   };
   function handleResponse(data, response) {
     if (response.statusCode === 201) {
-      res.json(data);
+      const recipient = { email: `${data.recipient.email}` };
+      res.json(recipient);
     } else {
       switch (response.statusCode) {
         case 404:
@@ -44,7 +46,7 @@ exports.insertTango = (req, res) => {
           break;
 
         default:
-          console.log(`Response status code: ${response.statusCode}`);
+          res.send(`Response status code: ${response.statusCode}`);
       }
     }
   }

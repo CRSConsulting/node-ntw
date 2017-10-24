@@ -50,7 +50,7 @@ const app = express();
 /**
  * Connect to MongoDB.
  */
-// mongoose
+ // mongoose
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI, { useMongoClient: true });
 process.on('SIGNT', () => {
@@ -143,8 +143,10 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
  */
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword', mobileController.getKeywordAndInsert);
-app.get('/api/mobile/sms', mobileController.insertSMS);
+app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
 app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.get('/api/mobile/test', mobileController.test);
+
 app.post('/api/tango', tangoController.insertTango);
 app.get('/api', apiController.getApi);
 app.get('/api/twilio', apiController.getTwilio);
