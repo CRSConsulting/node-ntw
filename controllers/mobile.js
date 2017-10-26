@@ -34,7 +34,7 @@ exports.getKeywordAndInsert = (req, res) =>
           setTimeout(resolve, t);
         }));
       }
-      return delay(1000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+      return delay(10000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
         res.status(404).send('err', err);
       });
     })
@@ -97,6 +97,7 @@ exports.insertWinnerSMS = (req, res) =>
       getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)
         .then((mobiles) => {
           const body = JSON.parse(mobiles[0].slice(970));
+          console.log('insertWinnerSMS==========================', body);
           res.json(body);
         }).catch((err) => {
           res.status(500).send(err);
@@ -130,11 +131,16 @@ exports.getRaffleWinner = (req, res) =>
     });
 
 exports.test = (req, res) =>
+  // console.log('req', req);
   fetch('http://localhost:3000/api/mobile/keyword')
     .then(res => res.json())
-    .then(json => fetch('http://localhost:3000/api/mobile/sms'))
+    .then((json) => {
+      return fetch('http://localhost:3000/api/mobile/sms');
+    })
     .then(res => res.json())
-    .then(json => tangoController.insertTango({ keyword: req }, res))
+    .then((json) => {
+      return tangoController.insertTango({ keyword: req }, res);
+    })
     .catch((err) => {
       console.log('err', err);
     });

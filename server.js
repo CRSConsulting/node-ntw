@@ -64,7 +64,7 @@ const app = express();
 //     setTimeout(() => {
 //       console.log('stopping 1st');
 //       cronJobs[key].stop();
-//     }, 10000);
+//     }, 50000);
 //     setTimeout(() => {
 //       console.log('starting 2nd');
 //       cronJobs[key].start()
@@ -87,21 +87,17 @@ const app = express();
 //     }, 30000);
 //   }
 // }
-// let count = 0;
-// Object.keys(cronJobs).forEach((key) => {
-//   console.log('key', key);
-//   if (Object.prototype.toString.call(cronJobs[key]) === '[object Object]') {
-//     if ({}.hasOwnProperty.call(cronJobs[key], 'users')) {
-//       count += cronJobs[key].users.length;
-//     }
-//   }
-// });
 
+
+// for (const key in cronJobs) {
+//   console.log('starting 1st');
+//   cronJobs[key].start();
+// }
 
 // function promise(index, keyword) {
 //   return new Promise((resolve) => {
-//     // const delay = Math.random() * 20000; // between 0 and 5 seconds
-//     const delay = 10000;
+//     const delay = Math.random() * 10000; // between 0 and 5 seconds
+//     // const delay = 1000;
 //     console.log(`${index}. Waiting ${delay}`);
 //     setTimeout(() => {
 //       const key = keyword.keyword;
@@ -111,13 +107,13 @@ const app = express();
 //     }, delay);
 //   });
 // }
-// console.log(Promise.all([
+// Promise.all([
 //   promise(1, { keyword: 'seattle.v1', cronPattern: '*/1 * * * * *' }),
 //   promise(2, { keyword: 'seattle.v2', cronPattern: '*/2 * * * * *' }),
 //   promise(3, { keyword: 'seattle.v3', cronPattern: '*/3 * * * * *' }),
 //   promise(4, { keyword: 'seattle.v4', cronPattern: '*/4 * * * * *' })
 // ])
-//   .then(() => console.log('All done!')));
+//   .then(() => console.log('All done!'));
 
 
 /**
