@@ -22,6 +22,7 @@ const multer = require('multer');
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
+const cronJobs = require('./config/cron');
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
@@ -48,9 +49,81 @@ const passportConfig = require('./config/passport');
 const app = express();
 
 /**
+ * Cron Config
+ */
+// const message = 'hello world';
+
+// if (message === 'hello world') {
+//   newFunction();
+// }
+
+// function newFunction() {
+//   for (const key in cronJobs) {
+//     console.log('starting 1st');
+//     cronJobs[key].start();
+//     setTimeout(() => {
+//       console.log('stopping 1st');
+//       cronJobs[key].stop();
+//     }, 10000);
+//     setTimeout(() => {
+//       console.log('starting 2nd');
+//       cronJobs[key].start()
+//       ;
+//     }, 15000);
+//     setTimeout(() => {
+//       console.log('stopping 2nd');
+//       cronJobs[key].stop()
+//       ;
+//     }, 20000);
+//     setTimeout(() => {
+//       console.log('starting 3rd');
+//       cronJobs[key].start()
+//       ;
+//     }, 25000);
+//     setTimeout(() => {
+//       console.log('stopping 3rd');
+//       cronJobs[key].stop()
+//       ;
+//     }, 30000);
+//   }
+// }
+// let count = 0;
+// Object.keys(cronJobs).forEach((key) => {
+//   console.log('key', key);
+//   if (Object.prototype.toString.call(cronJobs[key]) === '[object Object]') {
+//     if ({}.hasOwnProperty.call(cronJobs[key], 'users')) {
+//       count += cronJobs[key].users.length;
+//     }
+//   }
+// });
+
+
+// function promise(index, keyword) {
+//   return new Promise((resolve) => {
+//     // const delay = Math.random() * 20000; // between 0 and 5 seconds
+//     const delay = 10000;
+//     console.log(`${index}. Waiting ${delay}`);
+//     setTimeout(() => {
+//       const key = keyword.keyword;
+//       mobileController.test(key);
+//       console.log(`${index}. Done waiting ${delay}`);
+//       resolve();
+//     }, delay);
+//   });
+// }
+// console.log(Promise.all([
+//   promise(1, { keyword: 'seattle.v1', cronPattern: '*/1 * * * * *' }),
+//   promise(2, { keyword: 'seattle.v2', cronPattern: '*/2 * * * * *' }),
+//   promise(3, { keyword: 'seattle.v3', cronPattern: '*/3 * * * * *' }),
+//   promise(4, { keyword: 'seattle.v4', cronPattern: '*/4 * * * * *' })
+// ])
+//   .then(() => console.log('All done!')));
+
+
+/**
  * Connect to MongoDB.
  */
- // mongoose
+// mongoose
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI, { useMongoClient: true });
 process.on('SIGNT', () => {
@@ -169,3 +242,4 @@ app.listen(app.get('port'), () => {
 });
 
 module.exports = app;
+

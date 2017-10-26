@@ -91,8 +91,13 @@ exports.insertWinnerSMS = (req, res) =>
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
+<<<<<<< HEAD
 //       const phoneNumber = winner.phone;
       const phoneNumber = 6178204019;
+=======
+      // const phoneNumber = winner.phone;
+      const phoneNumber = 16178204019;
+>>>>>>> testing cron job/ testing concurrent connections,
       const message = 'Congrats you have won!';
       getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)
         .then((mobiles) => {
@@ -131,15 +136,9 @@ exports.getRaffleWinner = (req, res) =>
 
 exports.test = (req, res) =>
   fetch('http://localhost:3000/api/mobile/keyword')
-    .then(res => res.json()).then((json) => {
-      console.log('json1', json);
-      return fetch('http://localhost:3000/api/mobile/sms');
-    })
+    .then(res => res.json()).then(json => fetch('http://localhost:3000/api/mobile/sms'))
     .then(res => res.json())
-    .then((json) => {
-      console.log('json2', json);
-      return tangoController.insertTango({ message: 'helloworld' }, res);
-    })
+    .then(json => tangoController.insertTango({ keyword: req }, res))
     .catch((err) => {
       console.log('err', err);
     });
