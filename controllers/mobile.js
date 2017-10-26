@@ -91,7 +91,8 @@ exports.insertWinnerSMS = (req, res) =>
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      const phoneNumber = winner.phone;
+//       const phoneNumber = winner.phone;
+      const phoneNumber = 6178204019;
       const message = 'Congrats you have won!';
       getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)
         .then((mobiles) => {
