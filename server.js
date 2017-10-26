@@ -211,9 +211,12 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
  * API examples routes.
  */
 app.get('/api/mobile', mobileController.getAll);
-app.get('/api/mobile/keyword', mobileController.getKeywordAndInsert);
-app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
-app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
+app.get('/api/mobile/sms', mobileController.insertSMS);
+app.get('/api/mobile/raffle', mobileController.findWinnerIfAvailable);
+// app.get('/api/mobile/keyword', mobileController.getKeywordAndInsert);
+// app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
+// app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
 app.get('/api/mobile/test', mobileController.test);
 
 app.post('/api/tango', tangoController.insertTango);
