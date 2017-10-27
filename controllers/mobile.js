@@ -95,7 +95,6 @@ exports.getKeywordAndInsert = (req, res) =>
       function dateTimeReviver(key, value) {
         let a;
         if (key === 'transaction_date' || key === 'donation_date') {
-
           a = new Date(`${value} UTC`);
           if (a) {
             return a;
@@ -104,7 +103,7 @@ exports.getKeywordAndInsert = (req, res) =>
         // console.log('a', a);
         return value;
       }
-      return JSON.parse(mobiles[0].slice(958), dateTimeReviver)
+      return JSON.parse(mobiles[0].slice(958), dateTimeReviver);
     })
     .then((jsonData) => {
       const data = jsonData;
@@ -182,13 +181,19 @@ exports.getRaffleWinner = (req, res) =>
       res.status(500).send(err);
     });
 
+const items = {};
+
+
 exports.test = (req, res) =>
-  // console.log('req', req);
-  fetch('http://localhost:3000/api/mobile/keyword')
+  fetch('http://localhost:3000/api/mobile/keyword/Location1')
+    .then((res) => {
+      res.json();
+    })
+    .then(json => fetch('http://localhost:3000/api/mobile/sms'))
     .then(res => res.json())
-    .then((json) => fetch('http://localhost:3000/api/mobile/sms'))
-    .then(res => res.json())
-    .then((json) => tangoController.insertTango({ keyword: req }, res))
+    .then((json) => {
+      return tangoController.insertTango({ keyword: req }, res);
+    })
     .catch((err) => {
       console.log('err', err);
     });
