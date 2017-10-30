@@ -24,9 +24,28 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 const cron = require('./config/cron');
 
-const startCronJob = cron.job.start();
+const moment = require('moment');
 
 const schedule = require('node-schedule');
+
+const rule = new schedule.RecurrenceRule();
+// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// rule.hour = 0;
+// rule.minute = 5;
+
+// This job runs every 7 minutes
+rule.minute = new schedule.Range(0, 59, 7);
+
+const j = schedule.scheduleJob(rule, () => {
+  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+  const startCronJob = cron.job.start();
+});
+
+// start job
+// const startCronJob = cron.job.start();
+
+// // stop job
+// const stopCronJob = cron.job.stop();
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */

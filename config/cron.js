@@ -32,10 +32,12 @@ const job = new CronJob({
           console.log(`${index}. Waiting ${delay}`);
           setTimeout(() => {
             const key = query.keyword;
-            mobileController.master(req, res, key);
+            mobileController.master(key, res);
             console.log(`${index}. Done waiting ${delay}`);
             resolve();
           }, delay);
+        }).catch((err) => {
+          console.error('err', err);
         });
       }
       Promise.all([
@@ -47,7 +49,7 @@ const job = new CronJob({
         .then(() => console.log('Promise.All done!'));
       console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is done executing`);
       this.isCurrentlyExecuting = false;
-    }, 30000);
+    }, 10000);
     job.stop();
   },
   start: false,

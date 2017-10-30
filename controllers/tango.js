@@ -2,7 +2,7 @@ const Client = require('node-rest-client').Client;
 
 
 exports.insertTango = (req, res) => {
-  console.log('req', req);
+  console.log('insertTango REQ: ', req);
   const optionsAuth = {
     user: process.env.TANGO_USER,
     password: process.env.TANGO_PASSWORD,
