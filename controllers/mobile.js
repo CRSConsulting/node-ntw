@@ -16,6 +16,7 @@ const getAsync = Promise.promisify(cmd.get, {
 const randy = require('randy');
 const fetch = require('node-fetch');
 
+// const moment = require('moment');
 
 exports.getAll = (req, res) =>
   mobilesService.getAll()
@@ -26,60 +27,12 @@ exports.getAll = (req, res) =>
       res.status(500).send(err);
     });
 
-// exports.getKeywordAndInsert = (req, res) =>
-//   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":""}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
-//     .then((mobiles) => {
-//       const body = JSON.parse(mobiles[0].slice(958));
-//       const { id } = body;
-//       function delay(t) {
-//         return new Promise(((resolve) => {
-//           setTimeout(resolve, t);
-//         }));
-//       }
-//       return delay(10000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
-//         res.status(404).send('err', err);
-//       });
-//     })
-//     .then((mobiles) => {
-//       // const jsonData = mobileJSON;
-//       const jsonData = JSON.parse(mobiles[0].slice(958));
-//       const data = [];
 
-//       for (let i = 0, n = jsonData.length; i < n; i++) {
-//         const mobile = new Mobile(jsonData[i]);
-//         data.push(mobile);
-//       }
-
-//       return Mobile.insertMany(data);
-//     })
-//     .then((mobiles) => {
-//       const transactionsObj = mobiles;
-//       const transactionsId = [];
-//       const transactions = transactionsObj.map(cur => transactionsId.push(cur.transaction_id));
-//       const dupsFound = mobilesService.getDups().then((value) => {
-//         const transObj = value;
-//         const dupsTransactionId = [];
-//         transObj.forEach(cur => dupsTransactionId.push(cur._id.transaction_id));
-//         return dupsTransactionId;
-//       }).catch((err) => {
-//         console.log('err', err);
-//       });
-//       return Promise.all([dupsFound, transactionsId]);
-//     })
-//     .then((mobiles) => {
-//       const dupsFound = mobiles[0].sort();
-//       const transactionsId = mobiles[1].sort();
-//       console.log('dupsFound', dupsFound);
-//       console.log('transactiondsId', transactionsId);
-//       res.status(200).json(mobiles);
-//     })
-//     .catch((err) => {
-//       res.status(404).send(err);
-//     });
 
 exports.getKeywordAndInsert = (req, res) =>
   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
+      console.log('1st then');
       const body = JSON.parse(mobiles[0].slice(958));
       const { id } = body;
       function delay(t) {
@@ -87,11 +40,12 @@ exports.getKeywordAndInsert = (req, res) =>
           setTimeout(resolve, t);
         }));
       }
-      return delay(1000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+      return delay(10000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
         res.status(404).send('err', err);
       });
     })
     .then((mobiles) => {
+      console.log('2nd then');
       function dateTimeReviver(key, value) {
         let a;
         if (key === 'transaction_date' || key === 'donation_date') {
@@ -106,18 +60,20 @@ exports.getKeywordAndInsert = (req, res) =>
       return JSON.parse(mobiles[0].slice(958), dateTimeReviver);
     })
     .then((jsonData) => {
+      console.log('3rd then');
       const data = jsonData;
       const newTimer = mobilesService.generateTimer(data);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
+      console.log('4th then');
       const data = promises[0];
       const timer = promises[1];
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
           res.status(200).json({ rowsAdded: `${mobiles.nInserted} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
-          res.status(500).send(err);
+          res.status(500).send({ message: err, where: '4then()' });
         }
       });
     })
@@ -142,6 +98,7 @@ exports.insertWinnerSMS = (req, res) =>
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
+      console.log('sessionToken', sessionToken);
       //       const phoneNumber = winner.phone;
       const phoneNumber = 6178204019;
       const message = 'Congrats you have won!';
@@ -181,19 +138,14 @@ exports.getRaffleWinner = (req, res) =>
       res.status(500).send(err);
     });
 
-const items = {};
-
-
-exports.test = (req, res) =>
-  fetch('http://localhost:3000/api/mobile/keyword/Location1')
+exports.master = (req, res) =>
+  fetch(`http://localhost:3000/api/mobile/keyword/${req}`)
     .then((res) => {
       res.json();
     })
     .then(json => fetch('http://localhost:3000/api/mobile/sms'))
     .then(res => res.json())
-    .then((json) => {
-      return tangoController.insertTango({ keyword: req }, res);
-    })
+    .then(json => tangoController.insertTango({ keyword: 'THIS WILL BE THE WINNER' }, res))
     .catch((err) => {
       console.log('err', err);
     });

@@ -22,7 +22,11 @@ const multer = require('multer');
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
-const cronJobs = require('./config/cron');
+const cron = require('./config/cron');
+
+const startCronJob = cron.job.start();
+
+const schedule = require('node-schedule');
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
@@ -47,74 +51,6 @@ const passportConfig = require('./config/passport');
  * Create Express server.
  */
 const app = express();
-
-/**
- * Cron Config
- */
-// const message = 'hello world';
-
-// if (message === 'hello world') {
-//   newFunction();
-// }
-
-// function newFunction() {
-//   for (const key in cronJobs) {
-//     console.log('starting 1st');
-//     cronJobs[key].start();
-//     setTimeout(() => {
-//       console.log('stopping 1st');
-//       cronJobs[key].stop();
-//     }, 50000);
-//     setTimeout(() => {
-//       console.log('starting 2nd');
-//       cronJobs[key].start()
-//       ;
-//     }, 15000);
-//     setTimeout(() => {
-//       console.log('stopping 2nd');
-//       cronJobs[key].stop()
-//       ;
-//     }, 20000);
-//     setTimeout(() => {
-//       console.log('starting 3rd');
-//       cronJobs[key].start()
-//       ;
-//     }, 25000);
-//     setTimeout(() => {
-//       console.log('stopping 3rd');
-//       cronJobs[key].stop()
-//       ;
-//     }, 30000);
-//   }
-// }
-
-
-// for (const key in cronJobs) {
-//   console.log('starting 1st');
-//   cronJobs[key].start();
-// }
-
-// function promise(index, keyword) {
-//   return new Promise((resolve) => {
-//     const delay = Math.random() * 10000; // between 0 and 5 seconds
-//     // const delay = 1000;
-//     console.log(`${index}. Waiting ${delay}`);
-//     setTimeout(() => {
-//       const key = keyword.keyword;
-//       mobileController.test(key);
-//       console.log(`${index}. Done waiting ${delay}`);
-//       resolve();
-//     }, delay);
-//   });
-// }
-// Promise.all([
-//   promise(1, { keyword: 'seattle.v1', cronPattern: '*/1 * * * * *' }),
-//   promise(2, { keyword: 'seattle.v2', cronPattern: '*/2 * * * * *' }),
-//   promise(3, { keyword: 'seattle.v3', cronPattern: '*/3 * * * * *' }),
-//   promise(4, { keyword: 'seattle.v4', cronPattern: '*/4 * * * * *' })
-// ])
-//   .then(() => console.log('All done!'));
-
 
 /**
  * Connect to MongoDB.
@@ -214,7 +150,7 @@ app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
 app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
 app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
-app.get('/api/mobile/test', mobileController.test);
+app.get('/api/mobile/master', mobileController.master);
 
 app.post('/api/tango', tangoController.insertTango);
 app.get('/api', apiController.getApi);

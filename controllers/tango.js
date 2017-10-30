@@ -2,6 +2,7 @@ const Client = require('node-rest-client').Client;
 
 
 exports.insertTango = (req, res) => {
+  console.log('req', req);
   const optionsAuth = {
     user: process.env.TANGO_USER,
     password: process.env.TANGO_PASSWORD,
@@ -35,7 +36,7 @@ exports.insertTango = (req, res) => {
     if (response.statusCode === 201) {
       const recipient = { email: `${data.recipient.email}` };
       console.log('recipient', recipient);
-      res.json(recipient);
+      // res.send(recipient);
     } else {
       switch (response.statusCode) {
         case 404:
