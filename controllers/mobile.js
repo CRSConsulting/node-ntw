@@ -68,12 +68,11 @@ exports.getKeywordAndInsert = (req, res) =>
         if (!err || err.code === 11000) {
           res.status(200).json({ rowsAdded: `${mobiles.nInserted} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
-          res.status(500).send({ message: err, where: '4then()' });
+          res.status(404).send(err);
         }
       });
     })
     .catch((err) => {
-      console.log('catch');
       res.status(404).send(err);
     });
 
@@ -149,5 +148,5 @@ exports.master = (req, res) =>
     .then(res => res.json())
     .then(json => tangoController.insertTango({ keyword: 'THIS WILL BE THE WINNER' }, res))
     .catch((err) => {
-      console.log('err', err);
+      res.status(500).send(err);
     });

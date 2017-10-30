@@ -37,7 +37,7 @@ const job = new CronJob({
             resolve();
           }, delay);
         }).catch((err) => {
-          console.error('err', err);
+          res.status(500).send(err);
         });
       }
       Promise.all([
