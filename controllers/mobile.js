@@ -64,7 +64,8 @@ exports.getKeywordAndInsert = (req, res) =>
       const timer = promises[1];
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
-          res.status(200).json({entryResponse: mobiles, rowsAdded: `${mobiles.nInserted} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
+          const amtInsert = mobiles.insertedCount || mobiles.nInserted;
+          res.status(200).json({ entryResponse: mobiles, rowsAdded: `${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
           res.status(404).send(err);
         }
