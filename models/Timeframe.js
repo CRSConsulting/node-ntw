@@ -6,7 +6,7 @@ const timeframeSchema = new Schema({
   keyword: String,
   startTime: Date,
   endTime: Date,
-  used: Boolean,  
+  used: Boolean,
 }, {
   collection: 'timer',
   read: 'nearest',

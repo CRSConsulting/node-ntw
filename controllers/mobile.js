@@ -28,7 +28,6 @@ exports.getAll = (req, res) =>
     });
 
 
-
 exports.getKeywordAndInsert = (req, res) =>
   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
@@ -83,11 +82,25 @@ exports.getKeywordAndInsert = (req, res) =>
     });
 
 exports.insertWinnerSMS = (req, res) =>
-  mobilesService.getAll()
-    .then((mobiles) => {
-      const shuffle = randy.shuffle(mobiles);
-      const winner = randy.choice(shuffle);
-      return winner;
+  mobilesService.findRunningRaffle(req.params.keyword)
+    .then((foundTime) => {
+      if (foundTime) {
+        return Promise.all([mobilesService.getRaffleContestants(foundTime), foundTime]);
+      }
+      return Promise.reject('No Raffles need to be drawn at this instance');
+    })
+    .then((promises) => {
+      const mobiles = promises[0];
+      const time = promises[1];
+      if (mobiles.length > 0) {
+        const raffleArr = mobilesService.addWeightToRaffle(mobiles);
+        const shuffle = randy.shuffle(raffleArr);
+        const winner = randy.choice(shuffle);
+        time.used = true;
+        mobilesService.raffleComplete(time);
+        return winner;
+      }
+      return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
     })
     .then((mobiles) => {
       const winner = mobiles;
@@ -123,7 +136,7 @@ exports.getRaffleWinner = (req, res) =>
           const currency = a.collected_amount;
           const number = Number(currency.replace(/[^0-9\.-]+/g, ''));
           const chances = 1 + Math.floor(number / 10);
-          for (let i = 0; i < chances; i++) {
+          for (let i = 0; i < chances; i += 1) {
             r.push(a);
           }
         }
@@ -138,14 +151,59 @@ exports.getRaffleWinner = (req, res) =>
       res.status(500).send(err);
     });
 
-exports.master = (req, res) =>
-  fetch(`http://localhost:3000/api/mobile/keyword/${req}`)
-    .then((res) => {
-      res.json();
+exports.findWinnerIfAvailable = (req, res) => {
+  mobilesService.findRunningRaffle(req.params.keyword)
+    .then((foundTime) => {
+      if (foundTime) {
+        return Promise.all([mobilesService.getRaffleContestants(foundTime), foundTime]);
+      }
+      return Promise.reject('No Raffles need to be drawn at this instance');
+    })
+    .then((promises) => {
+      const mobiles = promises[0];
+      const time = promises[1];
+      console.log(mobiles.length);
+      if (mobiles.length > 0) {
+        const raffleArr = mobiles.reduce(
+          (r, a) => {
+            if (a.collected_amount && a.collected_amount !== null) {
+              const currency = a.collected_amount;
+              const number = Number(currency.replace(/[^0-9.-]+/g, ''));
+              const chances = 1 + Math.floor(number / 10);
+              for (let i = 0; i < chances; i += 1) {
+                r.push(a);
+              }
+            }
+            return r;
+          }
+          , []
+        );
+        console.log(raffleArr.length);
+        const shuffle = randy.shuffle(raffleArr);
+        const winner = randy.choice(shuffle);
+        time.used = true;
+        mobilesService.raffleComplete(time);
+        res.json(winner);
+      } else {
+        res.status(500).send({ msg: 'NO PARTICIPANTS IN RAFFLE ERROR' });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send(err);
+    });
+};
+
+exports.master = (req, res, key) =>
+  fetch(`http://localhost:3000/api/mobile/keyword/${key}`)
+    .then((resp) => {
+      resp.json();
     })
     .then(json => fetch('http://localhost:3000/api/mobile/sms'))
-    .then(res => res.json())
-    .then(json => tangoController.insertTango({ keyword: 'THIS WILL BE THE WINNER' }, res))
+    .then((resp) => { 
+      tangoController.insertTango({ keyword: resp }, res); 
+      return resp.json(); 
+    })
     .catch((err) => {
       console.log('err', err);
     });

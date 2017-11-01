@@ -53,6 +53,7 @@
     "pug": "^2.0.0-rc.3",
     "randy": "^1.5.1",
     "request": "^2.81.0",
+    "selenium-webdriver": "^3.6.0",
     "timer-stopwatch": "^0.2.0",
     "twilio": "^3.6.3",
     "unirest": "^0.5.1",

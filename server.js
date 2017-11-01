@@ -24,7 +24,7 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 const cron = require('./config/cron');
 
-const startCronJob = cron.job.start();
+// const startCronJob = cron.job.start();
 
 const schedule = require('node-schedule');
 /**
@@ -74,7 +74,7 @@ app.use(expressStatusMonitor());
 app.use(compression());
 app.use(sass({
   src: path.join(__dirname, 'public'),
-  dest: path.join(__dirname, 'public')
+  dest: path.join(__dirname, 'public'),
 }));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -87,8 +87,8 @@ app.use(session({
   store: new MongoStore({
     url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
     autoReconnect: true,
-    clear_interval: 3600
-  })
+    clear_interval: 3600,
+  }),
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -149,7 +149,7 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
 app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
-app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.get('/api/mobile/raffle/:keyword', mobileController.findWinnerIfAvailable);
 app.get('/api/mobile/master', mobileController.master);
 
 app.post('/api/tango', tangoController.insertTango);
@@ -158,7 +158,6 @@ app.get('/api/twilio', apiController.getTwilio);
 app.post('/api/twilio', apiController.postTwilio);
 app.get('/api/upload', apiController.getFileUpload);
 app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
-
 
 /**
  * Error Handler.

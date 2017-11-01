@@ -2,7 +2,6 @@ const {
   ReadPreference,
 } = require('mongodb');
 
-
 module.exports = mobilesService;
 
 function mobilesService(options) {
@@ -23,6 +22,10 @@ function mobilesService(options) {
     getAll,
     getDups,
     generateTimer,
+    findRunningRaffle,
+    getRaffleContestants,
+    raffleComplete,
+    addWeightToRaffle
   };
 
   function getAll() {
@@ -30,7 +33,7 @@ function mobilesService(options) {
   }
 
   function getDups() {
-    return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
+    return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction' }, count: { $sum: 1 } } }, { $match: { count: { $gte: 2 } } }]);
   }
 
   function findExistingRaffle(kw, start) {
@@ -57,14 +60,43 @@ function mobilesService(options) {
           used: false,
         });
         findExistingRaffle(uniqueKeys[i], start)
-        .then((count) => {
-          if (count === 0) {
-            Timeframe.create(tf);
-          }
-        });
+          .then((count) => {
+            if (count === 0) {
+              Timeframe.create(tf);
+            }
+          });
       }
     }
     return typeof tf !== 'undefined' ? tf : {};
+  }
+
+  function findRunningRaffle(kw) {
+    return Timeframe.findOne({ endTime: { $lte: new Date() }, used: false, keyword: `${kw}.*` });
+  }
+
+  function getRaffleContestants(timeframe) {
+    return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
+  }
+
+  function raffleComplete(time) {
+    return Timeframe.update({ _id: time._id }, { $set: { used: true } });
+  }
+
+  function addWeightToRaffle(unweighted) {
+    return unweighted.reduce(
+      (r, a) => {
+        if (a.collected_amount && a.collected_amount !== null) { // if money was donated
+          const currency = a.collected_amount;
+          const number = Number(currency.replace(/[^0-9.-]+/g, '')); // convert dollar to number
+          const chances = 1 + Math.floor(number / 10); // every $10 grants one more chance
+          for (let i = 0; i < chances; i += 1) {
+            r.push(a);
+          }
+        }
+        return r;
+      }
+      , []
+    );
   }
 }
 

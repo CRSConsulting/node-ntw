@@ -36,7 +36,7 @@ const job = new CronJob({
             console.log(`${index}. Done waiting ${delay}`);
             resolve();
           }, delay);
-        });
+        }).catch(err => console.log(err));
       }
       Promise.all([
         promise(1, { keyword: 'Location1' }),
