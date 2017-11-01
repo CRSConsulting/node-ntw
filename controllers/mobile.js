@@ -130,29 +130,6 @@ exports.insertWinnerSMS = (req, res) =>
       res.status(500).send(err);
     });
 
-exports.getRaffleWinner = (req, res) =>
-  mobilesService.getAll()
-    .then((mobiles) => {
-      const raffleArr = mobiles.reduce((r, a) => {
-        if (a.collected_amount !== null) {
-          const currency = a.collected_amount;
-          const number = Number(currency.replace(/[^0-9\.-]+/g, ''));
-          const chances = 1 + Math.floor(number / 10);
-          for (let i = 0; i < chances; i += 1) {
-            r.push(a);
-          }
-        }
-        return r;
-      }
-        , []);
-      const shuffle = randy.shuffle(raffleArr);
-      const winner = randy.choice(shuffle);
-      res.json(winner);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
-
 exports.findWinnerIfAvailable = (req, res) => {
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
