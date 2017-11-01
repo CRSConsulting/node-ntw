@@ -37,7 +37,7 @@ function mobilesService(options) {
   }
 
   function findExistingRaffle(kw, start) {
-    return Timeframe.count({ endTime: { $gte: start }, used: false, keyword: kw });
+    return Timeframe.count({ endTime: { $gte: start }, keyword: kw });
   }
 
   function generateTimer(jsonData) {
