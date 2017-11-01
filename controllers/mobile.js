@@ -196,12 +196,12 @@ exports.findWinnerIfAvailable = (req, res) => {
     });
 };
 
-exports.master = (req, res, key) =>
-  fetch(`http://localhost:3000/api/mobile/keyword/${key}`)
+exports.master = (req, res) =>
+  fetch(`http://localhost:3000/api/mobile/keyword/${req}`)
     .then((resp) => {
       resp.json();
     })
-    .then(json => fetch(`http://localhost:3000/api/mobile/sms/${key}`))
+    .then(json => fetch(`http://localhost:3000/api/mobile/sms/${req}`))
     .then((resp) => { 
       tangoController.insertTango({ keyword: resp }, res); 
       return resp.json(); 
