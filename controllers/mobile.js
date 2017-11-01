@@ -15,7 +15,6 @@ const getAsync = Promise.promisify(cmd.get, {
 });
 const randy = require('randy');
 const fetch = require('node-fetch');
-
 // const moment = require('moment');
 
 exports.getAll = (req, res) =>
@@ -26,7 +25,6 @@ exports.getAll = (req, res) =>
     .catch((err) => {
       res.status(500).send(err);
     });
-
 
 
 exports.getKeywordAndInsert = (req, res) =>
@@ -92,8 +90,8 @@ exports.insertWinnerSMS = (req, res) =>
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      console.log('sessionToken', sessionToken);
-      //       const phoneNumber = winner.phone;
+      // console.log('sessionToken', sessionToken);
+      // const phoneNumber = winner.phone;
       const phoneNumber = 6178204019;
       const message = 'Congrats you have won!';
       function delay(t) {
@@ -104,6 +102,7 @@ exports.insertWinnerSMS = (req, res) =>
       return delay(Math.random() * 10000).then(() =>
         getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
         .then((mobiles) => {
+          // console.log('===========================================================================================');
           const body = JSON.parse(mobiles[0].slice(970));
           console.log('insertWinnerSMS==========================', body);
           res.json(body);

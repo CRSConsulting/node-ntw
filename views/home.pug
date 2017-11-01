@@ -1,9 +1,12 @@
 extends layout
 
 block content
-  h1 ntw-project
-  p.lead Created With Node.js, Express.js, MongoDB, Pug.js
-  hr
+  h1= title
+  p Written with love by !{author}
+  p This will be safe: #{theGreat}
+  //- h1 ntw-project
+  //- p.lead Created With Node.js, Express.js, MongoDB, Pug.js
+  //- hr
   .row
     .col-sm-6
       h2 Heading

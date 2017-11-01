@@ -1,8 +1,47 @@
 const Client = require('node-rest-client').Client;
+const Tango = require('../models/Tango');
+const tangosService = require('./tangos.services')({
+  modelService: Tango,
+});
 
+exports.getAll = (req, res) => {
+  tangosService.getAll()
+    .then((tangos) => {
+      const data = tangos;
+      res.json(data);
+    }).catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
+exports.insert = (req, res) => {
+  tangosService.insert(req.body)
+    .then((tangos) => {
+      const data = tangos;
+      res.json(data);
+    }).catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
+exports.getOne = (req, res) => {
+  const queryCondition = {
+    _id: req.params.id
+  };
+
+  tangosService.getOne(queryCondition)
+    .then((tango) => {
+      const data = tango;
+      res.json(data);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
 
 exports.insertTango = (req, res) => {
   console.log('insertTango REQ: ', req);
+
   const optionsAuth = {
     user: process.env.TANGO_USER,
     password: process.env.TANGO_PASSWORD,
@@ -27,6 +66,8 @@ exports.insertTango = (req, res) => {
         lastName: 'Yu',
       },
       utid: 'U561593',
+      // Amazon GC "U666425"
+      // VISA GC "U426141"
     },
     headers: {
       'Content-Type': 'application/json',
