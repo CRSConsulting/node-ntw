@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
-  // Place JavaScript code here...
+  - var title = "On Dogs: Man's Best Friend";
+  - var author = "enlore";
+  - var theGreat = "<span>escape!</span>";
 
 });

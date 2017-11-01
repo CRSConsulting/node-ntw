@@ -9,6 +9,8 @@ html
     title #{title} - NTW Project
     link(rel='shortcut icon', href='/favicon.png')
     link(rel='stylesheet', href='/css/main.css')
+    //- script(type='text/javascript').
+    //-  if (foo) bar(1 + 5)
 
   body
     include partials/header
@@ -16,6 +18,7 @@ html
     .container
       include partials/flash
       block content
+
 
     include partials/footer
 
@@ -31,3 +34,13 @@ html
       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
       ga('create', 'UA-XXXXX-X', 'auto');
       ga('send', 'pageview');
+      
+    //- h1 Pug - node template engine  
+    //- #container.col
+    //-   if youAreUsingPug
+    //-     p You are amazing
+    //-   else
+    //-     p Get on it!
+    //-   p.
+    //-     Pug is a terse and simple templating language with a
+    //-     strong focus on performance and powerful features.

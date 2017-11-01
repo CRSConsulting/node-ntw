@@ -15,7 +15,6 @@ const getAsync = Promise.promisify(cmd.get, {
 });
 const randy = require('randy');
 const fetch = require('node-fetch');
-
 // const moment = require('moment');
 
 exports.getAll = (req, res) =>
@@ -31,7 +30,6 @@ exports.getAll = (req, res) =>
 exports.getKeywordAndInsert = (req, res) =>
   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
-      console.log('1st then');
       const body = JSON.parse(mobiles[0].slice(958));
       const { id } = body;
       function delay(t) {
@@ -39,12 +37,11 @@ exports.getKeywordAndInsert = (req, res) =>
           setTimeout(resolve, t);
         }));
       }
-      return delay(10000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+      return delay(60000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
         res.status(404).send('err', err);
       });
     })
     .then((mobiles) => {
-      console.log('2nd then');
       function dateTimeReviver(key, value) {
         let a;
         if (key === 'transaction_date' || key === 'donation_date') {
@@ -53,31 +50,27 @@ exports.getKeywordAndInsert = (req, res) =>
             return a;
           }
         }
-        // console.log('a', a);
         return value;
       }
       return JSON.parse(mobiles[0].slice(958), dateTimeReviver);
     })
     .then((jsonData) => {
-      console.log('3rd then');
       const data = jsonData;
       const newTimer = mobilesService.generateTimer(data);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
-      console.log('4th then');
       const data = promises[0];
       const timer = promises[1];
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
           res.status(200).json({ rowsAdded: `${mobiles.nInserted} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
-          res.status(500).send({ message: err, where: '4then()' });
+          res.status(404).send(err);
         }
       });
     })
     .catch((err) => {
-      console.log('catch');
       res.status(404).send(err);
     });
 
@@ -111,17 +104,25 @@ exports.insertWinnerSMS = (req, res) =>
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      console.log('sessionToken', sessionToken);
-      //       const phoneNumber = winner.phone;
+      // console.log('sessionToken', sessionToken);
+      // const phoneNumber = winner.phone;
       const phoneNumber = 6178204019;
       const message = 'Congrats you have won!';
-      getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)
+      function delay(t) {
+        return new Promise(((resolve) => {
+          setTimeout(resolve, t);
+        }));
+      }
+      return delay(Math.random() * 10000).then(() =>
+        getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
         .then((mobiles) => {
+          // console.log('===========================================================================================');
           const body = JSON.parse(mobiles[0].slice(970));
           console.log('insertWinnerSMS==========================', body);
           res.json(body);
-        }).catch((err) => {
-          res.status(500).send(err);
+        })
+        .catch((err) => {
+          res.status(404).send('err', err);
         });
     })
     .catch((err) => {
@@ -205,5 +206,5 @@ exports.master = (req, res, key) =>
       return resp.json(); 
     })
     .catch((err) => {
-      console.log('err', err);
+      res.status(500).send(err);
     });

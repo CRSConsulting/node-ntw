@@ -24,9 +24,28 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 const cron = require('./config/cron');
 
-// const startCronJob = cron.job.start();
+const moment = require('moment');
 
 const schedule = require('node-schedule');
+
+// const rule = new schedule.RecurrenceRule();
+// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// rule.hour = 0;
+// rule.minute = 5;
+
+// This job runs every 7 minutes
+// rule.minute = new schedule.Range(0, 59, 7);
+
+// const j = schedule.scheduleJob(rule, () => {
+//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+//   const startCronJob = cron.job.start();
+// });
+
+// start job
+// const startCronJob = cron.job.start();
+
+// // stop job
+// const stopCronJob = cron.job.stop();
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
@@ -146,13 +165,18 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 /**
  * API examples routes.
  */
+
+// Mobile
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
 app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
 app.get('/api/mobile/raffle/:keyword', mobileController.findWinnerIfAvailable);
 app.get('/api/mobile/master', mobileController.master);
-
-app.post('/api/tango', tangoController.insertTango);
+// Tango
+app.get('/api/tango', tangoController.getAll);
+app.post('/api/tango', tangoController.insert);
+app.get('/api/tango/:id', tangoController.getOne);
+// Default API endpoints
 app.get('/api', apiController.getApi);
 app.get('/api/twilio', apiController.getTwilio);
 app.post('/api/twilio', apiController.postTwilio);
