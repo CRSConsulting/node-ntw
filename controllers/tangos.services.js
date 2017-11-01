@@ -25,8 +25,7 @@ function tangosService(options) {
     return Tango.find();
   }
 
-  function insert() {
-    const data = { keyword: 'BRAVE1', venue: 'BRIDGESTONE ARENA', prize: 500, giftId: 'U666425' };
+  function insert(data) {
     const tango = new Tango(data);
     return tango.save();
   }

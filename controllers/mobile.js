@@ -145,7 +145,9 @@ exports.master = (req, res) =>
     })
     .then(json => fetch('http://localhost:3000/api/mobile/sms'))
     .then(res => res.json())
-    .then(json => tangoController.insertTango({ keyword: 'THIS WILL BE THE WINNER' }, res))
+    .then((json) => {
+      tangoController.insertTango({ keyword: `${req}` }, res);
+    })
     .catch((err) => {
       res.status(500).send(err);
     });
