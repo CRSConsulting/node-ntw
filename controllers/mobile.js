@@ -201,7 +201,7 @@ exports.master = (req, res, key) =>
     .then((resp) => {
       resp.json();
     })
-    .then(json => fetch('http://localhost:3000/api/mobile/sms'))
+    .then(json => fetch(`http://localhost:3000/api/mobile/sms/${key}`))
     .then((resp) => { 
       tangoController.insertTango({ keyword: resp }, res); 
       return resp.json(); 

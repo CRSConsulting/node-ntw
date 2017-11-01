@@ -42,32 +42,36 @@ function mobilesService(options) {
 
   function generateTimer(jsonData) {
     // console.log('generaTimer', jsonData);
-    const startAmount = 3;
+    const startAmount = 3; // amount to trigger timer creation
     let tf = {};
     if (jsonData.length < startAmount) return {};
-    const uniqueKeys = [...new Set(jsonData.map(item => item.keyword))];
+    const uniqueKeys = [...new Set(jsonData.map(item => item.keyword))]; // get array of unique keywords
     console.log(uniqueKeys);
     for (let i = 0; i < uniqueKeys.length; i += 1) {
-      const specKeys = jsonData.filter(mobile => (mobile.keyword === uniqueKeys[i]));
+      const specKeys = jsonData.filter(mobile => (mobile.keyword === uniqueKeys[i])); // get count of objects with keyword
       console.log('speckeyslength', specKeys.length, uniqueKeys[i]);
       if (specKeys.length >= startAmount) {
-        const start = new Date(specKeys[startAmount].transaction_date);
+        const start = new Date(specKeys[0].transaction_date);
         const end = new Date(specKeys[startAmount].transaction_date.getTime() + (15 * 60000));
-        tf = new Timeframe({
-          keyword: uniqueKeys[i],
-          startTime: start,
-          endTime: end,
-          used: false,
-        });
         findExistingRaffle(uniqueKeys[i], start)
-          .then((count) => {
-            if (count === 0) {
-              Timeframe.create(tf);
-            }
-          });
+          .then(insertTimeframe(i, start, end));
       }
     }
     return typeof tf !== 'undefined' ? tf : {};
+
+    function insertTimeframe(i, start, end) {
+      return (count) => {
+        if (count === 0) {
+          tf = new Timeframe({
+            keyword: uniqueKeys[i],
+            startTime: start,
+            endTime: end,
+            used: false,
+          });
+          Timeframe.create(tf);
+        }
+      };
+    }
   }
 
   function findRunningRaffle(kw) {
