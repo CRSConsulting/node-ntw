@@ -1,7 +1,27 @@
-$(document).ready(function() {
+$(document).ready(() => {
+  // $('#datepicker').datepicker({
+  //   autoclose: true,
+  //   todayHighlight: true
+  // }).datepicker('update', new Date());
 
-  - var title = "On Dogs: Man's Best Friend";
-  - var author = "enlore";
-  - var theGreat = "<span>escape!</span>";
+  // $('input').datepicker({ dateFormat: 'dd, mm, yy' });
+  // const dateVariable = $('input').val();
+  // console.log('dateVariable', dateVariable);
 
+  // $('.day').click(() => {
+  //   alert('Handler for .click() called.');
+  // });
+
+  $('#datepicker').datepicker({ autoclose: true,
+    todayHighlight: true });
+
+  $('#btnD').click(() => {
+    const currentDate = $('#datepicker').datepicker('getDate');
+    console.log('#btnD', currentDate);
+  });
+
+  $('#btnI').click(() => {
+    const currentDate = $('#datepicker').val();
+    console.log('#btnI', currentDate);
+  });
 });

@@ -88,11 +88,11 @@ exports.insertTango = (req, res) => {
             case 404:
               res.status(404).send('Page not found.');
               break;
-    
+
             case 500:
               res.status(500).send('Internal server error.');
               break;
-    
+
             default:
               console.log(`Response status code: ${response.statusCode}`);
           }

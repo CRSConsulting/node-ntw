@@ -9,8 +9,8 @@ const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKE
  * List of API examples.
  */
 exports.getApi = (req, res) => {
-  res.render('api/index', {
-    title: 'API Examples'
+  res.render('campaign/index', {
+    title: 'Campaigns'
   });
 };
 
