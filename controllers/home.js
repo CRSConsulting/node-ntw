@@ -4,6 +4,12 @@
  */
 exports.index = (req, res) => {
   res.render('home', {
-    title: 'Home'
+    title: 'Home',
+    user: req.user,
+    vegetables: [
+      'carrot',
+      'potato',
+      'beet'
+    ]
   });
 };

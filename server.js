@@ -29,12 +29,12 @@ const moment = require('moment');
 const schedule = require('node-schedule');
 
 // const rule = new schedule.RecurrenceRule();
-// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
-// rule.hour = 0;
-// rule.minute = 5;
+// // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// // rule.hour = 0;
+// // rule.minute = 5;
 
-// This job runs every 7 minutes
-// rule.minute = new schedule.Range(0, 59, 7);
+// // This job runs every 7 minutes
+// rule.minute = new schedule.Range(0, 59, 5);
 
 // const j = schedule.scheduleJob(rule, () => {
 //   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
@@ -60,7 +60,7 @@ const tangoController = require('./controllers/tango');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
-
+const dateController = require('./controllers/date');
 /**
  * API keys and Passport configuration.
  */
@@ -145,6 +145,7 @@ app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
  * Primary app routes.
  */
 app.get('/', homeController.index);
+// app.get('/hacker', hackerController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
@@ -176,6 +177,11 @@ app.get('/api/mobile/master', mobileController.master);
 app.get('/api/tango', tangoController.getAll);
 app.post('/api/tango', tangoController.insert);
 app.get('/api/tango/:id', tangoController.getOne);
+// Date
+app.get('/api/date', dateController.getAll);
+app.post('/api/date', dateController.insert);
+app.get('/api/date/:id', dateController.getOne);
+
 // Default API endpoints
 app.get('/api', apiController.getApi);
 app.get('/api/twilio', apiController.getTwilio);

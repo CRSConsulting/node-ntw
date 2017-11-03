@@ -1,0 +1,32 @@
+extends ../layout
+
+block content
+  .page-header
+    h3 Create Campaign
+
+  form.form-horizontal(method='POST')
+    input(type='hidden', name='_csrf', value=_csrf)
+    .form-group
+      label(class='col-sm-2 control-label', for='title') Title
+      .col-sm-8
+        input.form-control(type='text', name='title', id='title', autofocus=true, placeholder='ex: Donation Weekend')
+    .form-group
+      label(class='col-sm-2 control-label', for='keyword') Keyword
+      .col-sm-8
+        input.form-control(type='text', name='keyword', id='keyword', placeholder='ex: BRAVE1')
+    .form-group
+      label(class='col-sm-2 control-label', for='venue') Venue
+      .col-sm-8
+        input.form-control(type='text', name='venue', id='venue', placeholder='ex: Madison Square Garden')
+    .form-group
+      label(class='col-sm-2 control-label', for='date') Date
+      .col-sm-8
+        input#datepicker.form-control(type='text', placeholder='ex: 11/04/17')
+    .form-group
+      label(class='col-sm-2 control-label', for='time') Time
+      .col-sm-8
+        input.form-control(type='text', id='time', placeholder='ex: 07:00pm')        
+    .form-group
+      .col-sm-offset-2.col-sm-8
+        button.btn.btn-primary(type='submit')
+          | Send
