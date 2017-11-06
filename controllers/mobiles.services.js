@@ -87,16 +87,27 @@ function mobilesService(options) {
   }
 
   function addWeightToRaffle(unweighted) {
+    const fiveMinimum = 50; // set minimum donation to get 5 chances
+    const twentyMinimum = 100; // set minimum donation to get 20 chances
+    const unpaidDupeMax = 20;
     return unweighted.reduce(
       (r, a) => {
         if (a.collected_amount && a.collected_amount !== null) { // if money was donated
           const currency = a.collected_amount;
           const number = Number(currency.replace(/[^0-9.-]+/g, '')); // convert dollar to number
-          const chances = 1 + Math.floor(number / 10); // every $10 grants one more chance
+          let chances = 1;
+          if (number > twentyMinimum) {
+            chances = 20;
+          } else if (number > fiveMinimum) {
+            chances = 5;
+          } else if (number === 0) {
+            const multiEntries = r.filter(mobile => (mobile.phone === a.phone)); // get count in weighted array of duplicate phone entries
+            if (multiEntries.length === unpaidDupeMax) chances = 0;
+          }
           for (let i = 0; i < chances; i += 1) {
             r.push(a);
           }
-        }
+        } 
         return r;
       }
       , []
