@@ -41,10 +41,10 @@ const job = new CronJob({
         });
       }
       Promise.all([
-        promise(1, { keyword: 'Location1' }),
-        promise(2, { keyword: 'Location1' }),
-        promise(3, { keyword: 'Location1' }),
-        promise(4, { keyword: 'Location1' })
+        promise(1, { keyword: 'BRAVE1' }),
+        promise(2, { keyword: 'BRAVE2' }),
+        promise(3, { keyword: 'BRAVE3' }),
+        promise(4, { keyword: 'BRAVE4' })
       ])
         .then(() => console.log('Promise.All done!'));
       console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is done executing`);

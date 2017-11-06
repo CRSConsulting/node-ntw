@@ -48,9 +48,11 @@ exports.insertTango = (req, res) => {
   const client = new Client(optionsAuth);
   // Hard coded the keyword word
   const queryCondition = {
-    keyword: 'BRAVE1'
+    keyword: req.keyword
   };
 
+  console.log('queryCondition', queryCondition);
+  
   tangosService.getOne(queryCondition)
     .then((tango) => {
       const keyword = tango;
