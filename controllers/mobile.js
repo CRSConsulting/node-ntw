@@ -176,12 +176,13 @@ exports.findWinnerIfAvailable = (req, res) => {
 exports.master = (req, res) =>
   fetch(`http://localhost:3000/api/mobile/keyword/${req}`)
     .then((resp) => {
-      resp.json();
+      res.json();
     })
     .then(json => fetch(`http://localhost:3000/api/mobile/sms/${req}`))
-    .then((resp) => { 
-      tangoController.insertTango({ keyword: resp }, res); 
-      return resp.json(); 
+    .then((data) => { 
+      const winner = data;
+      tangoController.insertTango({ keyword: winner }, res); 
+      return res.json(); 
     })
     .catch((err) => {
       res.status(500).send(err);
