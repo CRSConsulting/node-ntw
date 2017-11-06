@@ -3,8 +3,3 @@ os: linux
 files:
   - source: /
     destination: /var/api/
-hooks:
-  AfterInstall:
-    - location: scripts/npm-install.sh
-      runas: root
-      timeout: 300
