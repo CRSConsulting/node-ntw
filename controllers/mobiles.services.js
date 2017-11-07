@@ -105,13 +105,26 @@ function mobilesService(options) {
     }
   }
   function findRunningRaffle(kw) {
-    return Timeframe.findOne({ endTime: { $lte: new Date() }, used: false, keyword: `${kw}.*` });
+    console.log('insanity check');
+    return Timeframe.findOne({ endTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
+
+  // function getRaffleContestants(timeframe) {
+  //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
+  // }
+
+  // function getRaffleContestants(timeframe) {
+  //   console.log('timeFrame', timeframe);
+  //   console.log('timeframe.endTime', timeframe.endTime);
+  //   console.log('timeframe.startTime', timeframe.startTime);
+  //   console.log('timeframe.keyword', timeframe.keyword);
+  //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
+  // }
 
   function getRaffleContestants(timeframe) {
     return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   }
-
+  
   function raffleComplete(time) {
     return Timeframe.update({ _id: time._id }, { $set: { used: true } });
   }

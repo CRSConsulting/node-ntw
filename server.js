@@ -42,7 +42,7 @@ const schedule = require('node-schedule');
 // });
 
 // start job
-// const startCronJob = cron.job.start();
+const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -170,8 +170,10 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 // Mobile
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
-app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
-app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+//  John's code, app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
+app.get('/api/mobile/sms/:keyword', mobileController.insertWinnerSMS);
+// John's code, app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.get('/api/mobile/raffle/:keyword', mobileController.findWinnerIfAvailable);
 app.get('/api/mobile/master', mobileController.master);
 
 // Tango
@@ -187,7 +189,10 @@ app.get('/api/date/:id', dateController.getOne);
 // Default API endpoints
 app.get('/api', apiController.getApi);
 app.post('/campaign', apiController.postCampaign);
-
+// app.get('/api/twilio', apiController.getTwilio);
+// app.post('/api/twilio', apiController.postTwilio);
+// app.get('/api/upload', apiController.getFileUpload);
+// app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
 // This is used for demo purposes.
 app.get('/books', bookController.getBooks);
 

@@ -25,26 +25,27 @@ const job = new CronJob({
     console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
 
     setTimeout(() => {
-      function promise(index, query, req, res) {
+      function promise(index, query) {
         return new Promise((resolve) => {
           const delay = Math.random() * 10000;
           // const delay = 10000;
           console.log(`${index}. Waiting ${delay}`);
           setTimeout(() => {
             const key = query.keyword;
-            mobileController.master(key, res);
+            mobileController.master(key);
             console.log(`${index}. Done waiting ${delay}`);
             resolve();
           }, delay);
         }).catch((err) => {
-          res.status(500).send(err);
+          console.log('err cron.js', err);
+          // res.status(500).send(err);
         });
       }
       Promise.all([
-        promise(1, { keyword: 'BRAVE1' }),
-        promise(2, { keyword: 'BRAVE2' }),
-        promise(3, { keyword: 'BRAVE3' }),
-        promise(4, { keyword: 'BRAVE4' })
+        promise(1, { keyword: 'BRAVE3' }),
+        // promise(2, { keyword: 'MOLINE2' }),
+        // promise(3, { keyword: 'MOLINE3' }),
+        // promise(4, { keyword: 'MOLINE5' })
       ])
         .then(() => console.log('Promise.All done!'));
       console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is done executing`);
