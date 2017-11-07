@@ -83,7 +83,7 @@ function mobilesService(options) {
       console.log('speckeyslength', specKeys.length, uniqueKeys[i]);
       if (specKeys.length >= startAmount) {
         const start = new Date(specKeys[0].transaction_date);
-        const end = new Date(specKeys[startAmount].transaction_date.getTime() + (15 * 60000));
+        const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
         findExistingRaffle(uniqueKeys[i], start)
           .then(insertTimeframe(i, start, end));
       }
