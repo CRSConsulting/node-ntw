@@ -106,6 +106,6 @@ exports.insertTango = (req, res) => {
       return client.post('https://integration-api.tangocard.com/raas/v2/orders', args, handleResponse);
     })
     .catch((err) => {
-      res.status(404).send('err', err);
+      res.status(404).send(err);
     });
 };
