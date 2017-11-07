@@ -42,7 +42,7 @@ const schedule = require('node-schedule');
 // });
 
 // start job
-// const startCronJob = cron.job.start();
+const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -61,6 +61,7 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
+const bookController = require('./controllers/book');
 /**
  * API keys and Passport configuration.
  */
@@ -145,7 +146,6 @@ app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
  * Primary app routes.
  */
 app.get('/', homeController.index);
-// app.get('/hacker', hackerController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
@@ -170,13 +170,17 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 // Mobile
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
-app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
-app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+//  John's code, app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
+app.get('/api/mobile/sms/:keyword', mobileController.insertWinnerSMS);
+// John's code, app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
+app.get('/api/mobile/raffle/:keyword', mobileController.findWinnerIfAvailable);
 app.get('/api/mobile/master', mobileController.master);
+
 // Tango
 app.get('/api/tango', tangoController.getAll);
 app.post('/api/tango', tangoController.insert);
 app.get('/api/tango/:id', tangoController.getOne);
+
 // Date
 app.get('/api/date', dateController.getAll);
 app.post('/api/date', dateController.insert);
@@ -184,11 +188,13 @@ app.get('/api/date/:id', dateController.getOne);
 
 // Default API endpoints
 app.get('/api', apiController.getApi);
-app.get('/api/twilio', apiController.getTwilio);
-app.post('/api/twilio', apiController.postTwilio);
-app.get('/api/upload', apiController.getFileUpload);
-app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
-
+app.post('/campaign', apiController.postCampaign);
+// app.get('/api/twilio', apiController.getTwilio);
+// app.post('/api/twilio', apiController.postTwilio);
+// app.get('/api/upload', apiController.getFileUpload);
+// app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
+// This is used for demo purposes.
+app.get('/books', bookController.getBooks);
 
 /**
  * Error Handler.

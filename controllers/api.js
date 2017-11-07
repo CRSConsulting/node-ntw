@@ -14,6 +14,36 @@ exports.getApi = (req, res) => {
   });
 };
 
+console.log('hello world from postCampaign');
+
+exports.postCampaign = (req, res) => {
+  console.log('start');
+  req.assert('title', 'Phone number is required.').notEmpty();
+  req.assert('venue', 'Message cannot be blank.').notEmpty();
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect('/api');
+  }
+  console.log('req.body', req);
+  // const message = {
+  //   to: req.body.number,
+  //   from: '+13472235148',
+  //   body: req.body.message
+  // };
+  // twilio.sendMessage(message, (err, responseData) => {
+  //   if (err) {
+  //     return next(err.message);
+  //   }
+  //   req.flash('success', {
+  //     msg: `Text sent to ${responseData.to}.`
+  //   });
+  //   res.redirect('/api/twilio');
+  // });
+};
+
 /**
  * GET /api/lastfm
  * Last.fm API example.
