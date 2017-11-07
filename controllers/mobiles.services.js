@@ -121,7 +121,7 @@ function mobilesService(options) {
   // }
   
   function raffleComplete(time) {
-    return Timeframe.update({ _id: time._id }, { $set: { used: true } });
+    return Timeframe.update({ _id: time._id }, { used: true }).exec();
   }
 
   function addWeightToRaffle(unweighted) {
