@@ -62,7 +62,6 @@ exports.getKeywordAndInsert = (req, res) =>
     .then((jsonData) => {
       console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
-      console.log('DATA =================================', data);
       const newTimer = mobilesService.generateTimer(data);
       return Promise.all([data, newTimer]);
     })
@@ -72,12 +71,9 @@ exports.getKeywordAndInsert = (req, res) =>
       const timer = promises[1];
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
-          console.log('insane check');
-          console.log('mobiles.nInserted', mobiles.nInserted);
-          console.log('req.params.keyword', req.params.keyword);
-          console.log('data.length', data.length);
-          console.log('timeCreated', timer);
-          res.status(200).json({ rowsAdded: `${mobiles.nInserted} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
+          const amtInsert = mobiles.insertedCount || mobiles.nInserted;
+          
+          res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
           console.log('err insertMany', err);
           res.status(404).send(err);
@@ -156,45 +152,37 @@ exports.getKeywordAndInsert = (req, res) =>
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
-      console.log('foundTime()', foundTime);
       if (foundTime) {
-        console.log('did i get here?');
         const test = mobilesService.getRaffleContestants(foundTime);
-        // return Promise.all([test, foundTime]);
-        return test;
+        return Promise.all([test, foundTime]);
       }
-      // return Promise.reject('No Raffles need to be drawn at this instance');
+      return Promise.reject('No Raffles need to be drawn at this instance');
     })
     .then((promises) => {
-      console.log('promises 2nd then()', promises);
+      console.log('insertwinner 2nd then()');
       const mobiles = promises[0];
       const time = promises[1];
-      console.log('mobiles', mobiles);
-      console.log('time', time);
       if (mobiles.length > 0) {
-        console.log('did I get here???--==-=-=--==--==-=-=--=-=-=');
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
         const shuffle = randy.shuffle(raffleArr);
         const winner = randy.choice(shuffle);
         time.used = true;
         mobilesService.raffleComplete(time);
-        console.log('winner', winner);
         return winner;
       }
-      console.log('i hope I didnt get here');
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
     })
     .then((mobiles) => {
-      console.log('mobiles third then()', mobiles);
+      console.log('insertwinner third then()');
       const winner = mobiles;
       const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`);
       return Promise.all([call, winner]);
     })
     .then((mobiles) => {
+      console.log('insertwinner 4th then()');
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      // console.log('sessionToken', sessionToken);
       // const phoneNumber = winner.phone;
       const phoneNumber = 6178204019;
       const message = 'Congrats you have won!';
@@ -206,24 +194,32 @@ exports.insertWinnerSMS = (req, res) =>
       return delay(Math.random() * 10000).then(() =>
         getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
         .then((mobiles) => {
-        // console.log('===========================================================================================');
-          const body = JSON.parse(mobiles[0].slice(970));
+          console.log('insertwinner delay function 4th then()');
+          console.log('req.params.keyword', req.params.keyword);
+          // console.log('===========================================================================================');
+          // const body = JSON.parse(mobiles[0].slice(970));
           // console.log('insertWinnerSMS==========================', body);
-          res.json(body);
+          // res.json(body);
+          return tangoController.insertTango([winner, req.params.keyword], res);
         })
         .catch((err) => {
+          console.log('errrrr=--=-=-=-=-=-=', err);
           res.status(404).send('err', err);
         });
     })
+    // .then((mobiles) => {
+    //   console.log('then() 5th');
+    //   console.log('mobiles', mobiles);
+    //   return tangoController.insert(mobiles);
+    // })
     .catch((err) => {
       console.log('err', err);
-      // res.status(500).send(err);
+      res.status(500).send(err);
     });
 
 exports.findWinnerIfAvailable = (req, res) => {
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
-      console.log('foundTime', foundTime);
       if (foundTime) {
         return Promise.all([mobilesService.getRaffleContestants(foundTime), foundTime]);
       }
@@ -232,7 +228,6 @@ exports.findWinnerIfAvailable = (req, res) => {
     .then((promises) => {
       const mobiles = promises[0];
       const time = promises[1];
-      console.log(mobiles.length);
       if (mobiles.length > 0) {
         const raffleArr = mobiles.reduce(
           (r, a) => {
@@ -248,7 +243,6 @@ exports.findWinnerIfAvailable = (req, res) => {
           }
           , []
         );
-        console.log(raffleArr.length);
         const shuffle = randy.shuffle(raffleArr);
         const winner = randy.choice(shuffle);
         time.used = true;
@@ -264,7 +258,7 @@ exports.findWinnerIfAvailable = (req, res) => {
     });
 };
 function handleErrors(response) {
-  console.log('resonse', response);
+  console.log('response', response.ok);
   if (!response.ok) {
     console.log('insanity check');
     throw Error(response.statusText);
@@ -273,26 +267,25 @@ function handleErrors(response) {
 }
 
 exports.master = (req, res) => {
-  console.log('master', res);
   fetch(`http://localhost:3000/api/mobile/keyword/${req}`)
     .then(handleErrors)
-    .then((res) => {
-      console.log('1st then ===-=-=-=-==-=-');
-      res.json();
+    .then((response) => {
+      console.log('1st fetch');
+      response.json();
     })
     .then((json) => {
-      console.log('2nd then()');
-      console.log('json', json);
-      fetch(`http://localhost:3000/api/mobile/sms/${req}`);
+      console.log('2nd fetch');
+      return fetch(`http://localhost:3000/api/mobile/sms/${req}`);
     })
+    // .then(response => response.json())
     .then(handleErrors)
-    .then(res => res.json())
-    .then((json) => {
-      console.log('json', json);
-      tangoController.insertTango({ keyword: `${req}` }, res);
-    })
+    // .then(response => response.json())
+    // .then((json) => {
+    //   console.log('json', json);
+    //   tangoController.insertTango({ keyword: `${req}` }, res);
+    // })
     .catch((err) => {
-      console.log('err=-==-=-=--==--=-==-=-=-=--=', err);
+      console.log('err master function=-==-=-=--==--=-==-=-=-=--=', err);
       // res.status(500).send(err);
     });
 };

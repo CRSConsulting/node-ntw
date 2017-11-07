@@ -40,7 +40,9 @@ exports.getOne = (req, res) => {
 };
 
 exports.insertTango = (req, res) => {
-  console.log('insertTango REQ: ', req);
+  // console.log('req inserTango', req);
+  const winner = req[0];
+  const keywordLocation = req[1];
   const optionsAuth = {
     user: process.env.TANGO_USER,
     password: process.env.TANGO_PASSWORD,
@@ -48,32 +50,31 @@ exports.insertTango = (req, res) => {
   const client = new Client(optionsAuth);
   // Hard coded the keyword word
   const queryCondition = {
-    keyword: req.keyword
+    keyword: keywordLocation
   };
 
   console.log('queryCondition', queryCondition);
   
   tangosService.getOne(queryCondition)
     .then((tango) => {
-      const keyword = tango;
       const args = {
         data: {
           accountIdentifier: 'ntw-one',
           amount: 1,
           customerIdentifier: 'test-customer',
-          emailSubject: 'New Order',
-          message: 'testing',
+          emailSubject: 'Congrats you have won a giftcard!',
+          message: 'Hello World',
           recipient: {
-            email: 'john.crs.consulting@gmail.com',
-            firstName: '11:41 am',
-            lastName: 'testing',
+            email: winner.email,
+            firstName: winner.first_name,
+            lastName: winner.last_name,
           },
           sendEmail: true,
           sender: {
             firstName: 'John',
             lastName: 'Yu',
           },
-          utid: keyword.giftId,
+          utid: tango.giftId,
           // Amazon GC "U666425"
           // VISA GC "U426141"
         },
@@ -85,6 +86,7 @@ exports.insertTango = (req, res) => {
         if (response.statusCode === 201) {
           const recipient = { email: `${data.recipient.email}` };
           console.log('recipient', recipient);
+          res.json(recipient);
         } else {
           switch (response.statusCode) {
             case 404:
@@ -96,6 +98,7 @@ exports.insertTango = (req, res) => {
               break;
 
             default:
+              res.json(response.statusCode);
               console.log(`Response status code: ${response.statusCode}`);
           }
         }

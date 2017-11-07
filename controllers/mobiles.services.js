@@ -105,7 +105,6 @@ function mobilesService(options) {
     }
   }
   function findRunningRaffle(kw) {
-    console.log('insanity check');
     return Timeframe.findOne({ endTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
@@ -113,33 +112,40 @@ function mobilesService(options) {
   //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   // }
 
-  // function getRaffleContestants(timeframe) {
-  //   console.log('timeFrame', timeframe);
-  //   console.log('timeframe.endTime', timeframe.endTime);
-  //   console.log('timeframe.startTime', timeframe.startTime);
-  //   console.log('timeframe.keyword', timeframe.keyword);
-  //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
-  // }
-
   function getRaffleContestants(timeframe) {
     return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   }
+
+  // function getRaffleContestants(timeframe) {
+  //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
+  // }
   
   function raffleComplete(time) {
     return Timeframe.update({ _id: time._id }, { $set: { used: true } });
   }
 
   function addWeightToRaffle(unweighted) {
+    const fiveMinimum = 50; // set minimum donation to get 5 chances
+    const twentyMinimum = 100; // set minimum donation to get 20 chances
+    const unpaidDupeMax = 20;
     return unweighted.reduce(
       (r, a) => {
         if (a.collected_amount && a.collected_amount !== null) { // if money was donated
           const currency = a.collected_amount;
           const number = Number(currency.replace(/[^0-9.-]+/g, '')); // convert dollar to number
-          const chances = 1 + Math.floor(number / 10); // every $10 grants one more chance
+          let chances = 1;
+          if (number > twentyMinimum) {
+            chances = 20;
+          } else if (number > fiveMinimum) {
+            chances = 5;
+          } else if (number === 0) {
+            const multiEntries = r.filter(mobile => (mobile.phone === a.phone)); // get count in weighted array of duplicate phone entries
+            if (multiEntries.length === unpaidDupeMax) chances = 0;
+          }
           for (let i = 0; i < chances; i += 1) {
             r.push(a);
           }
-        }
+        } 
         return r;
       }
       , []

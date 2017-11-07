@@ -28,7 +28,6 @@ const job = new CronJob({
       function promise(index, query) {
         return new Promise((resolve) => {
           const delay = Math.random() * 10000;
-          // const delay = 10000;
           console.log(`${index}. Waiting ${delay}`);
           setTimeout(() => {
             const key = query.keyword;
@@ -42,7 +41,7 @@ const job = new CronJob({
         });
       }
       Promise.all([
-        promise(1, { keyword: 'BRAVE3' }),
+        promise(1, { keyword: 'MOLINE1' }),
         // promise(2, { keyword: 'MOLINE2' }),
         // promise(3, { keyword: 'MOLINE3' }),
         // promise(4, { keyword: 'MOLINE5' })
