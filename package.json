@@ -10,8 +10,8 @@
   },
   "scripts": {
     "prestart": "node buildScripts/startMessage.js",
-    "start": "npm-run-all --parallel security-check open:src",
-    "open:src": "nodemon server.js",
+    "start": "npm-run-all --parallel security-check open:server",
+    "open:server": "nodemon server.js",
     "security-check": "nsp check",
     "eslint": "eslint **/*.js"
   },
