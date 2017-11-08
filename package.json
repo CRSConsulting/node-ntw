@@ -12,6 +12,8 @@
     "start": "npm-run-all --parallel security-check open:server",
     "open:server": "nodemon server.js",
     "security-check": "nsp check",
+    "test": "mocha --reporter spec",
+    "postinstall": "npm rebuild node-sass",
     "eslint": "eslint **/*.js"
   },
   "dependencies": {
