@@ -18,9 +18,10 @@ const passport = require('passport');
 const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
-const multer = require('multer');
+const methodOverride = require('method-override');
+// const multer = require('multer');
 
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
+// const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 const cron = require('./config/cron');
 
@@ -42,7 +43,7 @@ const schedule = require('node-schedule');
 // });
 
 // start job
-const startCronJob = cron.job.start();
+// const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -99,6 +100,7 @@ app.use(sass({
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride())
 app.use(expressValidator());
 app.use(session({
   resave: true,
