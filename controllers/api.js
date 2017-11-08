@@ -2,7 +2,7 @@
 // const request = bluebird.promisifyAll(require('request'), {
 //   multiArgs: true
 // });
-const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+// const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 
 /**
  * GET /api
@@ -13,8 +13,6 @@ exports.getApi = (req, res) => {
     title: 'Campaigns'
   });
 };
-
-console.log('hello world from postCampaign');
 
 exports.postCampaign = (req, res) => {
   console.log('start');
