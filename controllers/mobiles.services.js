@@ -134,13 +134,15 @@ function mobilesService(options) {
           const currency = a.collected_amount;
           const number = Number(currency.replace(/[^0-9.-]+/g, '')); // convert dollar to number
           let chances = 1;
-          if (number > twentyMinimum) {
+          if (number >= twentyMinimum) {
             chances = 20;
-          } else if (number > fiveMinimum) {
+          } else if (number >= fiveMinimum) {
             chances = 5;
           } else if (number === 0) {
-            const multiEntries = r.filter(mobile => (mobile.phone === a.phone)); // get count in weighted array of duplicate phone entries
+            let multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
             if (multiEntries.length === unpaidDupeMax) chances = 0;
+            let multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
+            if (multiEntriesEmail.length === unpaidDupeMax) chances = 0;
           }
           for (let i = 0; i < chances; i += 1) {
             r.push(a);
