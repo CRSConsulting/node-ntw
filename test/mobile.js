@@ -48,30 +48,11 @@ const agent = chai.request.agent(server);
 describe('Mobile Controller', () => {
   describe.only('#Promises', () => {
     let servicePromise;
-    let result;
-    let mobilesObj;
     beforeEach(() => {
-      servicePromise = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"BRAVE3"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`);
+      servicePromise = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":499529}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
     });
 
-    it('should be an Object', () => {
-      const result = servicePromise();
-      _.isObject(result).should.be.true;
-    });
-    // it('should work', () => servicePromise());
     it('should work and return data', () => servicePromise()
-      .then((mobiles) => {
-        const body = JSON.parse(mobiles[0].slice(958));
-        const { id } = body;
-        (body.id).should.equal(id);
-        result = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
-        _.isObject(result).should.be.true;
-      }));
-    it('should take 20000ms', (done) => {
-      result();
-      setTimeout(done, 20000);
-    });
-    it('should work and return mobilesObj', () => result()
       .then((mobiles) => {
         function dateTimeReviver(key, value) {
           let a;
@@ -83,13 +64,8 @@ describe('Mobile Controller', () => {
           }
           return value;
         }
-        mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
-        if (mobilesObj.length === 0) {
-          (mobilesObj.length).should.equal(0);
-          return Promise.reject('NO objects receieved');
-        }
-        _.isObject(mobilesObj).should.be.true;
-        return mobilesObj;
+        const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
+        console.log(mobilesObj);
       }));
   });
 
