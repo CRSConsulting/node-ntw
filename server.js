@@ -78,10 +78,15 @@ const app = express();
  */
 // mongoose
 mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI, { useMongoClient: true });
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+} else {
+  mongoose.connect(process.env.MONGODB_TEST_URL);
+}
 process.on('SIGNT', () => {
   mongoose.connection.close(() => {
     console.log('Mongoose default connection disonnected through application termination');
+    process.exit(0);
   });
 });
 /**
@@ -100,7 +105,7 @@ app.use(sass({
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(methodOverride())
+app.use(methodOverride());
 app.use(expressValidator());
 app.use(session({
   resave: true,
@@ -206,10 +211,12 @@ app.use(errorHandler());
 /**
  * Start Express server.
  */
+
 app.listen(app.get('port'), () => {
   console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
 });
+
 
 module.exports = app;
 
