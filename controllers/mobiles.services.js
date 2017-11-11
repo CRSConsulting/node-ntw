@@ -1,13 +1,17 @@
 const {
   ReadPreference,
 } = require('mongodb');
+const Timeframe = require('../models/Timeframe');
+const timeframeService = require('./timeframe.services')({
+  modelService: Timeframe
+});
 
 
 module.exports = mobilesService;
 
 function mobilesService(options) {
   let Mobile;
-  let Timeframe;
+  // let Timeframe;
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
   }
@@ -17,7 +21,7 @@ function mobilesService(options) {
   }
 
   Mobile = options.modelService;
-  Timeframe = options.timeService;
+  // Timeframe = options.timeService;
 
   return {
     getAll,
@@ -26,7 +30,7 @@ function mobilesService(options) {
     findRunningRaffle,
     getRaffleContestants,
     raffleComplete,
-    addWeightToRaffle
+    addWeightToRaffle,
   };
 
   function getAll() {
@@ -38,88 +42,52 @@ function mobilesService(options) {
   }
 
   function findExistingRaffle(kw, start) {
+    console.log('findExistingRaffle ===kw', kw);
+    console.log('findExistingRaffle ===start', start);
     return Timeframe.count({ endTime: { $gte: start }, used: false, keyword: kw });
   }
 
-  // function generateTimer(jsonData) {
-  //   // console.log('generaTimer', jsonData);
-  //   const startAmount = 3;
-  //   let tf = {};
-  //   if (jsonData.length < startAmount) return {};
-  //   const uniqueKeys = [...new Set(jsonData.map(item => item.keyword))];
-  //   console.log(uniqueKeys);
-  //   for (let i = 0; i < uniqueKeys.length; i += 1) {
-  //     const specKeys = jsonData.filter(mobile => (mobile.keyword === uniqueKeys[i]));
-  //     console.log('speckeyslength', specKeys.length, uniqueKeys[i]);
-  //     if (specKeys.length >= startAmount) {
-  //       const start = new Date(specKeys[startAmount].transaction_date);
-  //       const end = new Date(specKeys[startAmount].transaction_date.getTime() + (15 * 60000));
-  //       tf = new Timeframe({
-  //         keyword: uniqueKeys[i],
-  //         startTime: start,
-  //         endTime: end,
-  //         used: false,
-  //       });
-  //       findExistingRaffle(uniqueKeys[i], start)
-  //       .then((count) => {
-  //         if (count === 0) {
-  //           Timeframe.create(tf);
-  //         }
-  //       });
-  //     }
-  //   }
-  //   return typeof tf !== 'undefined' ? tf : {};
-  // }
-
   function generateTimer(jsonData) {
-    // console.log('generaTimer', jsonData);
     const startAmount = 3; // amount to trigger timer creation
-    let tf = {};
-    if (jsonData.length < startAmount) return {};
-    const uniqueKeys = [...new Set(jsonData.map(item => item.keyword))]; // get array of unique keywords
-    console.log(uniqueKeys);
+    if (jsonData.length < startAmount) return { message: 'Not Enough To Start' };
+    const uniqueKeys = [...new Set(jsonData.map(item =>
+      item.keyword
+    ))];
     for (let i = 0; i < uniqueKeys.length; i += 1) {
-      const specKeys = jsonData.filter(mobile => (mobile.keyword === uniqueKeys[i])); // get count of objects with keyword
-      console.log('speckeyslength', specKeys.length, uniqueKeys[i]);
+      const specKeys = jsonData.filter(mobile =>
+        mobile.keyword === uniqueKeys[i]
+      );
       if (specKeys.length >= startAmount) {
         const start = new Date(specKeys[0].transaction_date);
         const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
-        findExistingRaffle(uniqueKeys[i], start)
-          .then(insertTimeframe(i, start, end));
-      }
-    }
-    return typeof tf !== 'undefined' ? tf : {};
-
-    function insertTimeframe(i, start, end) {
-      return (count) => {
-        if (count === 0) {
-          tf = new Timeframe({
-            keyword: uniqueKeys[i],
-            startTime: start,
-            endTime: end,
-            used: false,
+        const test = findExistingRaffle(uniqueKeys[i], start)
+          .then((count) => {
+            if (count === 0) {
+              const time = {
+                keyword: uniqueKeys[i],
+                startTime: start,
+                endTime: end,
+                used: false,
+              };
+              timeframeService.insert(time);
+              return time;
+            }
+            return { message: 'Timer already exists' };
           });
-          Timeframe.create(tf);
-        }
-      };
+        return Promise.all([test]);
+      }
+      return { message: 'Not enough to start' };
     }
   }
+
   function findRunningRaffle(kw) {
     return Timeframe.findOne({ endTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
-
-  // function getRaffleContestants(timeframe) {
-  //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
-  // }
 
   function getRaffleContestants(timeframe) {
     return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   }
 
-  // function getRaffleContestants(timeframe) {
-  //   return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
-  // }
-  
   function raffleComplete(time) {
     return Timeframe.update({ _id: time._id }, { used: true }).exec();
   }
@@ -145,7 +113,7 @@ function mobilesService(options) {
           for (let i = 0; i < chances; i += 1) {
             r.push(a);
           }
-        } 
+        }
         return r;
       }
       , []
