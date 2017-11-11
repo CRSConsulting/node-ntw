@@ -2,7 +2,7 @@
 // During the test the env variable is set to test
 
 // Mocha wants DONE to be a synchronous callback, return as a promise
-process.env.NODE_ENV = 'test';
+// process.env.NODE_ENV = 'test';
 
 const server = require('../server');
 const Mobile = require('../models/Mobile');
@@ -44,12 +44,14 @@ const express = require('express');
 // create agent for tests
 const agent = chai.request.agent(server);
 
+const mongoose = require('mongoose');
 // Our parent block
 describe('Mobile Controller', () => {
   describe.only('#Promises', () => {
     let servicePromise;
     beforeEach(() => {
-      servicePromise = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":499529}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
+      mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+      servicePromise = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":499534}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
     });
 
     it('should work and return data', () => servicePromise()
@@ -65,8 +67,43 @@ describe('Mobile Controller', () => {
           return value;
         }
         const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
-        console.log(mobilesObj);
-      }));
+        if (mobilesObj.length === 0) {
+          return Promise.reject('NO objects receieved');
+        }
+        return mobilesObj;
+      })
+      .then((jsonData) => {
+        const data = jsonData;
+        _.isObject(data).should.be.true;
+        console.log('data', data);
+        const newTimer = mobilesService.generateTimer(data);
+        console.log('newTimer is a empty OBJ for some reason', newTimer);
+        _.isObject(newTimer).should.be.true;
+        return Promise.all([data, newTimer]).should.be.fulfilled;
+      })
+      .then((promises) => {
+        const data = promises[0];
+        _.isObject(data).should.be.true;
+        const timer = promises[1];
+        _.isObject(timer).should.be.true;
+        Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
+          console.log('Mobile.collection.insertMany', mobiles);
+          if (!err || err.code === 11000) {
+            const amtInsert = mobiles.insertedCount || mobiles.nInserted;
+            console.log('amtInsert', amtInsert);
+            console.log('data.length', data.length);
+            console.log('timerCreated', timer);
+            // res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for keyword out of ${data.length} grabbed objects.`, timerCreated: timer });
+          } else {
+            console.log('insertMany fail');
+            // res.status(404).send(err);
+          }
+        });
+      })
+    );
+    // it('should work', () => {
+
+    // });
   });
 
   describe('#as promised', () => {
@@ -76,6 +113,25 @@ describe('Mobile Controller', () => {
       (1 + 1).should.equal(2);
     });
     it('1 plus 1 should equal 2 even if a Promise delivers it', () => Promise.resolve(1 + 1).should.eventually.equal(2));
+  });
+
+  describe('/GET api/mobile/keyword/:keyword', () => {
+    it('should insert and return data', (done) => {
+      const keyword = {
+        id: 'MOLINE1'
+      };
+      agent.get(`/api/mobile/keyword/:${keyword.id}`)
+        .send(keyword)
+        .end((err, res) => {
+          // console.log('res', res);
+          if (err) {
+            return done(err);
+          }
+          // res.should.have.status(200);
+          res.should.be.a('object');
+          done();
+        });
+    });
   });
 });
 

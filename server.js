@@ -63,6 +63,7 @@ const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
 const bookController = require('./controllers/book');
+const timeframeController = require('./controllers/timeframe');
 /**
  * API keys and Passport configuration.
  */
@@ -203,6 +204,10 @@ app.post('/campaign', apiController.postCampaign);
 // This is used for demo purposes.
 app.get('/books', bookController.getBooks);
 
+// Timeframe
+app.get('/api/timeframe', timeframeController.getAll);
+app.post('/api/timeframe', timeframeController.insert);
+app.get('/api/timeframe/:id', timeframeController.getOne);
 /**
  * Error Handler.
  */
