@@ -18,7 +18,8 @@ function timeframeService(options) {
   return {
     getAll,
     insert,
-    getOne
+    getOne,
+    update
   };
 
   function getAll() {
@@ -30,8 +31,10 @@ function timeframeService(options) {
     return timeframe.save();
   }
   function getOne(queryCondition) {
-    console.log(queryCondition);
     return Timeframe.findOne(queryCondition);
+  }
+  function update(data) {
+    return Timeframe.update({ _id: data._id }, { endTime: data.endTime }).exec();
   }
 }
 

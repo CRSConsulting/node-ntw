@@ -11,7 +11,7 @@ module.exports = mobilesService;
 
 function mobilesService(options) {
   let Mobile;
-  // let Timeframe;
+
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
   }
@@ -21,7 +21,7 @@ function mobilesService(options) {
   }
 
   Mobile = options.modelService;
-  // Timeframe = options.timeService;
+
 
   return {
     getAll,
@@ -41,43 +41,78 @@ function mobilesService(options) {
     return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
   }
 
-  function findExistingRaffle(kw, start) {
-    console.log('findExistingRaffle ===kw', kw);
-    console.log('findExistingRaffle ===start', start);
-    return Timeframe.count({ endTime: { $gte: start }, used: false, keyword: kw });
+  // function findExistingRaffle(kw, start) {
+  //   return Timeframe.count({ endTime: { $gte: start }, used: false, keyword: kw });
+  // }
+
+  // function generateTimer(jsonData) {
+  //   const startAmount = 3;
+  //   if (jsonData.length < startAmount) return { message: 'Not Enough To Start' };
+  //   const uniqueKeys = [...new Set(jsonData.map(item =>
+  //     item.keyword
+  //   ))];
+  //   for (let i = 0; i < uniqueKeys.length; i += 1) {
+  //     const specKeys = jsonData.filter(mobile =>
+  //       mobile.keyword === uniqueKeys[i]
+  //     );
+  //     if (specKeys.length >= startAmount) {
+  //       const start = new Date(specKeys[0].transaction_date);
+  //       const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
+  //       const test = findExistingRaffle(uniqueKeys[i], start)
+  //         .then((count) => {
+  //           if (count === 0) {
+  //             const time = {
+  //               keyword: uniqueKeys[i],
+  //               startTime: start,
+  //               endTime: end,
+  //               used: false,
+  //             };
+  //             timeframeService.insert(time);
+  //             return time;
+  //           }
+  //           return { message: 'Timer already exists' };
+  //         });
+  //       return Promise.all([test]);
+  //     }
+  //     return { message: 'Not enough to start' };
+  //   }
+  // }
+  function findExistingRaffle(kw) {
+    return Timeframe.findOne({ startTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
-  function generateTimer(jsonData) {
+  function generateTimer(jsonData, baseKey) {
     const startAmount = 3; // amount to trigger timer creation
-    if (jsonData.length < startAmount) return { message: 'Not Enough To Start' };
-    const uniqueKeys = [...new Set(jsonData.map(item =>
-      item.keyword
-    ))];
-    for (let i = 0; i < uniqueKeys.length; i += 1) {
-      const specKeys = jsonData.filter(mobile =>
-        mobile.keyword === uniqueKeys[i]
-      );
-      if (specKeys.length >= startAmount) {
-        const start = new Date(specKeys[0].transaction_date);
-        const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
-        const test = findExistingRaffle(uniqueKeys[i], start)
-          .then((count) => {
-            if (count === 0) {
-              const time = {
-                keyword: uniqueKeys[i],
-                startTime: start,
-                endTime: end,
-                used: false,
-              };
-              timeframeService.insert(time);
-              return time;
-            }
-            return { message: 'Timer already exists' };
-          });
-        return Promise.all([test]);
-      }
-      return { message: 'Not enough to start' };
-    }
+    const test = findExistingRaffle(baseKey)
+      .then((time) => {
+        if (!time) return { message: 'Not within timeframe window' };
+        if (time.endTime) return { message: 'Endtime already set' };
+        const newTimer = time;
+        const dataAfterStart = jsonData.filter(mobile => // Only use objects with transaction date after start time
+          mobile.transaction_date.getTime() > time.startTime.getTime()
+        );
+        if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
+        const uniqueKeys = [...new Set(jsonData.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
+          item.keyword
+        ))];
+        for (let i = 0; i < uniqueKeys.length; i += 1) { // loop through all keyword variants to find if any have enough to create timer
+          const specKeys = dataAfterStart.filter(mobile => // Get subsect of objects with specific keyword variant
+            mobile.keyword === uniqueKeys[i]
+          );
+          if (specKeys.length >= startAmount) {
+            const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
+            // end is 15 minutes after transaction date of startAmount object
+            // count = 0;
+            // set end time and specific keyword
+            newTimer.endTime = end;
+            newTimer.keyword = uniqueKeys[i];
+            timeframeService.update(newTimer);
+            return newTimer;
+          }
+          return { message: 'Not enough to start' };
+        }
+      });
+    return Promise.all([test]);
   }
 
   function findRunningRaffle(kw) {
@@ -107,9 +142,9 @@ function mobilesService(options) {
           } else if (number >= fiveMinimum) {
             chances = 5;
           } else if (number === 0) {
-            let multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
+            const multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
             if (multiEntries.length === unpaidDupeMax) chances = 0;
-            let multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
+            const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
             if (multiEntriesEmail.length === unpaidDupeMax) chances = 0;
           }
           for (let i = 0; i < chances; i += 1) {

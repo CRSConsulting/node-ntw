@@ -75,9 +75,7 @@ describe('Mobile Controller', () => {
       .then((jsonData) => {
         const data = jsonData;
         _.isObject(data).should.be.true;
-        console.log('data', data);
         const newTimer = mobilesService.generateTimer(data);
-        console.log('newTimer is a empty OBJ for some reason', newTimer);
         _.isObject(newTimer).should.be.true;
         return Promise.all([data, newTimer]).should.be.fulfilled;
       })
@@ -86,6 +84,7 @@ describe('Mobile Controller', () => {
         _.isObject(data).should.be.true;
         const timer = promises[1];
         _.isObject(timer).should.be.true;
+        console.log('timere', timer);
         Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
           console.log('Mobile.collection.insertMany', mobiles);
           if (!err || err.code === 11000) {

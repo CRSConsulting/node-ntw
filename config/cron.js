@@ -37,13 +37,12 @@ const job = new CronJob({
           }, delay);
         }).catch((err) => {
           console.log('err cron.js', err);
-          // res.status(500).send(err);
         });
       }
       Promise.all([
-        promise(1, { keyword: 'BRAVE3' }),
-        // promise(2, { keyword: 'MOLINE2' }),
-        // promise(3, { keyword: 'MOLINE3' }),
+        promise(1, { keyword: 'BRAVE' }),
+        // promise(2, { keyword: 'MOLINE' }),
+        // promise(3, { keyword: 'FORT' }),
         // promise(4, { keyword: 'MOLINE5' })
       ])
         .then(() => console.log('Promise.All done!'));

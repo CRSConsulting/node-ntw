@@ -40,7 +40,6 @@ exports.getOne = (req, res) => {
 };
 
 exports.insertTango = (req, res) => {
-  // console.log('req inserTango', req);
   const winner = req[0];
   const keywordLocation = req[1];
   const optionsAuth = {
@@ -48,13 +47,9 @@ exports.insertTango = (req, res) => {
     password: process.env.TANGO_PASSWORD,
   };
   const client = new Client(optionsAuth);
-  // Hard coded the keyword word
   const queryCondition = {
     keyword: keywordLocation
   };
-
-  console.log('queryCondition', queryCondition);
-  
   tangosService.getOne(queryCondition)
     .then((tango) => {
       const args = {
