@@ -81,7 +81,7 @@ function mobilesService(options) {
   }
 
   function findRunningRaffle(kw) {
-    return Timeframe.findOne({ endTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
+    return Timeframe.findOne({ endTime: {$exists: true, $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
   function getRaffleContestants(timeframe) {
