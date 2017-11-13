@@ -62,7 +62,7 @@ exports.getKeywordAndInsert = (req, res) =>
     .then((jsonData) => {
       console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
-      const newTimer = mobilesService.generateTimer(data);
+      const newTimer = mobilesService.generateTimer(data,req.params.keyword);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
@@ -200,7 +200,7 @@ exports.insertWinnerSMS = (req, res) =>
           // const body = JSON.parse(mobiles[0].slice(970));
           // console.log('insertWinnerSMS==========================', body);
           // res.json(body);
-          return tangoController.insertTango([winner, req.params.keyword], res);
+          return tangoController.insertTango([winner, winner.keyword], res);
         })
         .catch((err) => {
           console.log('errrrr=--=-=-=-=-=-=', err);
