@@ -200,7 +200,7 @@ exports.insertWinnerSMS = (req, res) =>
           // const body = JSON.parse(mobiles[0].slice(970));
           // console.log('insertWinnerSMS==========================', body);
           // res.json(body);
-          return tangoController.insertTango([winner, req.params.keyword], res);
+          return tangoController.insertTango([winner, winner.keyword], res);
         })
         .catch((err) => {
           console.log('errrrr=--=-=-=-=-=-=', err);
