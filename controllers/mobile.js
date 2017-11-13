@@ -62,7 +62,7 @@ exports.getKeywordAndInsert = (req, res) =>
     .then((jsonData) => {
       console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
-      const newTimer = mobilesService.generateTimer(data);
+      const newTimer = mobilesService.generateTimer(data,req.params.keyword);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
