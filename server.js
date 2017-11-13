@@ -29,18 +29,18 @@ const moment = require('moment');
 
 const schedule = require('node-schedule');
 
-// const rule = new schedule.RecurrenceRule();
+const rule = new schedule.RecurrenceRule();
 // // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
 // // rule.hour = 0;
 // // rule.minute = 5;
 
 // // This job runs every 7 minutes
-// rule.minute = new schedule.Range(0, 59, 5);
+rule.minute = new schedule.Range(0, 59, 5);
 
-// const j = schedule.scheduleJob(rule, () => {
-//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-//   const startCronJob = cron.job.start();
-// });
+const j = schedule.scheduleJob(rule, () => {
+  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+  const startCronJob = cron.job.start();
+});
 
 // start job
 // const startCronJob = cron.job.start();

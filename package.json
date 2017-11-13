@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "npm-run-all --parallel security-check open:server",
-    "open:server": "nodemon server.js",
+    "open:server": "pm2 start server.js -e err.log -o out.log",
     "security-check": "nsp check",
     "eslint": "eslint **/*.js"
   },
