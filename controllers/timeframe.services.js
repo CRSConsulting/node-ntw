@@ -29,6 +29,11 @@ function timeframeService(options) {
     const timeframe = new Timeframe(data);
     return timeframe.save();
   }
+  
+  function update(data) {
+    return Timeframe.update({ _id: data._id }, { endTime: data.endTime, keyword: data.keyword }).exec();
+  }
+  
   function getOne(queryCondition) {
     console.log(queryCondition);
     return Timeframe.findOne(queryCondition);
