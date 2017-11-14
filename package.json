@@ -36,6 +36,7 @@
     "express-session": "^1.15.5",
     "express-status-monitor": "^1.0.0",
     "express-validator": "^3.2.1",
+    "helmet": "^3.9.0",
     "lodash": "^4.17.4",
     "lusca": "^1.5.1",
     "method-override": "^2.3.10",

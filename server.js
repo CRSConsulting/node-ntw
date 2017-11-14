@@ -19,6 +19,7 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const methodOverride = require('method-override');
+const helmet = require('helmet');
 // const multer = require('multer');
 
 // const upload = multer({ dest: path.join(__dirname, 'uploads') });
@@ -99,6 +100,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(expressStatusMonitor());
 app.use(compression());
+app.use(helmet());
 app.use(sass({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public')
