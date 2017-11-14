@@ -44,8 +44,8 @@ exports.insertTango = (req, res) => {
   const winner = req[0];
   const keywordLocation = req[1];
   const optionsAuth = {
-    user: process.env.TANGO_USER,
-    password: process.env.TANGO_PASSWORD,
+    user: process.env.TANGO_USER_LIVE,
+    password: process.env.TANGO_PASSWORD_LIVE,
   };
   const client = new Client(optionsAuth);
   // Hard coded the keyword word
@@ -57,15 +57,17 @@ exports.insertTango = (req, res) => {
   
   tangosService.getOne(queryCondition)
     .then((tango) => {
+      console.log(tango);
       const args = {
         data: {
-          accountIdentifier: 'ntw-one',
-          amount: 1,
-          customerIdentifier: 'test-customer',
+          accountIdentifier: 'ntwaccount',
+          amount: 0.01,
+          customerIdentifier: 'ntwcustomer',
           emailSubject: 'Congrats you have won a giftcard!',
           message: 'Hello World',
           recipient: {
             email: winner.email,
+            // email: 'ian@crs-consulting.com',
             firstName: winner.first_name,
             lastName: winner.last_name,
           },
@@ -74,7 +76,8 @@ exports.insertTango = (req, res) => {
             firstName: 'John',
             lastName: 'Yu',
           },
-          utid: tango.giftId,
+          utid: 'U666425'
+          // utid: tango.giftId,
           // Amazon GC "U666425"
           // VISA GC "U426141"
         },
@@ -98,12 +101,17 @@ exports.insertTango = (req, res) => {
               break;
 
             default:
-              res.json(response.statusCode);
+              res.json(data);
               console.log(`Response status code: ${response.statusCode}`);
+              console.log(data);
           }
         }
       }
-      return client.post('https://integration-api.tangocard.com/raas/v2/orders', args, handleResponse);
+      console.log(args);
+      // dev endpoint 'https://integration-api.tangocard.com/raas/v2/orders'
+      // prod endpoint https://api.tangocard.com/raas/v2/orders
+      return client.post('https://api.tangocard.com/raas/v2/orders', args, handleResponse);
+      // return client.get('https://integration-api.tangocard.com/raas/v2/catalogs?verbose=true', handleResponse);
     })
     .catch((err) => {
       res.status(404).send(err);

@@ -39,7 +39,7 @@ exports.getKeywordAndInsert = (req, res) =>
         }));
       }
       return delay(20000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
-        res.status(404).send('err', err);
+        res.status(404).send(err);
       });
     })
     .then((mobiles) => {
@@ -72,7 +72,7 @@ exports.getKeywordAndInsert = (req, res) =>
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
           const amtInsert = mobiles.insertedCount || mobiles.nInserted;
-          
+          console.log(`${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`);
           res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
           console.log('err insertMany', err);
@@ -153,6 +153,7 @@ exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
       if (foundTime) {
+        console.log(foundTime);
         const test = mobilesService.getRaffleContestants(foundTime);
         return Promise.all([test, foundTime]);
       }
@@ -163,7 +164,9 @@ exports.insertWinnerSMS = (req, res) =>
       const mobiles = promises[0];
       const time = promises[1];
       if (mobiles.length > 0) {
+        console.log(`Selecting winner out of ${mobiles.length} contestants`);
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
+        console.log(`Weighted arr has ${raffleArr.length} contestants`);
         const shuffle = randy.shuffle(raffleArr);
         const winner = randy.choice(shuffle);
         time.used = true;
@@ -183,8 +186,8 @@ exports.insertWinnerSMS = (req, res) =>
       const winner = mobiles[1];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      // const phoneNumber = winner.phone;
-      const phoneNumber = 6178204019;
+      const phoneNumber = winner.phone;
+      // const phoneNumber = 2034488493;
       const message = 'Congrats you have won!';
       function delay(t) {
         return new Promise(((resolve) => {
@@ -204,7 +207,7 @@ exports.insertWinnerSMS = (req, res) =>
         })
         .catch((err) => {
           console.log('errrrr=--=-=-=-=-=-=', err);
-          res.status(404).send('err', err);
+          res.status(404).send(err);
         });
     })
     // .then((mobiles) => {
@@ -229,6 +232,7 @@ exports.findWinnerIfAvailable = (req, res) => {
       const mobiles = promises[0];
       const time = promises[1];
       if (mobiles.length > 0) {
+        console.log(`Running raffle out of ${mobiles.length} contestants`);
         const raffleArr = mobiles.reduce(
           (r, a) => {
             if (a.collected_amount && a.collected_amount !== null) {

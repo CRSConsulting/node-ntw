@@ -18,7 +18,8 @@ function timeframeService(options) {
   return {
     getAll,
     insert,
-    getOne
+    getOne,
+    update
   };
 
   function getAll() {

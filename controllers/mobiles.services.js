@@ -46,23 +46,25 @@ function mobilesService(options) {
   }
 
   function generateTimer(jsonData, baseKey) {
-    const startAmount = 3; // amount to trigger timer creation
+    const startAmount = 5; // amount to trigger timer creation
     const test = findExistingRaffle(baseKey)
       .then((time) => {
         if (!time) return { message: 'Not within timeframe window' };
         if (time.endTime) return { message: 'Endtime already set' };
         const newTimer = time;
         const dataAfterStart = jsonData.filter(mobile => // Only use objects with transaction date after start time
-          mobile.transaction_date.getTime() > time.startTime.getTime()
+          mobile.transaction_date.getTime() >= time.startTime.getTime()
         ) 
         if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
-        const uniqueKeys = [...new Set(jsonData.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
+        const uniqueKeys = [...new Set(dataAfterStart.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
           item.keyword
         ))];
         for (let i = 0; i < uniqueKeys.length; i += 1) { // loop through all keyword variants to find if any have enough to create timer
           const specKeys = dataAfterStart.filter(mobile => // Get subsect of objects with specific keyword variant
             mobile.keyword === uniqueKeys[i]
           );
+          console.log(specKeys);
+          console.log(specKeys.length);
           if (specKeys.length >= startAmount) {
             const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
             // end is 15 minutes after transaction date of startAmount object
@@ -73,8 +75,8 @@ function mobilesService(options) {
             timeframeService.update(newTimer);
             return newTimer;
           }
-          return { message: 'Not enough to start' };
         }
+        return { message: 'Not enough to start' };
       });
     return Promise.all([test]);
   }
@@ -84,7 +86,7 @@ function mobilesService(options) {
   }
 
   function getRaffleContestants(timeframe) {
-    return Mobile.find({ transaction_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
+    return Mobile.find({ donation_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   }
 
   function raffleComplete(time) {

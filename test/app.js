@@ -8,6 +8,7 @@ describe('GET /', () => {
       .expect(200, done);
   });
 });
+    // "start": "npm-run-all --parallel security-check open:server",
 
 describe('GET /login', () => {
   it('should return 200 OK', (done) => {

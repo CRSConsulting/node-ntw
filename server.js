@@ -35,7 +35,7 @@ const rule = new schedule.RecurrenceRule();
 // // rule.minute = 5;
 
 // // This job runs every 7 minutes
-rule.minute = new schedule.Range(0, 59, 5);
+rule.minute = new schedule.Range(0, 59, 3);
 
 const j = schedule.scheduleJob(rule, () => {
   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
@@ -80,7 +80,7 @@ const app = express();
 // mongoose
 mongoose.Promise = global.Promise;
 if (process.env.NODE_ENV !== 'test') {
-  mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+  mongoose.connect('mongodb://CRSConsulting:CRSConsulting1!@ds019595-a0.nmz58.fleet.mlab.com:19595,ds019595-a1.nmz58.fleet.mlab.com:19595/ntw?replicaSet=rs-ds019595&ssl=true', { useMongoClient: true });
 } else {
   mongoose.connect(process.env.MONGODB_TEST_URL);
 }
