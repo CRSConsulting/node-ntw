@@ -40,9 +40,14 @@ exports.getOne = (req, res) => {
 };
 
 exports.insertTango = (req, res) => {
+  console.log('hello from insertTango');
   // console.log('req inserTango', req);
   const winner = req[0];
   const keywordLocation = req[1];
+  // const optionsAuth = {
+  //   user: process.env.TANGO_USER_PRIVATE,
+  //   password: process.env.TANGO_PASSWORD_PRIVATE,
+  // };
   const optionsAuth = {
     user: process.env.TANGO_USER,
     password: process.env.TANGO_PASSWORD,
@@ -57,17 +62,18 @@ exports.insertTango = (req, res) => {
   
   tangosService.getOne(queryCondition)
     .then((tango) => {
+      console.log('tango', tango);
       const args = {
         data: {
           accountIdentifier: 'ntw-one',
-          amount: 1,
+          amount: 5,
           customerIdentifier: 'test-customer',
           emailSubject: 'Congrats you have won a giftcard!',
           message: 'Hello World',
           recipient: {
-            email: winner.email,
-            firstName: winner.first_name,
-            lastName: winner.last_name,
+            email: 'john@crs-consulting.com',
+            firstName: 'John',
+            lastName: 'Yu',
           },
           sendEmail: true,
           sender: {
@@ -77,6 +83,7 @@ exports.insertTango = (req, res) => {
           utid: tango.giftId,
           // Amazon GC "U666425"
           // VISA GC "U426141"
+          // VISA Prepaid GC "U677579"
         },
         headers: {
           'Content-Type': 'application/json',
