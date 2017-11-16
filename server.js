@@ -36,15 +36,16 @@ const schedule = require('node-schedule');
 // // rule.minute = 5;
 
 // // This job runs every 7 minutes
-// rule.minute = new schedule.Range(0, 59, 5);
+// rule.minute = new schedule.Range(0, 59, 3);
 
 // const j = schedule.scheduleJob(rule, () => {
 //   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-//   const startCronJob = cron.job.start();
+//   // const startCronJob = cron.job.start();
+//   retryController.getAll();
 // });
 
 // start job
-// const startCronJob = cron.job.start();
+const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -65,6 +66,7 @@ const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
 const bookController = require('./controllers/book');
 const timeframeController = require('./controllers/timeframe');
+const retryController = require('./controllers/retry');
 /**
  * API keys and Passport configuration.
  */
@@ -210,6 +212,11 @@ app.get('/books', bookController.getBooks);
 app.get('/api/timeframe', timeframeController.getAll);
 app.post('/api/timeframe', timeframeController.insert);
 app.get('/api/timeframe/:id', timeframeController.getOne);
+// Retry
+app.get('/api/retry', retryController.getAll);
+app.post('/api/retry', retryController.insert);
+app.get('/api/retry/:id', retryController.getOne);
+app.delete('/api/retry/:id', retryController.removeById);
 /**
  * Error Handler.
  */
@@ -222,6 +229,12 @@ app.use(errorHandler());
 app.listen(app.get('port'), () => {
   console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+  console.log('resason', reason.stack);
 });
 
 

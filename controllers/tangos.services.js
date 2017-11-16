@@ -30,7 +30,6 @@ function tangosService(options) {
     return tango.save();
   }
   function getOne(queryCondition) {
-    console.log(queryCondition);
     return Tango.findOne(queryCondition);
   }
 }
