@@ -12,7 +12,9 @@
     "start": "npm-run-all --parallel security-check open:server",
     "open:server": "nodemon server.js",
     "security-check": "nsp check",
-    "test": "mocha --reporter spec --timeout 60000",
+    "test": "mocha --timeout 120000",
+    "coverage": "istanbul cover _mocha test/mobile.js -x *.test.js",
+    "showcoverage": "open coverage/lcov-report/index.html",
     "postinstall": "npm rebuild node-sass",
     "eslint": "eslint **/*.js"
   },
@@ -69,6 +71,7 @@
     "eslint-plugin-chai-friendly": "^0.4.0",
     "eslint-plugin-import": "^2.7.0",
     "mocha": "^3.5.0",
+    "mockgoose": "^7.3.3",
     "sinon": "^3.2.1",
     "sinon-mongoose": "^2.0.2",
     "supertest": "^3.0.0"

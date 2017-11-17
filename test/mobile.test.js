@@ -2,12 +2,14 @@
 // During the test the env variable is set to test
 
 // Mocha wants DONE to be a synchronous callback, return as a promise
-// process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'test';
 
 const server = require('../server');
 const Mobile = require('../models/Mobile');
 // const User = require('../models/User');
 const Timeframe = require('../models/Timeframe');
+const sinon = require('sinon');
+require('sinon-mongoose');
 const Promise = require('bluebird');
 const cmd = require('node-cmd');
 
@@ -23,63 +25,57 @@ const getAsync = Promise.promisify(cmd.get, {
   context: cmd,
 });
 
-const randy = require('randy');
-const fetch = require('node-fetch');
-
 const _ = require('lodash');
 const chaiAsPromised = require('chai-as-promised');
 const chai = require('chai');
 
 const expect = chai.expect();
 const should = chai.should();
+
 chai.use(require('chai-http'));
 chai.use(require('chai-json-schema'));
 
 chai.use(chaiAsPromised);
 
-const request = require('supertest');
-const express = require('express');
-// const app = express();
-
-// create agent for tests
-const agent = chai.request.agent(server);
-
 const mongoose = require('mongoose');
 // Our parent block
 describe('Mobile Controller', () => {
-  describe.only('#Promises', () => {
-    let servicePromise;
+  describe('#exports.getKeywordAndInsert', () => {
+    let mobileCause;
     beforeEach(() => {
       mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
-      servicePromise = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":499534}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
+      mobileCause = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":499534}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
     });
 
-    it('should work and return data', () => servicePromise()
+    it('should work and return data', () => mobileCause()
       .then((mobiles) => {
         function dateTimeReviver(key, value) {
+          _.isString(key).should.be.true;
           let a;
           if (key === 'transaction_date' || key === 'donation_date') {
             a = new Date(`${value} UTC`);
+            _.isDate(a).should.be.true;
             if (a) {
+              _.isDate(a).should.be.true;
               return a;
             }
           }
           return value;
         }
         const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
+        _.isObject(mobilesObj).should.be.true;
         if (mobilesObj.length === 0) {
-          return Promise.reject('NO objects receieved');
+          _.isInteger(mobilesObj.length).should.be.true;
+          return Promise.reject('NO objects receieved').should.be.rejected;
         }
         return mobilesObj;
       })
       .then((jsonData) => {
         const data = jsonData;
         _.isObject(data).should.be.true;
-        console.log('data', data);
-        const newTimer = mobilesService.generateTimer(data);
-        console.log('newTimer is a empty OBJ for some reason', newTimer);
+        const newTimer = mobilesService.generateTimer(data).should.be.fulfilled;
         _.isObject(newTimer).should.be.true;
-        return Promise.all([data, newTimer]).should.be.fulfilled;
+        return Promise.all([data, newTimer.should.be.fulfilled]).should.be.fulfilled;
       })
       .then((promises) => {
         const data = promises[0];
@@ -87,12 +83,13 @@ describe('Mobile Controller', () => {
         const timer = promises[1];
         _.isObject(timer).should.be.true;
         Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
-          console.log('Mobile.collection.insertMany', mobiles);
+          _.isObject(mobiles).should.be.true;
           if (!err || err.code === 11000) {
+            _.isEqual(mobiles.insertedCount, mobiles.nInserted).should.be.true;
             const amtInsert = mobiles.insertedCount || mobiles.nInserted;
-            console.log('amtInsert', amtInsert);
-            console.log('data.length', data.length);
-            console.log('timerCreated', timer);
+            _.isInteger(amtInsert).should.be.true;
+            _.isInteger(data.length).should.be.true;
+            _.isString(timer[0].message).should.be.true;
             // res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for keyword out of ${data.length} grabbed objects.`, timerCreated: timer });
           } else {
             console.log('insertMany fail');
@@ -101,37 +98,20 @@ describe('Mobile Controller', () => {
         });
       })
     );
-    // it('should work', () => {
-
-    // });
   });
-
-  describe('#as promised', () => {
-    it('should work', () => Promise.resolve().should.be.fulfilled); // change fullfilled to rejected and it will fail
-    it('should fail', () => Promise.reject().should.be.rejected); // change rejected to fullfilled and it will fail
-    it('1 plus 1 should equal 2', () => {
-      (1 + 1).should.equal(2);
+  describe('#exports.insertWinnerSMS', () => {
+    let servicePromise;
+    beforeEach(() => {
+      mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+      servicePromise = () => mobilesService.findRunningRaffle('BRAVE3');
     });
-    it('1 plus 1 should equal 2 even if a Promise delivers it', () => Promise.resolve(1 + 1).should.eventually.equal(2));
-  });
 
-  describe('/GET api/mobile/keyword/:keyword', () => {
-    it('should insert and return data', (done) => {
-      const keyword = {
-        id: 'MOLINE1'
-      };
-      agent.get(`/api/mobile/keyword/:${keyword.id}`)
-        .send(keyword)
-        .end((err, res) => {
-          // console.log('res', res);
-          if (err) {
-            return done(err);
-          }
-          // res.should.have.status(200);
-          res.should.be.a('object');
-          done();
-        });
-    });
+    it('should work and return data', () => servicePromise()
+      .then((mobiles) => {
+        console.log('mobiles', mobiles);
+        mobilesService.findRunningRaffle('BRAVE3').then(data => console.log('data', data));
+      })
+    );
   });
 });
 
