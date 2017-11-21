@@ -4,41 +4,31 @@
 // Mocha wants DONE to be a synchronous callback, return as a promise
 process.env.NODE_ENV = 'test';
 
-const server = require('../server');
 const Mobile = require('../models/Mobile');
-// const User = require('../models/User');
 const Timeframe = require('../models/Timeframe');
-const sinon = require('sinon');
-require('sinon-mongoose');
 const Promise = require('bluebird');
+const mongoose = require('mongoose');
+const randy = require('randy');
+const _ = require('lodash');
 const cmd = require('node-cmd');
-
-const mobilesService = require('../controllers/mobiles.services')({
-  timeService: Timeframe,
-  modelService: Mobile,
-});
-
-const tangoController = require('../controllers/tango');
 
 const getAsync = Promise.promisify(cmd.get, {
   multiArgs: true,
   context: cmd,
 });
+const mobilesService = require('../controllers/mobiles.services')({
+  timeService: Timeframe,
+  modelService: Mobile,
+});
 
-const _ = require('lodash');
 const chaiAsPromised = require('chai-as-promised');
 const chai = require('chai');
 
 const expect = chai.expect();
 const should = chai.should();
-
-chai.use(require('chai-http'));
-chai.use(require('chai-json-schema'));
-
 chai.use(chaiAsPromised);
 
-const mongoose = require('mongoose');
-// Our parent block
+
 describe('Mobile Controller', () => {
   describe('#exports.getKeywordAndInsert', () => {
     let mobileCause;
@@ -93,23 +83,81 @@ describe('Mobile Controller', () => {
             // res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for keyword out of ${data.length} grabbed objects.`, timerCreated: timer });
           } else {
             console.log('insertMany fail');
-            // res.status(404).send(err);
+            _.isError(Error);
           }
         });
       })
     );
   });
   describe('#exports.insertWinnerSMS', () => {
-    let servicePromise;
+    let mobileCause;
     beforeEach(() => {
       mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
-      servicePromise = () => mobilesService.findRunningRaffle('BRAVE3');
+      mobileCause = () => new Promise((resolve, reject) => {
+        const foundTime = { _id: '5a0153ff5a581a79820c67a1',
+          keyword: 'BRAVE3',
+          startTime: '2017-11-13T14:00:00.000Z',
+          used: false,
+          __v: 0,
+          endTime: '2017-11-13T23:11:00.000Z' };
+        return resolve(foundTime);
+      });
     });
 
-    it('should work and return data', () => servicePromise()
+    it('should send winner a text message ', () => mobileCause()
+      .then((foundTime) => {
+        if (foundTime) {
+          _.isObject(foundTime).should.be.true;
+          const test = mobilesService.getRaffleContestants(foundTime).should.be.fulfilled;
+          return Promise.all([test, foundTime]).should.be.fulfilled;
+        }
+        return Promise.reject('No Raffles need to be drawn at this instance');
+      })
+      .then((promises) => {
+        const mobiles = promises[0];
+        _.isObject(mobiles).should.be.true;
+        const time = promises[1];
+        _.isObject(time).should.be.true;
+        if (mobiles.length > 0) {
+          const raffleArr = mobilesService.addWeightToRaffle(mobiles);
+          _.isObject(raffleArr).should.be.true;
+          const shuffle = randy.shuffle(raffleArr);
+          _.isObject(shuffle).should.be.true;
+          const winner = randy.choice(shuffle);
+          _.isObject(winner).should.be.true;
+          time.used = true;
+          mobilesService.raffleComplete(time).should.be.fulfilled;
+          return winner;
+        }
+        return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG').should.be.rejected;
+      })
       .then((mobiles) => {
-        console.log('mobiles', mobiles);
-        mobilesService.findRunningRaffle('BRAVE3').then(data => console.log('data', data));
+        const winner = mobiles;
+        _.isObject(winner).should.be.true;
+        const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`).should.be.fulfilled;
+        return Promise.all([call, winner]).should.be.fulfilled;
+      })
+      .then((mobiles) => {
+        const winner = mobiles[1];
+        _.isObject(winner).should.be.true;
+        const body = JSON.parse(mobiles[0][0].slice(867));
+        _.isObject(winner).should.be.true;
+        const sessionToken = body.user.session_token;
+        _.isString(sessionToken);
+        const phoneNumber = winner.phone;
+        _.isString(phoneNumber);
+        const message = 'Congrats you have won!';
+        _.isString(message);
+        function delay(t) {
+          return new Promise(((resolve) => {
+            setTimeout(resolve, t);
+          }));
+        }
+        return delay(Math.random() * 10000).then(() =>
+          getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)).should.be.fulfilled
+          .then((mobiles) => {
+            // return tangoController.insertTango([winner, winner.keyword], res).should.be.fulfilled;
+          });
       })
     );
   });
