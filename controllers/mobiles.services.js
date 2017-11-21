@@ -47,16 +47,13 @@ function mobilesService(options) {
   }
 
   function generateTimer(jsonData, baseKey) {
-    console.log(jsonData.length);
     const startAmount = 3; // amount to trigger timer creation
     const test = findExistingRaffle(baseKey)
       .then((time) => {
         if (!time) return { message: 'Not within timeframe window' };
         if (time.endTime) return { message: 'Endtime already set' };
         const newTimer = time;
-        const dataAfterStart = jsonData.filter((mobile) => {
-          return new Date(mobile.transaction_date).getTime() > new Date(time.startTime).getTime();
-        });
+        const dataAfterStart = jsonData.filter(mobile => new Date(mobile.transaction_date).getTime() > new Date(time.startTime).getTime());
         if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
         const uniqueKeys = [...new Set(jsonData.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
           item.keyword
@@ -69,12 +66,11 @@ function mobilesService(options) {
             const currentTime = new Date(specKeys[startAmount - 1].transaction_date).getTime();
             const end = currentTime + (15 * 60000);
             // const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
-
             // end is 15 minutes after transaction date of startAmount object
             // count = 0;
             // set end time and specific keyword
             newTimer.endTime = end;
-            newTimer.keyword = uniqueKeys[i]; 
+            newTimer.keyword = uniqueKeys[i];
             timeframeService.update(newTimer);
             return newTimer;
           }
@@ -112,9 +108,13 @@ function mobilesService(options) {
             chances = 5;
           } else if (number === 0) {
             const multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
-            if (multiEntries.length === unpaidDupeMax) chances = 0;
+            if (multiEntries.length === unpaidDupeMax) {
+              chances = 0;
+            }
             const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
-            if (multiEntriesEmail.length === unpaidDupeMax) chances = 0;
+            if (multiEntriesEmail.length === unpaidDupeMax) {
+              chances = 0;
+            }
           }
           for (let i = 0; i < chances; i += 1) {
             r.push(a);
