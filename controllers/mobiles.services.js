@@ -29,6 +29,7 @@ function mobilesService(options) {
     generateTimer,
     findRunningRaffle,
     getRaffleContestants,
+    findExistingRaffle,
     raffleComplete,
     addWeightToRaffle,
   };
@@ -41,20 +42,21 @@ function mobilesService(options) {
     return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
   }
 
- function findExistingRaffle(kw) {
+  function findExistingRaffle(kw) {
     return Timeframe.findOne({ startTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
   function generateTimer(jsonData, baseKey) {
+    console.log(jsonData.length);
     const startAmount = 3; // amount to trigger timer creation
     const test = findExistingRaffle(baseKey)
       .then((time) => {
         if (!time) return { message: 'Not within timeframe window' };
         if (time.endTime) return { message: 'Endtime already set' };
         const newTimer = time;
-        const dataAfterStart = jsonData.filter(mobile => // Only use objects with transaction date after start time
-          mobile.transaction_date.getTime() > time.startTime.getTime()
-        ) 
+        const dataAfterStart = jsonData.filter((mobile) => {
+          return new Date(mobile.transaction_date).getTime() > new Date(time.startTime).getTime();
+        });
         if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
         const uniqueKeys = [...new Set(jsonData.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
           item.keyword
@@ -64,12 +66,15 @@ function mobilesService(options) {
             mobile.keyword === uniqueKeys[i]
           );
           if (specKeys.length >= startAmount) {
-            const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
+            const currentTime = new Date(specKeys[startAmount - 1].transaction_date).getTime();
+            const end = currentTime + (15 * 60000);
+            // const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
+
             // end is 15 minutes after transaction date of startAmount object
             // count = 0;
             // set end time and specific keyword
             newTimer.endTime = end;
-            newTimer.keyword = uniqueKeys[i];
+            newTimer.keyword = uniqueKeys[i]; 
             timeframeService.update(newTimer);
             return newTimer;
           }
@@ -80,8 +85,6 @@ function mobilesService(options) {
   }
 
   function findRunningRaffle(kw) {
-    console.log('did i arrive');
-    console.log('kw', kw);
     return Timeframe.findOne({ endTime: { $exists: true, $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
@@ -108,9 +111,9 @@ function mobilesService(options) {
           } else if (number >= fiveMinimum) {
             chances = 5;
           } else if (number === 0) {
-            let multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
+            const multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
             if (multiEntries.length === unpaidDupeMax) chances = 0;
-            let multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
+            const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
             if (multiEntriesEmail.length === unpaidDupeMax) chances = 0;
           }
           for (let i = 0; i < chances; i += 1) {

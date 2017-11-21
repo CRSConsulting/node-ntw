@@ -62,7 +62,7 @@ exports.getKeywordAndInsert = (req, res) =>
     .then((jsonData) => {
       console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
-      const newTimer = mobilesService.generateTimer(data,req.params.keyword);
+      const newTimer = mobilesService.generateTimer(data, req.params.keyword);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
@@ -88,6 +88,7 @@ exports.getKeywordAndInsert = (req, res) =>
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
+      console.log('foundTime', foundTime);
       if (foundTime) {
         const test = mobilesService.getRaffleContestants(foundTime);
         return Promise.all([test, foundTime]);
