@@ -19,6 +19,7 @@
     "eslint": "eslint **/*.js"
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.1.4",
     "async": "^2.5.0",
     "bcrypt-nodejs": "^0.0.3",
     "bluebird": "^3.5.0",
@@ -66,6 +67,7 @@
     "restify": "^6.2.3",
     "sinon-as-promised": "^4.0.3",
     "superagent": "^3.8.1",
+    "uuid": "^3.1.0",
     "validator": "^8.0.0"
   },
   "devDependencies": {
