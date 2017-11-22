@@ -15,7 +15,7 @@ const request = require('request');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
-describe('mobileService', () => {
+describe.only('mobileService', () => {
   describe('#getAll', () => {
     it('should return a list of data', (done) => {
       mobilesService.getAll()
@@ -395,7 +395,12 @@ describe('mobileService', () => {
           frequency: 'One Time',
           anonymous: 'No',
           createdAt: '2017-11-21T21:10:47.165Z' }];
-      mobilesService.addWeightToRaffle(data);
+      const raffleArr = mobilesService.addWeightToRaffle(data);
+      _.isObject(raffleArr).should.be.true;
+      _.isEqual(data.length, raffleArr.length).should.be.true;
+      _.forEach(raffleArr, (value) => {
+        value.should.be.an.instanceOf(Object).and.have.property('keyword');
+      });
       done();
     });
   });
@@ -602,7 +607,14 @@ describe('mobileService', () => {
           collected_amount: '$0.00',
           phone: '16178204019',
           email: 'john@crs-consulting.com' }];
-      mobilesService.addWeightToRaffle(data);
+
+      const raffleArr = mobilesService.addWeightToRaffle(data);
+      _.isObject(raffleArr).should.be.true;
+      const maxEntries = 20;
+      _.isEqual(maxEntries, raffleArr.length).should.be.true;
+      _.forEach(raffleArr, (value) => {
+        value.should.be.an.instanceOf(Object).and.have.property('keyword');
+      });
       done();
     });
   });
@@ -753,7 +765,11 @@ describe('mobileService', () => {
           frequency: 'One Time',
           anonymous: 'No',
           createdAt: '2017-11-21T21:10:47.165Z' }];
-      mobilesService.addWeightToRaffle(data);
+      const raffleArr = mobilesService.addWeightToRaffle(data);
+      _.isObject(raffleArr).should.be.true;
+      _.forEach(raffleArr, (value) => {
+        value.should.be.an.instanceOf(Object).and.have.property('keyword');
+      });
       done();
     });
   });
@@ -904,7 +920,11 @@ describe('mobileService', () => {
           frequency: 'One Time',
           anonymous: 'No',
           createdAt: '2017-11-21T21:10:47.165Z' }];
-      mobilesService.addWeightToRaffle(data);
+      const raffleArr = mobilesService.addWeightToRaffle(data);
+      _.isObject(raffleArr).should.be.true;
+      _.forEach(raffleArr, (value) => {
+        value.should.be.an.instanceOf(Object).and.have.property('keyword');
+      });
       done();
     });
   });
@@ -1055,7 +1075,11 @@ describe('mobileService', () => {
           frequency: 'One Time',
           anonymous: 'No',
           createdAt: '2017-11-21T21:10:47.165Z' }];
-      mobilesService.addWeightToRaffle(data);
+      const raffleArr = mobilesService.addWeightToRaffle(data);
+      _.isObject(raffleArr).should.be.true;
+      _.forEach(raffleArr, (value) => {
+        value.should.be.an.instanceOf(Object).and.have.property('keyword');
+      });
       done();
     });
   });
