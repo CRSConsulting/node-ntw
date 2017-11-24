@@ -47,7 +47,6 @@ function mobilesService(options) {
   }
 
   function generateTimer(jsonData, baseKey) {
-    console.log(jsonData.length);
     const startAmount = 3; // amount to trigger timer creation
     const test = findExistingRaffle(baseKey)
       .then((time) => {

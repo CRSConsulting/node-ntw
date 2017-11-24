@@ -7,7 +7,17 @@ const mobilesService = require('./mobiles.services')({
   modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our serivce
 });
 
+const Token = require('../models/Token');
+const tokenService = require('./token.services')({
+  modelService: Token
+});
+
 const tangoController = require('./tango');
+
+const Message = require('../models/Message');
+const messageService = require('./message.services')({
+  modelService: Message
+});
 
 const getAsync = Promise.promisify(cmd.get, {
   multiArgs: true,
@@ -43,6 +53,7 @@ exports.getKeywordAndInsert = (req, res) =>
       });
     })
     .then((mobiles) => {
+      console.log('getKeywordAndInsert(), 2nd then()');
       function dateTimeReviver(key, value) {
         let a;
         if (key === 'transaction_date' || key === 'donation_date') {
@@ -72,7 +83,7 @@ exports.getKeywordAndInsert = (req, res) =>
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
           const amtInsert = mobiles.insertedCount || mobiles.nInserted;
-          
+
           res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
           console.log('err insertMany', err);
@@ -81,14 +92,12 @@ exports.getKeywordAndInsert = (req, res) =>
       });
     })
     .catch((err) => {
-      console.log('=======', err);
       res.status(405).send(err);
     });
 
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
-      console.log('foundTime', foundTime);
       if (foundTime) {
         const test = mobilesService.getRaffleContestants(foundTime);
         return Promise.all([test, foundTime]);
@@ -128,27 +137,26 @@ exports.insertWinnerSMS = (req, res) =>
           setTimeout(resolve, t);
         }));
       }
-      return delay(Math.random() * 10000).then(() =>
+      const sendText = delay(Math.random() * 10000).then(() =>
         getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
-        .then((mobiles) => {
-          console.log('insertwinner delay function 4th then()');
-          console.log('req.params.keyword', req.params.keyword);
-          // console.log('===========================================================================================');
-          // const body = JSON.parse(mobiles[0].slice(970));
-          // console.log('insertWinnerSMS==========================', body);
-          // res.json(body);
-          return tangoController.insertTango([winner, winner.keyword], res);
-        })
+        // .then((mobiles) => {
+        //   console.log('insertwinner delay function 4th then()');
+        //   console.log('req.params.keyword', req.params.keyword);
+        //   // console.log('===========================================================================================');
+        //   // const body = JSON.parse(mobiles[0].slice(970));
+        //   // console.log('insertWinnerSMS==========================', body);
+        //   // res.json(body);
+        //   return tangoController.insertTango([winner, winner.keyword], res);
+        // })
         .catch((err) => {
-          console.log('errrrr=--=-=-=-=-=-=', err);
           res.status(404).send('err', err);
         });
+      const sendEmail = messageService.sendEmail(winner);
+      return winner;
     })
-    // .then((mobiles) => {
-    //   console.log('then() 5th');
-    //   console.log('mobiles', mobiles);
-    //   return tangoController.insert(mobiles);
-    // })
+    .then((mobiles) => {
+      res.json(mobiles);
+    })
     .catch((err) => {
       console.log('err', err);
       res.status(500).send(err);
@@ -212,9 +220,15 @@ exports.master = (req, res) => {
     })
     .then((json) => {
       console.log('2nd fetch');
-      return fetch(`http://localhost:3000/api/mobile/sms/${req}`);
+      fetch(`http://localhost:3000/api/mobile/sms/${req}`);
     })
-    // .then(response => response.json())
+    // .then((res) => {
+    //   console.log('3rd fetch');
+    //   return res.json();
+    // })
+    // .then((winner) => {
+    //   console.log('winner', winner);
+    // })
     .then(handleErrors)
     // .then(response => response.json())
     // .then((json) => {
@@ -222,7 +236,7 @@ exports.master = (req, res) => {
     //   tangoController.insertTango({ keyword: `${req}` }, res);
     // })
     .catch((err) => {
-      console.log('err master function=-==-=-=--==--=-==-=-=-=--=', err);
+      console.log('err master function', err);
       // res.status(500).send(err);
     });
 };
