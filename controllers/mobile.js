@@ -214,19 +214,7 @@ exports.master = (req, res) => {
       console.log('2nd fetch');
       fetch(`http://localhost:3000/api/mobile/sms/${req}`);
     })
-    // .then((res) => {
-    //   console.log('3rd fetch');
-    //   return res.json();
-    // })
-    // .then((winner) => {
-    //   console.log('winner', winner);
-    // })
     .then(handleErrors)
-    // .then(response => response.json())
-    // .then((json) => {
-    //   console.log('json', json);
-    //   tangoController.insertTango({ keyword: `${req}` }, res);
-    // })
     .catch((err) => {
       console.log('err master function', err);
       // res.status(500).send(err);

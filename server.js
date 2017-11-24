@@ -64,9 +64,10 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
-const bookController = require('./controllers/book');
 const timeframeController = require('./controllers/timeframe');
 const retryController = require('./controllers/retry');
+const messageController = require('./controllers/message');
+const tokenController = require('./controllers/token');
 /**
  * API keys and Passport configuration.
  */
@@ -201,13 +202,6 @@ app.get('/api/date/:id', dateController.getOne);
 // Default API endpoints
 app.get('/api', apiController.getApi);
 app.post('/campaign', apiController.postCampaign);
-// app.get('/api/twilio', apiController.getTwilio);
-// app.post('/api/twilio', apiController.postTwilio);
-// app.get('/api/upload', apiController.getFileUpload);
-// app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
-// This is used for demo purposes.
-app.get('/books', bookController.getBooks);
-
 // Timeframe
 app.get('/api/timeframe', timeframeController.getAll);
 app.post('/api/timeframe', timeframeController.insert);
@@ -217,6 +211,13 @@ app.get('/api/retry', retryController.getAll);
 app.post('/api/retry', retryController.insert);
 app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
+// Message
+app.get('/api/message/verify', messageController.verifyEmail);
+app.post('/api/message/', messageController.sendEmail);
+
+// Token
+app.get('/api/token', tokenController.getAll);
+app.post('/api/token', tokenController.insert);
 /**
  * Error Handler.
  */
