@@ -65,6 +65,7 @@ exports.getKeywordAndInsert = (req, res) =>
         return value;
       }
       const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
+      // console.log('hello world', mobilesObj);
       if (mobilesObj.length === 0) {
         return Promise.reject('NO objects receieved');
       }
@@ -139,15 +140,6 @@ exports.insertWinnerSMS = (req, res) =>
       }
       const sendText = delay(Math.random() * 10000).then(() =>
         getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
-        // .then((mobiles) => {
-        //   console.log('insertwinner delay function 4th then()');
-        //   console.log('req.params.keyword', req.params.keyword);
-        //   // console.log('===========================================================================================');
-        //   // const body = JSON.parse(mobiles[0].slice(970));
-        //   // console.log('insertWinnerSMS==========================', body);
-        //   // res.json(body);
-        //   return tangoController.insertTango([winner, winner.keyword], res);
-        // })
         .catch((err) => {
           res.status(404).send('err', err);
         });
