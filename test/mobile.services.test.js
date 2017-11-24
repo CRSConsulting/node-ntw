@@ -9,7 +9,7 @@ const mobilesService = require('../controllers/mobiles.services')({
   timeService: Timeframe,
   modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our serivce
 });
-const { getWeather } = require('../controllers/getWeather.js');
+
 const sinon = require('sinon');
 const request = require('request');
 const mongoose = require('mongoose');

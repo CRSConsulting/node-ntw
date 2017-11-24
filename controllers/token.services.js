@@ -8,19 +8,12 @@ function tokenService(options) {
   Token = options.modelService;
 
   return {
-    ping,
     getAll,
     getOne,
     insert,
     updateOne,
     removeOne
   };
-
-  function ping() {
-    return new Promise(((resolve, reject) => {
-      resolve('pong from token.services');
-    }));
-  }
 
   function getAll() {
     return Token.find();
