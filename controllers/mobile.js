@@ -85,70 +85,6 @@ exports.getKeywordAndInsert = (req, res) =>
       res.status(405).send(err);
     });
 
-// exports.insertWinnerSMS = (req, res) =>
-//   mobilesService.getAll()
-//     .then((mobiles) => {
-//       const shuffle = randy.shuffle(mobiles);
-//       const winner = randy.choice(shuffle);
-//       return winner;
-//     })
-//     .then((mobiles) => {
-//       const winner = mobiles;
-//       const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`);
-//       return Promise.all([call, winner]);
-//     })
-//     .then((mobiles) => {
-//       const winner = mobiles[1];
-//       const body = JSON.parse(mobiles[0][0].slice(867));
-//       const sessionToken = body.user.session_token;
-//       // console.log('sessionToken', sessionToken);
-//       // const phoneNumber = winner.phone;
-//       const phoneNumber = 6178204019;
-//       const message = 'Congrats you have won!';
-//       function delay(t) {
-//         return new Promise(((resolve) => {
-//           setTimeout(resolve, t);
-//         }));
-//       }
-//       return delay(Math.random() * 10000).then(() =>
-//         getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
-//         .then((mobiles) => {
-//           // console.log('===========================================================================================');
-//           const body = JSON.parse(mobiles[0].slice(970));
-//           console.log('insertWinnerSMS==========================', body);
-//           res.json(body);
-//         })
-//         .catch((err) => {
-//           res.status(404).send('err', err);
-//         });
-//     })
-//     .catch((err) => {
-//       res.status(500).send(err);
-//     });
-
-// exports.getRaffleWinner = (req, res) =>
-//   mobilesService.getAll()
-//     .then((mobiles) => {
-//       const raffleArr = mobiles.reduce((r, a) => {
-//         if (a.collected_amount !== null) {
-//           const currency = a.collected_amount;
-//           const number = Number(currency.replace(/[^0-9\.-]+/g, ''));
-//           const chances = 1 + Math.floor(number / 10);
-//           for (let i = 0; i < chances; i++) {
-//             r.push(a);
-//           }
-//         }
-//         return r;
-//       }
-//         , []);
-//       const shuffle = randy.shuffle(raffleArr);
-//       const winner = randy.choice(shuffle);
-//       res.json(winner);
-//     })
-//     .catch((err) => {
-//       res.status(500).send(err);
-//     });
-
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
@@ -199,10 +135,6 @@ exports.insertWinnerSMS = (req, res) =>
         .then((mobiles) => {
           console.log('insertwinner delay function 4th then()');
           console.log('req.params.keyword', req.params.keyword);
-          // console.log('===========================================================================================');
-          // const body = JSON.parse(mobiles[0].slice(970));
-          // console.log('insertWinnerSMS==========================', body);
-          // res.json(body);
           return tangoController.insertTango([winner, winner.keyword], res);
         })
         .catch((err) => {
@@ -210,11 +142,6 @@ exports.insertWinnerSMS = (req, res) =>
           res.status(404).send(err);
         });
     })
-    // .then((mobiles) => {
-    //   console.log('then() 5th');
-    //   console.log('mobiles', mobiles);
-    //   return tangoController.insert(mobiles);
-    // })
     .catch((err) => {
       console.log('err', err);
       res.status(500).send(err);
@@ -281,16 +208,16 @@ exports.master = (req, res) => {
       console.log('2nd fetch');
       return fetch(`http://localhost:3000/api/mobile/sms/${req}`);
     })
-    // .then(response => response.json())
     .then(handleErrors)
-    // .then(response => response.json())
-    // .then((json) => {
-    //   console.log('json', json);
-    //   tangoController.insertTango({ keyword: `${req}` }, res);
-    // })
     .catch((err) => {
       console.log('err master function=-==-=-=--==--=-==-=-=-=--=', err);
-      // res.status(500).send(err);
+    });
+};
+
+exports.modifyMobiles = (req, res) => {
+  mobilesService.getPreChangeMobiles()
+    .then((mobiles) => {
+      mobilesService.removeUnnecessaryFields(mobiles);
     });
 };
 

@@ -5,13 +5,57 @@ const Timeframe = require('../models/Timeframe');
 const timeframeService = require('./timeframe.services')({
   modelService: Timeframe
 });
-
+const _ = require('lodash');
 
 module.exports = mobilesService;
 
 function mobilesService(options) {
   let Mobile;
   // let Timeframe;
+  const extraFields = [
+    'shortcode',
+    'type',
+    'volunteer_fundraiser',
+    'team',
+    'alternative_team_id',
+    'fee_rate',
+    'pledged_amount',
+    'processing_fee',
+    'gender',
+    'billing_status',
+    'billing_type',
+    'donation',
+    'source',
+    'form',
+    'form_payment_type',
+    'form_name',
+    'form_type',
+    'form_id',
+    'fulfillment_texts',
+    'donation_notes',
+    'account',
+    'account_id',
+    'campaign_name',
+    'account_plan',
+    'account_plan_price',
+    'frequency',
+    'anonymous',
+    'billing_transaction',
+    'billing_transaction_reference',
+    'billing_transaction_code',
+    'parent_name',
+    'payment_gateway',
+    'veteran2',
+    'veteran_2',
+    'accept',
+    'info',
+    'vet_2',
+    'a',
+    'vet2',
+    'question_2_vet',
+    'question_2',
+  ];
+
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
   }
@@ -31,6 +75,9 @@ function mobilesService(options) {
     getRaffleContestants,
     raffleComplete,
     addWeightToRaffle,
+    getPreChangeMobiles,
+    groupedByKey,
+    removeUnnecessaryFields
   };
 
   function getAll() {
@@ -41,7 +88,7 @@ function mobilesService(options) {
     return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
   }
 
- function findExistingRaffle(kw) {
+  function findExistingRaffle(kw) {
     return Timeframe.findOne({ startTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
@@ -54,7 +101,7 @@ function mobilesService(options) {
         const newTimer = time;
         const dataAfterStart = jsonData.filter(mobile => // Only use objects with transaction date after start time
           mobile.transaction_date.getTime() >= time.startTime.getTime()
-        ) 
+        )
         if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
         const uniqueKeys = [...new Set(dataAfterStart.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
           item.keyword
@@ -63,8 +110,6 @@ function mobilesService(options) {
           const specKeys = dataAfterStart.filter(mobile => // Get subsect of objects with specific keyword variant
             mobile.keyword === uniqueKeys[i]
           );
-          console.log(specKeys);
-          console.log(specKeys.length);
           if (specKeys.length >= startAmount) {
             const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
             // end is 15 minutes after transaction date of startAmount object
@@ -82,7 +127,7 @@ function mobilesService(options) {
   }
 
   function findRunningRaffle(kw) {
-    return Timeframe.findOne({ endTime: {$exists: true, $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
+    return Timeframe.findOne({ endTime: { $exists: true, $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
   function getRaffleContestants(timeframe) {
@@ -121,6 +166,18 @@ function mobilesService(options) {
       }
       , []
     );
+  }
+
+  function removeUnnecessaryFields(mobiles) {
+    return _.omit(mobiles, extraFields);
+  }
+
+  function groupedByKey(noFluff) {
+    return _.groupBy(noFluff, (a) => { return a.keyword; });
+  }
+
+  function getPreChangeMobiles() {
+    return Mobile.find({ form: { $exists: true } });
   }
 }
 

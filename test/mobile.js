@@ -27,111 +27,111 @@ const randy = require('randy');
 const fetch = require('node-fetch');
 
 const _ = require('lodash');
-const chaiAsPromised = require('chai-as-promised');
 const chai = require('chai');
 
 const expect = chai.expect();
 const should = chai.should();
-chai.use(require('chai-http'));
-chai.use(require('chai-json-schema'));
-
-chai.use(chaiAsPromised);
 
 const request = require('supertest');
 const express = require('express');
 // const app = express();
 
 // create agent for tests
-const agent = chai.request.agent(server);
-
+const braveJSON = require('../brave.json');
 const mongoose = require('mongoose');
 // Our parent block
 describe('Mobile Controller', () => {
-  describe.only('#Promises', () => {
-    let servicePromise;
-    beforeEach(() => {
-      mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
-      servicePromise = () => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":499534}' "https://app.mobilecause.com/api/v2/reports/results.json?"`);
+  // function dateTimeReviver(key, value) {
+  //   let a;
+  //   if (key === 'transaction_date' || key === 'donation_date') {
+  //     a = new Date(`${value} UTC`);
+  //     if (a) {
+  //       return a;
+  //     }
+  //   }
+  //   return value;
+  // }
+  // describe('test Raffle', () => {
+  //   it('should generate timer', () => {
+  //     console.time('forLength');
+  //     const uniqueKeys = [...new Set(braveJSON.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
+  //       item.keyword
+  //     ))];
+  //     for (let i = 0; i < uniqueKeys.length; i += 1) { // loop through all keyword variants to find if any have enough to create timer
+  //       const specKeys = braveJSON.filter(mobile => // Get subsect of objects with specific keyword variant
+  //         mobile.keyword === uniqueKeys[i]
+  //       );
+  //       if (specKeys.length >= 20) {
+  //         console.timeEnd('forLength');
+  //         return;
+  //       }
+  //     }
+  //   });
+  //   it('should generate timer reduction', () => {
+  //     console.time('reduceLength');
+  //     const redArr = [];
+  //     for (let i = 0; i < braveJSON.length; i += 1) {
+  //       const obj = braveJSON[i];
+  //       if (redArr[obj.keyword]) {
+  //         redArr[obj.keyword].push(obj);
+  //         if (redArr[obj.keyword].length >= 20) {
+  //           console.timeEnd('reduceLength');
+  //           return;
+  //         }
+  //       } else {
+  //         redArr[obj.keyword] = [obj];
+  //       }
+  //     }
+  //   });
+  //   it('should display user weighting', (done) => {
+  //     console.time('individuals');
+  //     Mobile.find({ donation_date: { $lte: new Date()}, keyword: 'BRAVE2' })
+  //       .then((mobiles) => {
+  //         return mobilesService.addWeightToRaffle(mobiles);
+  //       })
+  //       .then((mobiles) => {
+  //         const individuals = mobiles.reduce(
+  //           (r, a) => {
+  //             if (a.email == '') {
+  //               console.log(a);
+  //             }
+  //             if (r[a.email]) {
+  //               r[a.email] += 1;
+  //             } else {
+  //               r[a.email] = 1;
+  //             }
+  //             return r;
+  //           }
+  //           , []
+  //         );
+  //         console.log(individuals);
+  //         console.timeEnd('individuals');
+  //         done();
+  //       });
+  //   });
+  // });
+  describe('modify mobiles', () => {
+    const mobiles = [];
+    before((done) => {
+      mobilesService.getPreChangeMobiles().then((obj) => { 
+        _.forEach(obj, a => mobiles.push(a.toJSON()));
+        done(); 
+      });
     });
-
-    it('should work and return data', () => servicePromise()
-      .then((mobiles) => {
-        function dateTimeReviver(key, value) {
-          let a;
-          if (key === 'transaction_date' || key === 'donation_date') {
-            a = new Date(`${value} UTC`);
-            if (a) {
-              return a;
-            }
-          }
-          return value;
-        }
-        const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
-        if (mobilesObj.length === 0) {
-          return Promise.reject('NO objects receieved');
-        }
-        return mobilesObj;
-      })
-      .then((jsonData) => {
-        const data = jsonData;
-        _.isObject(data).should.be.true;
-        console.log('data', data);
-        const newTimer = mobilesService.generateTimer(data);
-        console.log('newTimer is a empty OBJ for some reason', newTimer);
-        _.isObject(newTimer).should.be.true;
-        return Promise.all([data, newTimer]).should.be.fulfilled;
-      })
-      .then((promises) => {
-        const data = promises[0];
-        _.isObject(data).should.be.true;
-        const timer = promises[1];
-        _.isObject(timer).should.be.true;
-        Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
-          console.log('Mobile.collection.insertMany', mobiles);
-          if (!err || err.code === 11000) {
-            const amtInsert = mobiles.insertedCount || mobiles.nInserted;
-            console.log('amtInsert', amtInsert);
-            console.log('data.length', data.length);
-            console.log('timerCreated', timer);
-            // res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for keyword out of ${data.length} grabbed objects.`, timerCreated: timer });
-          } else {
-            console.log('insertMany fail');
-            // res.status(404).send(err);
-          }
-        });
-      })
-    );
-    // it('should work', () => {
-
-    // });
-  });
-
-  describe('#as promised', () => {
-    it('should work', () => Promise.resolve().should.be.fulfilled); // change fullfilled to rejected and it will fail
-    it('should fail', () => Promise.reject().should.be.rejected); // change rejected to fullfilled and it will fail
-    it('1 plus 1 should equal 2', () => {
-      (1 + 1).should.equal(2);
+    it('should return objects with 62 keys from the database', () => {
+      _.forEach(mobiles, (a) => {
+        (a).should.be.an('object');
+        (Object.keys(a).length).should.equal(62);
+      });
+      (mobiles).should.be.an('array');
+      // (mobiles).should.deep.include({ keyword: 'BRAVE1' }); 
     });
-    it('1 plus 1 should equal 2 even if a Promise delivers it', () => Promise.resolve(1 + 1).should.eventually.equal(2));
-  });
-
-  describe('/GET api/mobile/keyword/:keyword', () => {
-    it('should insert and return data', (done) => {
-      const keyword = {
-        id: 'MOLINE1'
-      };
-      agent.get(`/api/mobile/keyword/:${keyword.id}`)
-        .send(keyword)
-        .end((err, res) => {
-          // console.log('res', res);
-          if (err) {
-            return done(err);
-          }
-          // res.should.have.status(200);
-          res.should.be.a('object');
-          done();
-        });
+    it('should strip objects down to 20 keys',() => {
+      const newMobiles = mobilesService.removeUnnecessaryFields(mobiles);
+      _.forEach(newMobiles, (a) => {
+        (a).should.be.an('object');
+        (Object.keys(a).length).should.equal(20);
+      });
     });
   });
 });
-
