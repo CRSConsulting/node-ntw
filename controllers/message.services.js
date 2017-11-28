@@ -21,6 +21,7 @@ function messageService(options) {
 
 
   function sendEmail(req) {
+    // console.log('sendEmail service check for request id: ', req);
     const token = uuidv4(); // unique id generator
     const dateExpires = new Date();
     dateExpires.setHours(dateExpires.getHours() + 24); // 24 hour date expiration
@@ -40,7 +41,7 @@ function messageService(options) {
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
-      to: 'john.crs.consulting@gmail.com',
+      to: 'johnyu.programmer@gmail.com',
       from: 'test@example.com',
       subject: subjectObj,
       text: textObj

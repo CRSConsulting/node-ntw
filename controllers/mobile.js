@@ -25,6 +25,7 @@ const getAsync = Promise.promisify(cmd.get, {
 });
 const randy = require('randy');
 const fetch = require('node-fetch');
+const zipcode = require('zipcode');
 // const moment = require('moment');
 
 exports.getAll = (req, res) =>
@@ -48,7 +49,7 @@ exports.getKeywordAndInsert = (req, res) =>
           setTimeout(resolve, t);
         }));
       }
-      return delay(20000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+      return delay(40000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
         res.status(404).send('err', err);
       });
     })
@@ -65,7 +66,7 @@ exports.getKeywordAndInsert = (req, res) =>
         return value;
       }
       const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
-      // console.log('hello world', mobilesObj);
+
       if (mobilesObj.length === 0) {
         return Promise.reject('NO objects receieved');
       }
@@ -144,7 +145,8 @@ exports.insertWinnerSMS = (req, res) =>
           res.status(404).send('err', err);
         });
       const sendEmail = messageService.sendEmail(winner);
-      return winner;
+      return Promise.all([winner, sendText, sendEmail]);
+      // return winner;
     })
     .then((mobiles) => {
       res.json(mobiles);
@@ -197,7 +199,6 @@ exports.findWinnerIfAvailable = (req, res) => {
 function handleErrors(response) {
   console.log('response', response.ok);
   if (!response.ok) {
-    console.log('insanity check');
     throw Error(response.statusText);
   }
   return response;
