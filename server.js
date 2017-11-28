@@ -45,7 +45,7 @@ const schedule = require('node-schedule');
 // });
 
 // start job
-const startCronJob = cron.job.start();
+// const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();

@@ -32,6 +32,7 @@ function mobilesService(options) {
     findExistingRaffle,
     raffleComplete,
     addWeightToRaffle,
+    selectFiveWinners
   };
 
   function getAll() {
@@ -124,6 +125,24 @@ function mobilesService(options) {
       }
       , []
     );
+  }
+
+  function selectFiveWinners(mobiles) {
+    const winnerArr = [];
+    console.log(mobiles.length);
+    for (let i = 0; i < 5; i++) {
+      const shuffle = randy.shuffle(mobiles);
+      const winner = randy.choice(shuffle);
+      winnerArr.push({
+        first_name: winner.first_name,
+        last_name: winner.last_name,
+        phone: winner.phone,
+        email: winner.email
+      });
+      mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
+    }
+    console.log(winnerArr);
+    return winnerArr;
   }
 }
 

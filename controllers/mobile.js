@@ -110,13 +110,21 @@ exports.insertWinnerSMS = (req, res) =>
       console.log('insertwinner 2nd then()');
       const mobiles = promises[0];
       const time = promises[1];
+      // if (mobiles.length > 0) {
+      //   const raffleArr = mobilesService.addWeightToRaffle(mobiles);
+      //   const shuffle = randy.shuffle(raffleArr);
+      //   const winner = randy.choice(shuffle);
+      //   time.used = true;
+      //   mobilesService.raffleComplete(time);
+      //   return winner;
+      // }
       if (mobiles.length > 0) {
+        console.log(`Selecting winner out of ${mobiles.length} contestants`);
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
-        const shuffle = randy.shuffle(raffleArr);
-        const winner = randy.choice(shuffle);
-        time.used = true;
-        mobilesService.raffleComplete(time);
-        return winner;
+        console.log(`Weighted arr has ${raffleArr.length} contestants`);
+        const winners = mobilesService.selectFiveWinners(mobiles);
+        // mobilesService.raffleComplete(time);
+        return winners;
       }
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
     })
@@ -128,7 +136,9 @@ exports.insertWinnerSMS = (req, res) =>
     })
     .then((mobiles) => {
       console.log('insertwinner 4th then()');
-      const winner = mobiles[1];
+      const winners = mobiles[1];
+      const firstPlace = winners.winners[0];
+      console.log('firstPlace~~~~~~', firstPlace);
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
       // const phoneNumber = winner.phone;
@@ -144,9 +154,9 @@ exports.insertWinnerSMS = (req, res) =>
         .catch((err) => {
           res.status(404).send('err', err);
         });
-      const sendEmail = messageService.sendEmail(winner);
-      return Promise.all([winner, sendText, sendEmail]);
-      // return winner;
+      const sendEmail = messageService.sendEmail(winners);
+
+      return firstPlace;
     })
     .then((mobiles) => {
       res.json(mobiles);

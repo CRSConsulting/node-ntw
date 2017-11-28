@@ -21,19 +21,21 @@ function messageService(options) {
 
 
   function sendEmail(req) {
-    // console.log('sendEmail service check for request id: ', req);
+    console.log(req);
+    const firstPlace = req.winners[0];
     const token = uuidv4(); // unique id generator
     const dateExpires = new Date();
     dateExpires.setHours(dateExpires.getHours() + 24); // 24 hour date expiration
     const tokenObj = {
       token_string: token,
       expiration_date: dateExpires,
-      email: req.email,
-      isAuthenticated: false
+      email: firstPlace.email,
+      isAuthenticated: false,
+      winnersList: req._id
     };
     tokenService.insert(tokenObj);
-    const toEmailObj = req.email;
-    const subjectObj = `Hello: ${req.first_name}`;
+    const toEmailObj = firstPlace.email;
+    const subjectObj = `Hello: ${firstPlace.first_name}`;
     const textObj = `${'This is a email verfication. \n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
             'http://' + 'localhost:3000/' + 'api/message/verify' + '?token='}${decodeURIComponent(token)}\n\n` +
