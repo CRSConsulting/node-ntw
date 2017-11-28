@@ -18,6 +18,10 @@ const tokenSchema = new Schema({
   isAuthenticated: {
     type: Boolean,
     required: true
+  },
+  winnersList: {
+    type: Schema.Types.ObjectId,
+    ref: 'Winners'
   }
 });
 
