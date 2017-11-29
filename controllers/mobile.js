@@ -100,6 +100,7 @@ exports.getKeywordAndInsert = (req, res) =>
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
+      console.log('insertwinner 1st then()');
       if (foundTime) {
         const test = mobilesService.getRaffleContestants(foundTime);
         return Promise.all([test, foundTime]);
@@ -123,7 +124,7 @@ exports.insertWinnerSMS = (req, res) =>
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
         console.log(`Weighted arr has ${raffleArr.length} contestants`);
         const winners = mobilesService.selectFiveWinners(mobiles);
-        // mobilesService.raffleComplete(time);
+        mobilesService.raffleComplete(time);
         return winners;
       }
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
@@ -137,8 +138,9 @@ exports.insertWinnerSMS = (req, res) =>
     .then((mobiles) => {
       console.log('insertwinner 4th then()');
       const winners = mobiles[1];
-      const firstPlace = winners.winners[0];
-      console.log('firstPlace~~~~~~', firstPlace);
+      console.log('winners', winners);
+      const firstPlace = winners[0];
+      console.log('====firstPlace====', firstPlace);
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
       // const phoneNumber = winner.phone;
@@ -207,7 +209,7 @@ exports.findWinnerIfAvailable = (req, res) => {
     });
 };
 function handleErrors(response) {
-  console.log('response', response.ok);
+  // console.log('response', response.ok);
   if (!response.ok) {
     throw Error(response.statusText);
   }

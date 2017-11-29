@@ -5,7 +5,7 @@ const Timeframe = require('../models/Timeframe');
 const timeframeService = require('./timeframe.services')({
   modelService: Timeframe
 });
-
+const randy = require('randy');
 
 module.exports = mobilesService;
 
@@ -129,7 +129,6 @@ function mobilesService(options) {
 
   function selectFiveWinners(mobiles) {
     const winnerArr = [];
-    console.log(mobiles.length);
     for (let i = 0; i < 5; i++) {
       const shuffle = randy.shuffle(mobiles);
       const winner = randy.choice(shuffle);
@@ -139,9 +138,9 @@ function mobilesService(options) {
         phone: winner.phone,
         email: winner.email
       });
-      mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
+      // mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
+      // console.log('==========', mobiles);
     }
-    console.log(winnerArr);
     return winnerArr;
   }
 }

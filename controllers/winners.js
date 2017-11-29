@@ -6,7 +6,6 @@ const winnersService = require('../controllers/winners.services')({
 exports.getAll = (req, res) =>
   winnersService.getAll()
     .then((winners) => {
-      console.log('tokenService.getAll()', winners);
       res.json(winners);
     })
     .catch((err) => {
@@ -16,7 +15,6 @@ exports.getAll = (req, res) =>
 exports.insert = (req, res) =>
   winnersService.insert()
     .then((winners) => {
-      console.log('winnersService.insert', winners);
       res.json(winners);
     })
     .catch((err) => {

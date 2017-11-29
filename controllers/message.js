@@ -28,7 +28,7 @@ exports.verifyEmail = (req, res) =>
         };
         tokenService.updateOne({ token_string: req.query.token }, updateAuth).then((token) => {
           if (token.isAuthenticated === true) {
-            console.log('token', token)
+            console.log('token', token);
             res.json('Your email has been verified');
           } else {
             return Promise.reject('Invalid Token');
