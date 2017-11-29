@@ -41,9 +41,8 @@ const job = new CronJob({
         });
       }
       Promise.all([
-        // promise(1, { keyword: 'MOLINE' }),
-        promise(2, { keyword: 'BRAVE' }),
-        // promise(3, { keyword: 'FORT' })
+        promise(1, { keyword: 'BRAVE' }),
+        // promise(2, { keyword: 'MOLINE2' }),
         // promise(3, { keyword: 'MOLINE3' }),
         // promise(4, { keyword: 'MOLINE5' })
       ])

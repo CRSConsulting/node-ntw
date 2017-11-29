@@ -19,6 +19,7 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const methodOverride = require('method-override');
+const helmet = require('helmet');
 // const multer = require('multer');
 
 // const upload = multer({ dest: path.join(__dirname, 'uploads') });
@@ -35,12 +36,13 @@ const rule = new schedule.RecurrenceRule();
 // // rule.minute = 5;
 
 // // This job runs every 7 minutes
-rule.minute = new schedule.Range(0, 59, 3);
+// rule.minute = new schedule.Range(0, 59, 3);
 
-const j = schedule.scheduleJob(rule, () => {
-  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-  const startCronJob = cron.job.start();
-});
+// const j = schedule.scheduleJob(rule, () => {
+//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+//   // const startCronJob = cron.job.start();
+//   retryController.getAll();
+// });
 
 // start job
 // const startCronJob = cron.job.start();
@@ -62,8 +64,10 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
-const bookController = require('./controllers/book');
 const timeframeController = require('./controllers/timeframe');
+const retryController = require('./controllers/retry');
+const messageController = require('./controllers/message');
+const tokenController = require('./controllers/token');
 /**
  * API keys and Passport configuration.
  */
@@ -99,6 +103,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(expressStatusMonitor());
 app.use(compression());
+app.use(helmet());
 app.use(sass({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public')
@@ -197,17 +202,22 @@ app.get('/api/date/:id', dateController.getOne);
 // Default API endpoints
 app.get('/api', apiController.getApi);
 app.post('/campaign', apiController.postCampaign);
-// app.get('/api/twilio', apiController.getTwilio);
-// app.post('/api/twilio', apiController.postTwilio);
-// app.get('/api/upload', apiController.getFileUpload);
-// app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
-// This is used for demo purposes.
-app.get('/books', bookController.getBooks);
-
 // Timeframe
 app.get('/api/timeframe', timeframeController.getAll);
 app.post('/api/timeframe', timeframeController.insert);
 app.get('/api/timeframe/:id', timeframeController.getOne);
+// Retry
+app.get('/api/retry', retryController.getAll);
+app.post('/api/retry', retryController.insert);
+app.get('/api/retry/:id', retryController.getOne);
+app.delete('/api/retry/:id', retryController.removeById);
+// Message
+app.get('/api/message/verify', messageController.verifyEmail);
+app.post('/api/message/', messageController.sendEmail);
+
+// Token
+app.get('/api/token', tokenController.getAll);
+app.post('/api/token', tokenController.insert);
 /**
  * Error Handler.
  */
@@ -220,6 +230,12 @@ app.use(errorHandler());
 app.listen(app.get('port'), () => {
   console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+  console.log('resason', reason.stack);
 });
 
 

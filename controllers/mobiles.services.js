@@ -6,6 +6,7 @@ const timeframeService = require('./timeframe.services')({
   modelService: Timeframe
 });
 const _ = require('lodash');
+const randy = require('randy');
 
 module.exports = mobilesService;
 
@@ -73,11 +74,13 @@ function mobilesService(options) {
     generateTimer,
     findRunningRaffle,
     getRaffleContestants,
+    findExistingRaffle,
     raffleComplete,
     addWeightToRaffle,
     getPreChangeMobiles,
     groupedByKey,
-    removeUnnecessaryFields
+    removeUnnecessaryFields,
+    selectFiveWinners
   };
 
   function getAll() {
@@ -99,9 +102,7 @@ function mobilesService(options) {
         if (!time) return { message: 'Not within timeframe window' };
         if (time.endTime) return { message: 'Endtime already set' };
         const newTimer = time;
-        const dataAfterStart = jsonData.filter(mobile => // Only use objects with transaction date after start time
-          mobile.transaction_date.getTime() >= time.startTime.getTime()
-        )
+        const dataAfterStart = jsonData.filter(mobile => new Date(mobile.transaction_date).getTime() > new Date(time.startTime).getTime());
         if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
         const uniqueKeys = [...new Set(dataAfterStart.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
           item.keyword
@@ -111,7 +112,9 @@ function mobilesService(options) {
             mobile.keyword === uniqueKeys[i]
           );
           if (specKeys.length >= startAmount) {
-            const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
+            const currentTime = new Date(specKeys[startAmount - 1].transaction_date).getTime();
+            const end = currentTime + (15 * 60000);
+            // const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
             // end is 15 minutes after transaction date of startAmount object
             // count = 0;
             // set end time and specific keyword
@@ -153,10 +156,14 @@ function mobilesService(options) {
           } else if (number >= fiveMinimum) {
             chances = 5;
           } else if (number === 0) {
-            let multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
-            if (multiEntries.length === unpaidDupeMax) chances = 0;
-            let multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
-            if (multiEntriesEmail.length === unpaidDupeMax) chances = 0;
+            const multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
+            if (multiEntries.length === unpaidDupeMax) {
+              chances = 0;
+            }
+            const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
+            if (multiEntriesEmail.length === unpaidDupeMax) {
+              chances = 0;
+            }
           }
           for (let i = 0; i < chances; i += 1) {
             r.push(a);
@@ -178,6 +185,24 @@ function mobilesService(options) {
 
   function getPreChangeMobiles() {
     return Mobile.find({ form: { $exists: true } });
+  }
+
+  function selectFiveWinners(mobiles) {
+    const winnerArr = [];
+    console.log(mobiles.length);
+    for (let i = 0; i < 5; i++) {
+      const shuffle = randy.shuffle(mobiles);
+      const winner = randy.choice(shuffle);
+      winnerArr.push({
+        first_name: winner.first_name,
+        last_name: winner.last_name,
+        phone: winner.phone,
+        email: winner.email
+      });
+      mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
+    }
+    console.log(winnerArr);
+    return winnerArr;
   }
 }
 

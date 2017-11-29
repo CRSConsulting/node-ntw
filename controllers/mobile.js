@@ -7,7 +7,22 @@ const mobilesService = require('./mobiles.services')({
   modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our serivce
 });
 
+const Token = require('../models/Token');
+const tokenService = require('./token.services')({
+  modelService: Token
+});
+
+const Winners = require('../models/Winners');
+const winnersService = require('./winners.services')({
+  modelService: Winners
+})
+
 const tangoController = require('./tango');
+
+const Message = require('../models/Message');
+const messageService = require('./message.services')({
+  modelService: Message
+});
 
 const getAsync = Promise.promisify(cmd.get, {
   multiArgs: true,
@@ -43,6 +58,7 @@ exports.getKeywordAndInsert = (req, res) =>
       });
     })
     .then((mobiles) => {
+      console.log('getKeywordAndInsert(), 2nd then()');
       function dateTimeReviver(key, value) {
         let a;
         if (key === 'transaction_date' || key === 'donation_date') {
@@ -54,6 +70,7 @@ exports.getKeywordAndInsert = (req, res) =>
         return value;
       }
       const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
+      // console.log('hello world', mobilesObj);
       if (mobilesObj.length === 0) {
         return Promise.reject('NO objects receieved');
       }
@@ -62,7 +79,7 @@ exports.getKeywordAndInsert = (req, res) =>
     .then((jsonData) => {
       console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
-      const newTimer = mobilesService.generateTimer(data,req.params.keyword);
+      const newTimer = mobilesService.generateTimer(data, req.params.keyword);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
@@ -72,7 +89,6 @@ exports.getKeywordAndInsert = (req, res) =>
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
         if (!err || err.code === 11000) {
           const amtInsert = mobiles.insertedCount || mobiles.nInserted;
-          console.log(`${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`);
           res.status(200).json({ rowsAdded: `${amtInsert} new objects were inserted for ${req.params.keyword} out of ${data.length} grabbed objects.`, timerCreated: timer });
         } else {
           console.log('err insertMany', err);
@@ -81,7 +97,6 @@ exports.getKeywordAndInsert = (req, res) =>
       });
     })
     .catch((err) => {
-      console.log('=======', err);
       res.status(405).send(err);
     });
 
@@ -103,44 +118,47 @@ exports.insertWinnerSMS = (req, res) =>
         console.log(`Selecting winner out of ${mobiles.length} contestants`);
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
         console.log(`Weighted arr has ${raffleArr.length} contestants`);
-        const shuffle = randy.shuffle(raffleArr);
-        const winner = randy.choice(shuffle);
-        time.used = true;
-        mobilesService.raffleComplete(time);
-        return winner;
+        const winners = mobilesService.selectFiveWinners(raffleArr);
+        // mobilesService.raffleComplete(time);
+        return winners;
       }
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
     })
     .then((mobiles) => {
+      console.log(mobiles);
+      return winnersService.insert(mobiles);
+    })
+    .then((mobiles) => {
       console.log('insertwinner third then()');
-      const winner = mobiles;
+      const winners = mobiles;
       const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`);
-      return Promise.all([call, winner]);
+      return Promise.all([call, winners]);
     })
     .then((mobiles) => {
       console.log('insertwinner 4th then()');
-      const winner = mobiles[1];
+      const winners = mobiles[1];
+      const firstPlace = winners.winners[0];
+      console.log('firstPlace~~~~~~', firstPlace);
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      const phoneNumber = winner.phone;
-      // const phoneNumber = 2034488493;
+      // const phoneNumber = firstPlace.phone;
+      const phoneNumber = 2034488493;
       const message = 'Congrats you have won!';
       function delay(t) {
         return new Promise(((resolve) => {
           setTimeout(resolve, t);
         }));
       }
-      return delay(Math.random() * 10000).then(() =>
+      const sendText = delay(Math.random() * 10000).then(() =>
         getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
-        .then((mobiles) => {
-          console.log('insertwinner delay function 4th then()');
-          console.log('req.params.keyword', req.params.keyword);
-          return tangoController.insertTango([winner, winner.keyword], res);
-        })
         .catch((err) => {
-          console.log('errrrr=--=-=-=-=-=-=', err);
-          res.status(404).send(err);
+          res.status(404).send('err', err);
         });
+      const sendEmail = messageService.sendEmail(winners);
+      return firstPlace;
+    })
+    .then((mobiles) => {
+      res.json(mobiles);
     })
     .catch((err) => {
       console.log('err', err);
@@ -206,18 +224,12 @@ exports.master = (req, res) => {
     })
     .then((json) => {
       console.log('2nd fetch');
-      return fetch(`http://localhost:3000/api/mobile/sms/${req}`);
+      fetch(`http://localhost:3000/api/mobile/sms/${req}`);
     })
     .then(handleErrors)
     .catch((err) => {
-      console.log('err master function=-==-=-=--==--=-==-=-=-=--=', err);
-    });
-};
-
-exports.modifyMobiles = (req, res) => {
-  mobilesService.getPreChangeMobiles()
-    .then((mobiles) => {
-      mobilesService.removeUnnecessaryFields(mobiles);
+      console.log('err master function', err);
+      // res.status(500).send(err);
     });
 };
 
