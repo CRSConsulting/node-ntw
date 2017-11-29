@@ -138,8 +138,10 @@ function mobilesService(options) {
         phone: winner.phone,
         email: winner.email
       });
-      // mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
-      // console.log('==========', mobiles);
+      mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
+      if (!mobiles[0]) {
+        break;
+      }
     }
     return winnerArr;
   }

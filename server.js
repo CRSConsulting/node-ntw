@@ -45,7 +45,7 @@ const schedule = require('node-schedule');
 // });
 
 // start job
-// const startCronJob = cron.job.start();
+const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -214,7 +214,7 @@ app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
 // Message
 
-app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail);
+app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail, tangoController.insertTango);
 app.post('/api/message/', messageController.sendEmail);
 
 // Token

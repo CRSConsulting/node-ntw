@@ -18,7 +18,7 @@ exports.sendEmail = (req, res) =>
       res.status(500).send(err);
     });
 
-exports.verifyEmail = (req, res) =>
+exports.verifyEmail = (req, res, next) =>
   tokenService.getOne({ token_string: req.query.token })
     .then((token) => {
       const dateNow = Date.now();
@@ -29,7 +29,8 @@ exports.verifyEmail = (req, res) =>
         tokenService.updateOne({ token_string: req.query.token }, updateAuth).then((token) => {
           if (token.isAuthenticated === true) {
             console.log('token', token);
-            res.json('Your email has been verified');
+            // res.json('Your email has been verified');
+            next();
           } else {
             return Promise.reject('Invalid Token');
           }

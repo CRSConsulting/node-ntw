@@ -3,7 +3,10 @@ const Tango = require('../models/Tango');
 const tangosService = require('./tangos.services')({
   modelService: Tango,
 });
-
+const Winner = require('../models/Winner');
+const winnerService = require('./winners.services')({
+  modelService: Tango,
+});
 const retryController = require('./retry');
 
 exports.getAll = (req, res) => {
@@ -42,6 +45,11 @@ exports.getOne = (req, res) => {
 };
 
 exports.insertTango = (req, res) => {
+  console.log('hello world');
+  winnerService.getAll().then((data) => {
+    console.log('data', data);
+  }).catch((err) => { console.log('err', err)})
+
   const winner = req[0];
   const keywordLocation = req[1];
   const optionsAuth = {
