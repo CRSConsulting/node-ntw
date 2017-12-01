@@ -361,7 +361,7 @@ exports.insertWinnerSMS = (req, res) =>
         vet2: null,
         question_2_vet: null,
         question_2: null,
-        createdAt: '2017-11-29T19:06:59.180Z' }]
+        createdAt: '2017-11-29T19:06:59.180Z' }];
       // console.log('mobiles :', mobiles);
       const time = promises[1];
       // if (mobiles.length > 0) {
@@ -384,7 +384,6 @@ exports.insertWinnerSMS = (req, res) =>
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
     })
     .then((mobiles) => {
-      console.log(mobiles);
       return winnersService.insert(mobiles);
     })
     .then((mobiles) => {
@@ -396,12 +395,10 @@ exports.insertWinnerSMS = (req, res) =>
     .then((mobiles) => {
       console.log('insertwinner 4th then()');
       const winners = mobiles[1];
-      // console.log('winners', winners);
-      const firstPlace = winners[0];
-      // console.log('====firstPlace====', firstPlace);
+      const firstPlace = winners.winners[0];
       const body = JSON.parse(mobiles[0][0].slice(867));
       const sessionToken = body.user.session_token;
-      // const phoneNumber = winner.phone;
+      // const phoneNumber = firstPlace.phone;
       const phoneNumber = 6178204019;
       const message = 'Congrats you have won!';
       function delay(t) {
@@ -415,7 +412,6 @@ exports.insertWinnerSMS = (req, res) =>
           res.status(404).send('err', err);
         });
       const sendEmail = messageService.sendEmail(winners);
-
       return firstPlace;
     })
     .then((mobiles) => {

@@ -42,8 +42,8 @@ function retryService(options) {
     return Retry.findOneAndRemove(queryCondition);
   }
 
-  function retryTango(keyword, email, id, retries, res) {
-    return tangoController.insertTangoRetry(keyword, email, id, retries, res);
+  function retryTango(retryObj) {
+    return tangoController.insertTangoRetry(retryObj);
   }
 
   function updateOne(queryCondition, doc) {
@@ -52,4 +52,3 @@ function retryService(options) {
     });
   }
 }
-

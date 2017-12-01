@@ -136,7 +136,9 @@ function mobilesService(options) {
         first_name: winner.first_name,
         last_name: winner.last_name,
         phone: winner.phone,
-        email: winner.email
+        email: winner.email,
+        keyword: winner.keyword,
+        isValid: false
       });
       mobiles = mobiles.filter(x => x.email !== winner.email && x.phone !== winner.phone);
       if (!mobiles[0]) {

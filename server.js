@@ -30,22 +30,24 @@ const moment = require('moment');
 
 const schedule = require('node-schedule');
 
+const retryController = require('./controllers/retry');
+
 // const rule = new schedule.RecurrenceRule();
-// // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
-// // rule.hour = 0;
-// // rule.minute = 5;
+// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// rule.hour = 0;
+// rule.minute = 5;
 
-// // This job runs every 7 minutes
-// rule.minute = new schedule.Range(0, 59, 3);
+// This job runs every 7 minutes
+// rule.minute = new schedule.Range(0, 59, 1);
 
-// const j = schedule.scheduleJob(rule, () => {
+// const j = schedule.scheduleJob(rule, (req, res) => {
 //   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
 //   // const startCronJob = cron.job.start();
-//   retryController.getAll();
+//   retryController.getAll(req, res);
 // });
 
 // start job
-const startCronJob = cron.job.start();
+// const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -65,7 +67,7 @@ const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
 const timeframeController = require('./controllers/timeframe');
-const retryController = require('./controllers/retry');
+
 const messageController = require('./controllers/message');
 const tokenController = require('./controllers/token');
 const ipController = require('./controllers/ip');
