@@ -3,39 +3,53 @@ const retryService = require('./retry.services')({
   modelService: Retry,
 });
 
-exports.getAll = (req, res) => {
+const messageController = require('./message');
+
+const retryController = require('./retry');
+
+exports.getAll = () => {
   retryService.getAll()
     .then((retry) => {
-      const data = retry[0];
-      const keyword = data.keyword;
-      const email = data.email;
-      const id = data._id;
-      const retries = data.retries;
-      if (data.retries < 6) {
-        retryService.retryTango(keyword, email, id, retries, res);
-      } else {
-        return Promise.reject('This document does not need a retry');
-      }
-    }).catch((err) => {
-      res.status(500).send(err);
+      if (retry[0] === undefined) { return console.log('No retries needed'); }
+      retry.forEach((cur, i) => {
+        if (cur.retries <= 6 && cur.isValid === false) {
+          console.log('retry in process...');
+          return retryService.retryTango(cur);
+        }
+        if (cur.isValid === true && cur.sendEmail === false) {
+          const queryCondition = {
+            _id: cur._id
+          };
+          const body = {
+            sendEmail: true
+          };
+          // sendEmail sets to true, because we only want to send the email once
+          const updateRetryObj = retryController.updateById(queryCondition, body);
+          const sendEmail = messageController.sendRetryEmail(cur);
+          console.log('check your email for retries that exceeded 6x');
+          return Promise.all([updateRetryObj, sendEmail]);
+        }
+        return console.log('No retries needed');
+      });
+    })
+    .catch((err) => {
+      console.log('Error: from exports.getAll :', err);
     });
 };
 
 exports.insert = (req, res) => {
   retryService.insert(req)
     .then((retry) => {
-      console.log('retry', retry);
+      return retry;
     }).catch((err) => {
-      console.log('err', err);
       res.status(500).send(err);
     });
 };
 
 exports.getOne = (req, res) => {
   const queryCondition = {
-    keyword: req.params.id
+    email: req.email
   };
-
   retryService.getOne(queryCondition)
     .then((retry) => {
       const data = retry;
@@ -49,18 +63,17 @@ exports.getOne = (req, res) => {
 exports.removeById = (req, res) => {
   retryService.removeOne(req)
     .then((retry) => {
-      res.send(retry);
+      return retry;
     })
     .catch((err) => {
       console.log('err', err);
-      res.status(500).send(err);
     });
 };
 
-exports.updateById = (queryCondition, body, res) => {
+exports.updateById = (queryCondition, body) => {
   retryService.updateOne(queryCondition, body)
     .then((retry) => {
-      res.send(retry);
+      return retry;
     })
     .catch(err => console.log('err', err));
 };

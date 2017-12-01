@@ -18,6 +18,15 @@ exports.sendEmail = (req, res) =>
       res.status(500).send(err);
     });
 
+exports.sendRetryEmail = (req, res) =>
+  messageService.sendRetryEmail(req)
+    .then((message) => {
+      return message;
+    })
+    .catch((err) => {
+      console.log('err', err);
+    });
+
 exports.verifyEmail = (req, res, next) =>
   tokenService.getOne({ token_string: req.query.token })
     .then((token) => {

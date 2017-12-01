@@ -5,15 +5,14 @@ const iplocation = Promise.promisifyAll(require('iplocation'));
 exports.checkIp = (req, res, next) => {
   let ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
   console.log('current IP address :', ip);
-  // // MA IP
-  // ip = '69.43.65.102';
+  // MA IP
+  ip = '69.43.65.102';
   // // NY IP
   // ip = '72.229.28.185';
   // // FL IP
   // ip = '96.31.78.217';
   iplocation(`${ip}`)
     .then((data) => {
-      console.log('data', data);
       console.log('data.region_name', data.region_name.trim());
       if (data.country_code.trim() !== 'US') { return Promise.reject('Invalid location'); }
       if (data.region_name.trim() === 'New York') {
