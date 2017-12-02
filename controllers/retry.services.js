@@ -35,6 +35,7 @@ function retryService(options) {
     return retry.save();
   }
   function getOne(queryCondition) {
+    console.log('queryCondition', queryCondition);
     return Retry.findOne(queryCondition);
   }
 

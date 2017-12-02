@@ -32,6 +32,7 @@ exports.getAll = () => {
         return console.log('No retries needed');
       });
     })
+    .then(data => console.log('=======', data))
     .catch((err) => {
       console.log('Error: from exports.getAll :', err);
     });
@@ -39,9 +40,8 @@ exports.getAll = () => {
 
 exports.insert = (req, res) => {
   retryService.insert(req)
-    .then((retry) => {
-      return retry;
-    }).catch((err) => {
+    .then(retry => retry)
+    .catch((err) => {
       res.status(500).send(err);
     });
 };
@@ -62,9 +62,7 @@ exports.getOne = (req, res) => {
 
 exports.removeById = (req, res) => {
   retryService.removeOne(req)
-    .then((retry) => {
-      return retry;
-    })
+    .then(retry => retry)
     .catch((err) => {
       console.log('err', err);
     });
@@ -72,8 +70,6 @@ exports.removeById = (req, res) => {
 
 exports.updateById = (queryCondition, body) => {
   retryService.updateOne(queryCondition, body)
-    .then((retry) => {
-      return retry;
-    })
+    .then(retry => retry)
     .catch(err => console.log('err', err));
 };

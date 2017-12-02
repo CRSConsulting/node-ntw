@@ -49,25 +49,23 @@ exports.getOne = (req, res) => {
 };
 
 exports.insertTango = (req, res) => {
-  let winner;
-  let keywordLocation;
+  let winnerObj;
   let retryObj;
   let queryCondition;
-  winnerService.getAll()
-    .then((data) => {
-      winner = data[0].winners[0];
-      keywordLocation = winner.keyword;
-      queryCondition = {
-        keyword: keywordLocation
-      };
+  winnerService.getOne({ _id: res.locals.winnersList })
+    .then((winner) => {
+      winnerObj = winner.winners.shift();
       return retryService.getOne({ email: 'john.crs.consulting@gmail.com' });
     })
     .then((retry) => {
       retryObj = retry;
       if (!retryObj || retryObj.isValid === false) {
+        queryCondition = {
+          keyword: winnerObj.keyword
+        };
         return tangosService.getOne(queryCondition);
       }
-      return retryObj;
+      return console.log('No retries are needed');
     })
     .then((tango) => {
       const optionsAuth = {
@@ -84,16 +82,16 @@ exports.insertTango = (req, res) => {
           message: 'Congrats',
           recipient: {
             email: 'john.crs.consulting@gmail.com',
-            firstName: winner.first_name,
-            lastName: winner.last_name,
+            firstName: winnerObj.first_name,
+            lastName: winnerObj.last_name,
           },
           sendEmail: true,
           sender: {
             firstName: 'NTW',
             lastName: '',
           },
-          // utid: tango.giftId,
-          utid: null,
+          utid: tango.giftId,
+          // utid: null,
           // Amazon GC "U666425"
           // VISA GC "U426141"
           // VISA Prepaid GC "U677579"
@@ -112,14 +110,12 @@ exports.insertTango = (req, res) => {
           res.json(recipient);
         } else {
           if (!retryObj) {
-            console.log('else insertTango :', winner.isValid);
             const data = {
-              first_name: winner.first_name,
-              last_name: winner.last_name,
-              keyword: keywordLocation,
+              first_name: winnerObj.first_name,
+              last_name: winnerObj.last_name,
+              keyword: queryCondition.keyword,
               // email: winner.email,
               email: 'john.crs.consulting@gmail.com',
-              transaction_id: winner.transaction_id,
               retries: 1,
               startTime: AddMinutesToDate(currentTime, 10),
               isValid: false,
@@ -140,11 +136,11 @@ exports.insertTango = (req, res) => {
 
             default:
               if (!retryObj) {
-                res.json(`Failed to send giftcard to ${winner.email}, please try again later`);
+                res.json(`Failed to send giftcard to ${winnerObj.email}, please try again later`);
               } else if (retryObj.isValid === false) {
-                res.json(`Failed to send giftcard to ${winner.email}, we will atempt up to 6 times within a 48 hour time window`);
+                res.json(`Failed to send giftcard to ${winnerObj.email}, we will atempt up to 6 times within a 48 hour time window`);
               } else {
-                res.json(`Failed to send giftcard to ${winner.email}, please check your email later`);
+                res.json(`Failed to send giftcard to ${winnerObj.email}, please check your email later`);
               }
           }
         }
