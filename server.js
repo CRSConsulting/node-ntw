@@ -71,6 +71,7 @@ const timeframeController = require('./controllers/timeframe');
 const messageController = require('./controllers/message');
 const tokenController = require('./controllers/token');
 const ipController = require('./controllers/ip');
+const ftpController = require('./controllers/ftp');
 /**
  * API keys and Passport configuration.
  */
@@ -222,6 +223,9 @@ app.post('/api/message/', messageController.sendEmail);
 // Token
 app.get('/api/token', tokenController.getAll);
 app.post('/api/token', tokenController.insert);
+
+// FTP
+app.get('/ftp', ftpController.writeFile);
 /**
  * Error Handler.
  */

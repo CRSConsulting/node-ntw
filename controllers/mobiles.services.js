@@ -16,9 +16,9 @@ function mobilesService(options) {
     throw new Error('Options.modelService is required');
   }
 
-  if (!options.timeService) {
-    throw new Error('Options.timeService is required');
-  }
+  // if (!options.timeService) {
+  //   throw new Error('Options.timeService is required');
+  // }
 
   Mobile = options.modelService;
   // Timeframe = options.timeService;
