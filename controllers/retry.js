@@ -5,7 +5,9 @@ const retryService = require('./retry.services')({
 
 const messageController = require('./message');
 
-const retryController = require('./retry');
+// const retryController = require('./retry');
+
+const tangoController = require('./tango');
 
 exports.getAll = () => {
   retryService.getAll()
@@ -14,7 +16,7 @@ exports.getAll = () => {
       retry.forEach((cur, i) => {
         if (cur.retries <= 6 && cur.isValid === false) {
           console.log('retry in process...');
-          return retryService.retryTango(cur);
+          return tangoController.insertTangoRetry(cur);
         }
         if (cur.isValid === true && cur.sendEmail === false) {
           const queryCondition = {
@@ -24,7 +26,7 @@ exports.getAll = () => {
             sendEmail: true
           };
           // sendEmail sets to true, because we only want to send the email once
-          const updateRetryObj = retryController.updateById(queryCondition, body);
+          const updateRetryObj = module.exports.updateById(queryCondition, body);
           const sendEmail = messageController.sendRetryEmail(cur);
           console.log('check your email for retries that exceeded 6x');
           return Promise.all([updateRetryObj, sendEmail]);
