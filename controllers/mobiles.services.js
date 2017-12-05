@@ -5,7 +5,6 @@ const Timeframe = require('../models/Timeframe');
 const timeframeService = require('./timeframe.services')({
   modelService: Timeframe
 });
-const _ = require('lodash');
 const randy = require('randy');
 
 module.exports = mobilesService;
@@ -77,9 +76,6 @@ function mobilesService(options) {
     findExistingRaffle,
     raffleComplete,
     addWeightToRaffle,
-    getPreChangeMobiles,
-    groupedByKey,
-    removeUnnecessaryFields,
     selectFiveWinners
   };
 
@@ -175,17 +171,6 @@ function mobilesService(options) {
     );
   }
 
-  function removeUnnecessaryFields(mobiles) {
-    return _.omit(mobiles, extraFields);
-  }
-
-  function groupedByKey(noFluff) {
-    return _.groupBy(noFluff, (a) => { return a.keyword; });
-  }
-
-  function getPreChangeMobiles() {
-    return Mobile.find({ form: { $exists: true } });
-  }
 
   function selectFiveWinners(mobiles) {
     const winnerArr = [];

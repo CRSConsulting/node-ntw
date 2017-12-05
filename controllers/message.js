@@ -19,16 +19,17 @@ exports.sendEmail = (req, res) =>
     });
 
 exports.verifyEmail = (req, res) =>
-  tokenService.getOne({ token_string: req.query.token })
+  tokenService.getOne({ token_string: req.query.token, attempted: false })
     .then((token) => {
       const dateNow = Date.now();
       if (token && (dateNow < token.expiration_date)) {
         const updateAuth = {
-          isAuthenticated: true
+          isAuthenticated: true,
+          attempted: true
         };
         tokenService.updateOne({ token_string: req.query.token }, updateAuth).then((token) => {
           if (token.isAuthenticated === true) {
-            console.log('token', token)
+            console.log('token', token);
             res.json('Your email has been verified');
           } else {
             return Promise.reject('Invalid Token');

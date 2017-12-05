@@ -22,7 +22,7 @@ function messageService(options) {
 
   function sendEmail(req) {
     console.log(req);
-    const firstPlace = req.winners[0];
+    const firstPlace = req.winners[req.winnerIndex];
     const token = uuidv4(); // unique id generator
     const dateExpires = new Date();
     dateExpires.setHours(dateExpires.getHours() + 24); // 24 hour date expiration
@@ -34,6 +34,7 @@ function messageService(options) {
       winnersList: req._id
     };
     tokenService.insert(tokenObj);
+    console.log('tokenObj', tokenObj);
     const toEmailObj = firstPlace.email;
     const subjectObj = `Hello: ${firstPlace.first_name}`;
     const textObj = `${'This is a email verfication. \n\n' +

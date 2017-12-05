@@ -42,6 +42,7 @@ const rule = new schedule.RecurrenceRule();
 //   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
 //   // const startCronJob = cron.job.start();
 //   retryController.getAll();
+//   tokenController.getAll();
 // });
 
 // start job
@@ -68,6 +69,7 @@ const timeframeController = require('./controllers/timeframe');
 const retryController = require('./controllers/retry');
 const messageController = require('./controllers/message');
 const tokenController = require('./controllers/token');
+const ipController = require('./controllers/ip');
 /**
  * API keys and Passport configuration.
  */
@@ -212,7 +214,8 @@ app.post('/api/retry', retryController.insert);
 app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
 // Message
-app.get('/api/message/verify', messageController.verifyEmail);
+
+app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail);
 app.post('/api/message/', messageController.sendEmail);
 
 // Token

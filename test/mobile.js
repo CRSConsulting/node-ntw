@@ -10,6 +10,7 @@ const Mobile = require('../models/Mobile');
 const Timeframe = require('../models/Timeframe');
 const Promise = require('bluebird');
 const cmd = require('node-cmd');
+const zip = require('zippity-do-dah');
 
 const mobilesService = require('../controllers/mobiles.services')({
   timeService: Timeframe,
@@ -417,5 +418,10 @@ describe('Mobile Controller', () => {
       }
       (winnerArr.length).should.equal(4);
     });
-  })
+    it('should give zip object', () => {
+      const address = zip.zipcode(90020);
+      console.log(address);
+      
+    })
+  });
 });

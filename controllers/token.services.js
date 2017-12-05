@@ -12,11 +12,16 @@ function tokenService(options) {
     getOne,
     insert,
     updateOne,
-    removeOne
+    removeOne,
+    getExpired
   };
 
   function getAll() {
     return Token.find();
+  }
+
+  function getExpired() {
+    return Token.find({ expiration_date: { $lte: new Date() } }).populate('winnersList');
   }
 
   function getOne(queryCondition) {

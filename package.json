@@ -9,7 +9,7 @@
     "npm": "5.4.2"
   },
   "scripts": {
-    "start" : "node server.js",
+    "start": "node server.js",
     "open:server": "pm2 start server.js -e err.log -o out.log",
     "security-check": "nsp check",
     "test": "mocha --timeout 120000",
@@ -40,12 +40,14 @@
     "express-status-monitor": "^1.0.0",
     "express-validator": "^3.2.1",
     "helmet": "^3.9.0",
+    "iplocation": "^5.0.0",
     "istanbul": "^0.4.5",
     "lodash": "^4.17.4",
     "lusca": "^1.5.1",
+    "maxmind": "^2.3.0",
     "method-override": "^2.3.10",
     "mime": "^2.0.3",
-    "moment": "^2.19.1",
+    "moment": "^2.19.2",
     "mongodb": "^2.2.33",
     "mongoose": "^4.11.7",
     "morgan": "^1.8.2",
@@ -64,11 +66,13 @@
     "pug": "^2.0.0-rc.3",
     "randy": "^1.5.1",
     "request": "^2.83.0",
+    "request-ip": "^2.0.2",
     "restify": "^6.2.3",
     "sinon-as-promised": "^4.0.3",
     "superagent": "^3.8.1",
     "uuid": "^3.1.0",
-    "validator": "^8.0.0"
+    "validator": "^8.0.0",
+    "zippity-do-dah": "0.0.3"
   },
   "devDependencies": {
     "chai": "^4.1.2",

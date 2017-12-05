@@ -1,10 +1,14 @@
+const helpers = require('../helpers');
+
+const calls = helpers.Calls;
+const notify = helpers.Notify;
+
 const Mobile = require('../models/Mobile');
 const Timeframe = require('../models/Timeframe');
 const Promise = require('bluebird');
-const cmd = require('node-cmd');
 const mobilesService = require('./mobiles.services')({
   timeService: Timeframe,
-  modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our serivce
+  modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our service
 });
 
 const Token = require('../models/Token');
@@ -15,19 +19,13 @@ const tokenService = require('./token.services')({
 const Winners = require('../models/Winners');
 const winnersService = require('./winners.services')({
   modelService: Winners
-})
-
-const tangoController = require('./tango');
+});
 
 const Message = require('../models/Message');
 const messageService = require('./message.services')({
   modelService: Message
 });
 
-const getAsync = Promise.promisify(cmd.get, {
-  multiArgs: true,
-  context: cmd,
-});
 const randy = require('randy');
 const fetch = require('node-fetch');
 // const moment = require('moment');
@@ -43,17 +41,12 @@ exports.getAll = (req, res) =>
 
 
 exports.getKeywordAndInsert = (req, res) =>
-  getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+  calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
       console.log('getKeywordAndInsert(), 1st then()');
       const body = JSON.parse(mobiles[0].slice(958));
       const { id } = body;
-      function delay(t) {
-        return new Promise(((resolve) => {
-          setTimeout(resolve, t);
-        }));
-      }
-      return delay(20000).then(() => getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
+      return calls.delay(20000).then(() => calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
         res.status(404).send(err);
       });
     })
@@ -70,7 +63,7 @@ exports.getKeywordAndInsert = (req, res) =>
         return value;
       }
       const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
-      // console.log('hello world', mobilesObj);
+
       if (mobilesObj.length === 0) {
         return Promise.reject('NO objects receieved');
       }
@@ -103,6 +96,7 @@ exports.getKeywordAndInsert = (req, res) =>
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
+      console.log('insertwinner 1st then()');
       if (foundTime) {
         console.log(foundTime);
         const test = mobilesService.getRaffleContestants(foundTime);
@@ -114,12 +108,20 @@ exports.insertWinnerSMS = (req, res) =>
       console.log('insertwinner 2nd then()');
       const mobiles = promises[0];
       const time = promises[1];
+      // if (mobiles.length > 0) {
+      //   const raffleArr = mobilesService.addWeightToRaffle(mobiles);
+      //   const shuffle = randy.shuffle(raffleArr);
+      //   const winner = randy.choice(shuffle);
+      //   time.used = true;
+      //   mobilesService.raffleComplete(time);
+      //   return winner;
+      // }
       if (mobiles.length > 0) {
         console.log(`Selecting winner out of ${mobiles.length} contestants`);
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
         console.log(`Weighted arr has ${raffleArr.length} contestants`);
-        const winners = mobilesService.selectFiveWinners(raffleArr);
-        // mobilesService.raffleComplete(time);
+        const winners = mobilesService.selectFiveWinners(mobiles);
+        mobilesService.raffleComplete(time);
         return winners;
       }
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
@@ -131,32 +133,10 @@ exports.insertWinnerSMS = (req, res) =>
     .then((mobiles) => {
       console.log('insertwinner third then()');
       const winners = mobiles;
-      const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`);
+      const call = notify.getSessionToken;
       return Promise.all([call, winners]);
     })
-    .then((mobiles) => {
-      console.log('insertwinner 4th then()');
-      const winners = mobiles[1];
-      const firstPlace = winners.winners[0];
-      console.log('firstPlace~~~~~~', firstPlace);
-      const body = JSON.parse(mobiles[0][0].slice(867));
-      const sessionToken = body.user.session_token;
-      // const phoneNumber = firstPlace.phone;
-      const phoneNumber = 2034488493;
-      const message = 'Congrats you have won!';
-      function delay(t) {
-        return new Promise(((resolve) => {
-          setTimeout(resolve, t);
-        }));
-      }
-      const sendText = delay(Math.random() * 10000).then(() =>
-        getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`))
-        .catch((err) => {
-          res.status(404).send('err', err);
-        });
-      const sendEmail = messageService.sendEmail(winners);
-      return firstPlace;
-    })
+    .then(mobiles => notify.sendUserMessages(mobiles[0], mobiles[1], res))
     .then((mobiles) => {
       res.json(mobiles);
     })
@@ -207,9 +187,8 @@ exports.findWinnerIfAvailable = (req, res) => {
     });
 };
 function handleErrors(response) {
-  console.log('response', response.ok);
+  // console.log('response', response.ok);
   if (!response.ok) {
-    console.log('insanity check');
     throw Error(response.statusText);
   }
   return response;
