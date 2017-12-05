@@ -22,7 +22,6 @@ function retryService(options) {
     insert,
     getOne,
     removeOne,
-    retryTango,
     updateOne
   };
 
@@ -35,16 +34,11 @@ function retryService(options) {
     return retry.save();
   }
   function getOne(queryCondition) {
-    console.log('queryCondition', queryCondition);
     return Retry.findOne(queryCondition);
   }
 
   function removeOne(queryCondition) {
     return Retry.findOneAndRemove(queryCondition);
-  }
-
-  function retryTango(retryObj) {
-    return tangoController.insertTangoRetry(retryObj);
   }
 
   function updateOne(queryCondition, doc) {
