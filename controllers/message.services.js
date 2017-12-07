@@ -16,7 +16,8 @@ function messageService(options) {
   Message = options.modelService;
 
   return {
-    sendEmail
+    sendEmail,
+    sendRetryEmail
   };
 
 
@@ -31,10 +32,11 @@ function messageService(options) {
       expiration_date: dateExpires,
       email: firstPlace.email,
       isAuthenticated: false,
-      winnersList: req._id
+      winnersList: req._id,
+      attempted: false
     };
-    tokenService.insert(tokenObj);
     console.log('tokenObj', tokenObj);
+    tokenService.insert(tokenObj);
     const toEmailObj = firstPlace.email;
     const subjectObj = `Hello: ${firstPlace.first_name}`;
     const textObj = `${'This is a email verfication. \n\n' +
@@ -52,6 +54,22 @@ function messageService(options) {
     sgMail.send(msg);
 
     return { message: 'Email sent' };
+  }
+
+  function sendRetryEmail(req) {
+    const toEmailObj = req.email;
+    const subjectObj = `Hello: ${req.first_name}`;
+    const textObj = `${`${'This is a email notification. \n\n' +
+            'This winner has exceeded the 6 attempts to TangoAPI:\n\n'} ${req}`}`;
+
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
+      to: 'ian@crs-consulting.com',
+      from: 'john@crs-consulting.com',
+      subject: subjectObj,
+      text: textObj
+    };
+    return sgMail.send(msg);
   }
 }
 

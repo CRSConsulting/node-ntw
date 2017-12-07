@@ -22,13 +22,14 @@ exports.getAll = (req, res) =>
 exports.getExpired = (req, res) =>
   tokenService.getExpired()
     .then((token) => {
-      if (token) {
-        notify.moveToNextWinner(token,res);
-      }
-      return Promise.reject('No tokens have expired');
+      if (token[0] === undefined) { return Promise.reject('No tokens have expired'); }
+      token.forEach((cur) => {
+        notify.moveToNextWinner(cur, res);
+      });
     })
     .catch((err) => {
-      res.status(500).send(err);
+      console.log(err);
+      // res.status(500).send(err);
     });
 
 

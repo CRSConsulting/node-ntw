@@ -2,13 +2,13 @@ const {
   ReadPreference,
 } = require('mongodb');
 
-const tangoController = require('./tango');
 // const promiseRetry = require('promise-retry');
 
 module.exports = retryService;
 
 function retryService(options) {
   let Retry;
+  const retryIntervals = [1,30,4*60,24*60,48*60];
 
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
@@ -22,8 +22,8 @@ function retryService(options) {
     insert,
     getOne,
     removeOne,
-    retryTango,
-    updateOne
+    updateOne,
+    createDateArray
   };
 
   function getAll() {
@@ -35,6 +35,7 @@ function retryService(options) {
     return retry.save();
   }
   function getOne(queryCondition) {
+    console.log('queryCondition', queryCondition);
     return Retry.findOne(queryCondition);
   }
 
@@ -42,14 +43,14 @@ function retryService(options) {
     return Retry.findOneAndRemove(queryCondition);
   }
 
-  function retryTango(keyword, email, id, retries, res) {
-    return tangoController.insertTangoRetry(keyword, email, id, retries, res);
-  }
-
   function updateOne(queryCondition, doc) {
     return Retry.findOneAndUpdate(queryCondition, doc, {
       new: true
     });
   }
-}
 
+  function createDateArray(currentTime) {
+    const retryDates = retryIntervals.map(interval => new Date(currentTime.getTime() + (interval * 60000)));
+    return retryDates;
+  }
+}

@@ -30,20 +30,24 @@ const moment = require('moment');
 
 const schedule = require('node-schedule');
 
+const retryController = require('./controllers/retry');
+const tokenController = require('./controllers/token');
+
 const rule = new schedule.RecurrenceRule();
-// // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
-// // rule.hour = 0;
-// // rule.minute = 5;
+// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// rule.hour = 0;
+// rule.minute = 5;
 
-// // This job runs every 7 minutes
-// rule.minute = new schedule.Range(0, 59, 3);
+// This job runs every 7 minutes
+rule.minute = new schedule.Range(0, 59, 1);
 
-// const j = schedule.scheduleJob(rule, () => {
-//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-//   // const startCronJob = cron.job.start();
-//   retryController.getAll();
-//   tokenController.getAll();
-// });
+const j = schedule.scheduleJob(rule, (req, res) => {
+  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+  // const startCronJob = cron.job.start();
+  retryController.getAll(req, res);
+
+  tokenController.getExpired(req, res);
+});
 
 // start job
 // const startCronJob = cron.job.start();
@@ -66,9 +70,8 @@ const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const dateController = require('./controllers/date');
 const timeframeController = require('./controllers/timeframe');
-const retryController = require('./controllers/retry');
+
 const messageController = require('./controllers/message');
-const tokenController = require('./controllers/token');
 const ipController = require('./controllers/ip');
 /**
  * API keys and Passport configuration.
@@ -215,7 +218,7 @@ app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
 // Message
 
-app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail);
+app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail, tangoController.insertTango);
 app.post('/api/message/', messageController.sendEmail);
 
 // Token

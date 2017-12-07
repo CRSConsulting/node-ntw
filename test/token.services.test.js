@@ -109,14 +109,39 @@ describe('Token Service', () => {
   //   });
   // });
   describe('grab subdocument', () => {
-    it('should give winners object', (done) => {
-      tokenService.getExpired()
+    let useToken;
+    before((done) => {
+      tokenService.getOne({ email: 'fishjim2@ail.com' })
         .then((token) => {
-            console.log(token[0]);
-          console.log(token[0].winnersList);
-          (token[0].winnersList.winners.length).should.not.equal(0);
+          useToken = token;
+          done();
+        });
+    });
+    it('should get token from Before statement', () => {
+      (useToken.email).should.equal('fishjim2@ail.com');
+    });
+    it('should find token by ID', (done) => {
+      tokenService.getOne({ _id: useToken._id })
+        .then((token) => {
+          (token.email).should.equal('fishjim2@ail.com');
+          done();
+        });
+    });
+    it('should update Token by ID', (done) => {
+      tokenService.updateOne({ _id: useToken._id }, { attempted: true })
+        .then((token) => {
+          (token.attempted).should.equal(true);
           done();
         });
     });
   });
+  it('should get a token', (done) => {
+    tokenService.getOne({ email: 'fishjim2@ail.com' })
+      .then((token) => {
+        (token.attempted).should.equal(false);
+        (token.token_string).should.equal('061ea228-58df-4436-91bc-789798d6d451');
+        done();
+      });
+  });
+  
 });

@@ -18,7 +18,16 @@ exports.sendEmail = (req, res) =>
       res.status(500).send(err);
     });
 
-exports.verifyEmail = (req, res) =>
+exports.sendRetryEmail = (req, res) =>
+  messageService.sendRetryEmail(req)
+    .then((message) => {
+      return message;
+    })
+    .catch((err) => {
+      console.log('err', err);
+    });
+
+exports.verifyEmail = (req, res, next) =>
   tokenService.getOne({ token_string: req.query.token, attempted: false })
     .then((token) => {
       const dateNow = Date.now();
@@ -29,8 +38,8 @@ exports.verifyEmail = (req, res) =>
         };
         tokenService.updateOne({ token_string: req.query.token }, updateAuth).then((token) => {
           if (token.isAuthenticated === true) {
-            console.log('token', token);
-            res.json('Your email has been verified');
+            res.locals = token;
+            next();
           } else {
             return Promise.reject('Invalid Token');
           }
