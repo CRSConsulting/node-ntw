@@ -11,7 +11,7 @@ const tokenService = require('./token.services')({
 exports.sendEmail = (req, res) =>
   messageService.sendEmail(req)
     .then((message) => {
-      console.log('send email ctrl: ', message);
+      // console.log('send email ctrl: ', message);
       res.json(message);
     })
     .catch((err) => {

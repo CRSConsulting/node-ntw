@@ -7,6 +7,7 @@ process.env.NODE_ENV = 'test';
 const Mobile = require('../models/Mobile');
 const Timeframe = require('../models/Timeframe');
 const Promise = require('bluebird');
+const server = require('../server');
 const mongoose = require('mongoose');
 const randy = require('randy');
 const _ = require('lodash');
@@ -154,12 +155,77 @@ describe('Mobile Controller', () => {
           }));
         }
         return delay(Math.random() * 10000).then(() =>
-          getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)).should.be.fulfilled
-          .then((mobiles) => {
-            // return tangoController.insertTango([winner, winner.keyword], res).should.be.fulfilled;
-          });
+          getAsync(`curl -v -D - -H 'Authorization: Token token="${sessionToken}", type="session"' -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"shortcode_string":"41444","phone_number":"${phoneNumber}","message":"${message}"' https://app.mobilecause.com/api/v2/messages/send_sms`)).should.be.fulfilled;
+        // .then((mobiles) => {
+        //   // return tangoController.insertTango([winner, winner.keyword], res).should.be.fulfilled;
+        // });
       })
     );
   });
 });
 
+describe('Mobile Controller API URL Testing', () => {
+  describe('#mobileController.getAll===> GET: /api/mobile', () => {
+    it('should GET all the mobile', (done) => {
+      chai.request(server)
+        .get('/api/mobile')
+        .end((err, res) => {
+          if (err) done(err);
+          res.should.have.status(200);
+          res.body.should.have.be.a('Array');
+          done();
+        });
+    }).timeout(10000);
+  });
+  describe('#mobileController.getKeywordAndInsert===> GET: /api/mobile/keyword/:keyword', () => {
+    it('should GET keyword, insert into db', (done) => {
+      chai.request(server)
+        .get('/api/mobile/keyword/BRAVE')
+        .end((err, res) => {
+          if (err) done(err);
+          res.should.have.status(200);
+          res.body.should.have.be.a('object');
+          done();
+        });
+    }).timeout(120000);
+  });
+  describe('#mobileController.insertWinnerSMS===> GET: /api/mobile/sms/:keyword', () => {
+    it('should return Error: No Raffles need to be drawn at this instance', (done) => {
+      chai.request(server)
+        .get('/api/mobile/sms/BRAVE')
+        .end((err, res) => {
+          res.should.have.status(500);
+          const error = res.text;
+          const message = 'No Raffles need to be drawn at this instance';
+          _.isEqual(error, message).should.be.true;
+          done();
+        });
+    }).timeout(10000);
+  });
+  describe('#mobileController.findWinnerIfAvailable===> GET: /api/mobile/raffle/:keyword', () => {
+    it('should return Error: No Raffles need to be drawn at this instance', (done) => {
+      chai.request(server)
+        .get('/api/mobile/raffle/BRAVE')
+        .end((err, res) => {
+          res.should.have.status(500);
+          const error = res.text;
+          const message = 'No Raffles need to be drawn at this instance';
+          _.isEqual(error, message).should.be.true;
+          done();
+        });
+    }).timeout(5000);
+  });
+  // describe('#mobileController.master', () => {
+  //   it('should GET all the mobile', (done) => {
+  //     chai.request(server)
+  //       .get('/api/mobile/master')
+  //       .end((err, res) => {
+  //         console.log('===', res.text);
+  //         if (err) done(err);
+  //         res.should.have.status(200);
+  //         res.body.should.have.be.a('Array');
+  //         done();
+  //       });
+  //   }).timeout(80000);
+  // });
+});

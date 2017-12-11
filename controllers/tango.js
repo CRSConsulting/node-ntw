@@ -107,7 +107,7 @@ exports.insertTango = (req, res) => {
       function handleResponse(data, response) {
         if (response.statusCode === 201) {
           const recipient = `Congrats you have just won a giftcard. Check your email: ${data.recipient.email}`;
-          res.json(recipient);
+          res.render('tango', { email: data.recipient.email });
         } else {
           if (!retryObj) {
             const data = {
