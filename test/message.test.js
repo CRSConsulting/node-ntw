@@ -7,11 +7,8 @@ const Promise = require('bluebird');
 const server = require('../server');
 const mongoose = require('mongoose');
 const _ = require('lodash');
-const Client = require('node-rest-client').Client;
 const Message = require('../models/Message');
 
-const sinon = require('sinon');
-const sinonTest = require('sinon-test')(sinon);
 const chaiAsPromised = require('chai-as-promised');
 const chai = require('chai');
 
@@ -35,10 +32,11 @@ describe('Message Controller **Update the DB before running these tests**', () =
           done();
         });
     });
+    // This test is a reference to object #49 in token collection in ROBOMONGO
     it('should return Error: Invalid Token, #expiration date expired', (done) => {
       chai.request(server)
         .get('/api/message/verify')
-        .query({ token: '3ee039d8-14ba-44f0-998f-3375dc35f8d4' })
+        .query({ token: '0a1912f5-17da-4235-a30e-ffdff652fa8b' })
         .end((err, res) => {
           res.should.have.status(500);
           const error = res.text;
@@ -47,17 +45,13 @@ describe('Message Controller **Update the DB before running these tests**', () =
           done();
         });
     });
+    // This test is a reference to object #50 in token collection in ROBOMONGO, 
     it('should return turn token.isAuthenticated to true', (done) => {
       chai.request(server)
         .get('/api/message/verify')
-        .query({ token: '94967d37-9d9a-4b51-bb98-63949e36499a' })
+        .query({ token: 'e4464c8f-1514-4bf9-95e0-3b9b88c01851' })
         .end((err, res) => {
-        //   console.log('res===', res);
           res.should.have.status(404);
-          //   const error = res.error;
-          //   console.log('error', error);
-          //   const message = 'Invalid Token';
-          //   _.isEqual(error, message).should.be.true;
           done();
         });
     });
