@@ -1,0 +1,34 @@
+{ "single": {
+  "success": {
+    "res": {
+      "statusCode": 200,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    "body": {
+      "status": "success",
+      "data": [
+        {
+          "id": 4,
+          "name": "The Land Before Time",
+          "genre": "Fantasy",
+          "rating": 7,
+          "explicit": false
+        }
+      ]
+    }
+  },
+  "failure": {
+    "res": {
+      "statusCode": 404,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    "body": {
+      "status": "error",
+      "message": "That movie does not exist."
+    }
+  }
+}}

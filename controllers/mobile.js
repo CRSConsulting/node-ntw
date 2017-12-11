@@ -45,7 +45,7 @@ exports.getAll = (req, res) =>
 exports.getKeywordAndInsert = (req, res) =>
   getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
-      console.log('getKeywordAndInsert(), 1st then()');
+      // console.log('getKeywordAndInsert(), 1st then()');
       const body = JSON.parse(mobiles[0].slice(958));
       const { id } = body;
       function delay(t) {
@@ -58,7 +58,7 @@ exports.getKeywordAndInsert = (req, res) =>
       });
     })
     .then((mobiles) => {
-      console.log('getKeywordAndInsert(), 2nd then()');
+      // console.log('getKeywordAndInsert(), 2nd then()');
       function dateTimeReviver(key, value) {
         let a;
         if (key === 'transaction_date' || key === 'donation_date') {
@@ -77,13 +77,13 @@ exports.getKeywordAndInsert = (req, res) =>
       return mobilesObj;
     })
     .then((jsonData) => {
-      console.log('getKeywordAndInsert(), 3rd then()');
+      // console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
       const newTimer = mobilesService.generateTimer(data, req.params.keyword);
       return Promise.all([data, newTimer]);
     })
     .then((promises) => {
-      console.log('getKeywordAndInsert(), 4th then()');
+      // console.log('getKeywordAndInsert(), 4th then()');
       const data = promises[0];
       const timer = promises[1];
       Mobile.collection.insertMany(data, { ordered: false }, (err, mobiles) => {
@@ -104,7 +104,7 @@ exports.getKeywordAndInsert = (req, res) =>
 exports.insertWinnerSMS = (req, res) =>
   mobilesService.findRunningRaffle(req.params.keyword)
     .then((foundTime) => {
-      console.log('insertwinner 1st then()');
+      // console.log('insertwinner 1st then()');
       if (foundTime) {
         const test = mobilesService.getRaffleContestants(foundTime);
         return Promise.all([test, foundTime]);
@@ -112,7 +112,7 @@ exports.insertWinnerSMS = (req, res) =>
       return Promise.reject('No Raffles need to be drawn at this instance');
     })
     .then((promises) => {
-      console.log('insertwinner 2nd then()');
+      // console.log('insertwinner 2nd then()');
       // const mobiles = promises[0];
       const mobiles = [{ _id: '5a0a2729280b84915a0b0c55',
         shortcode: '41444',
@@ -387,13 +387,13 @@ exports.insertWinnerSMS = (req, res) =>
       return winnersService.insert(mobiles);
     })
     .then((mobiles) => {
-      console.log('insertwinner third then()');
+      // console.log('insertwinner third then()');
       const winner = mobiles;
       const call = getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN}", type="private"' -H "Accept: application/json" -H "Content-type:application/json" -X POST -d '{}'  https://app.mobilecause.com/api/v2/users/login_with_auth_token`);
       return Promise.all([call, winner]);
     })
     .then((mobiles) => {
-      console.log('insertwinner 4th then()');
+      // console.log('insertwinner 4th then()');
       const winners = mobiles[1];
       const firstPlace = winners.winners[0];
       const body = JSON.parse(mobiles[0][0].slice(867));
