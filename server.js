@@ -39,11 +39,11 @@ const rule = new schedule.RecurrenceRule();
 // rule.minute = 5;
 
 // This job runs every 7 minutes
-rule.minute = new schedule.Range(0, 59, 1);
+rule.minute = new schedule.Range(0, 59, 2);
 
 const j = schedule.scheduleJob(rule, (req, res) => {
   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-  // const startCronJob = cron.job.start();
+  const startCronJob = cron.job.start();
   retryController.getAll(req, res);
 
   tokenController.getExpired(req, res);
@@ -241,7 +241,7 @@ app.listen(app.get('port'), () => {
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
   // application specific logging, throwing an error, or other logic here
-  console.log('resason', reason.stack);
+  console.log('reason', reason.stack);
 });
 
 

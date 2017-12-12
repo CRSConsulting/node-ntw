@@ -107,6 +107,7 @@ function mobilesService(options) {
           const specKeys = dataAfterStart.filter(mobile => // Get subsect of objects with specific keyword variant
             mobile.keyword === uniqueKeys[i]
           );
+          
           if (specKeys.length >= startAmount) {
             const currentTime = new Date(specKeys[startAmount - 1].transaction_date).getTime();
             const end = currentTime + (15 * 60000);
@@ -191,7 +192,6 @@ function mobilesService(options) {
         break;
       }
     }
-    console.log(winnerArr);
     return winnerArr;
   }
 }

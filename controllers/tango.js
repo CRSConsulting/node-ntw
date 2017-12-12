@@ -167,12 +167,12 @@ exports.insertTangoRetry = (retryObj) => {
       const args = {
         data: {
           accountIdentifier: 'ntw-one',
-          amount: 1,
+          amount: 0.01,
           customerIdentifier: 'test-customer',
           emailSubject: 'Congrats you have won a giftcard!',
           message: 'Congrats',
           recipient: {
-            email: 'john.crs.consulting@gmail.com',
+            email: 'ian@crs-consulting.com',
             firstName: retryObj.first_name,
             lastName: retryObj.last_name,
           },
@@ -182,7 +182,7 @@ exports.insertTangoRetry = (retryObj) => {
             lastName: '',
           },
           // utid: tango.giftId,
-          utid: null,
+          utid: tango.giftId,
           // Amazon GC "U666425"
           // VISA GC "U426141"
           // VISA Prepaid GC "U677579"
@@ -197,7 +197,7 @@ exports.insertTangoRetry = (retryObj) => {
         };
         if (response.statusCode === 201) {
           const recipient = { email: `${data.recipient.email}` };
-          console.log(`Tango gift card sented to email: ${recipient}`);
+          console.log(`Tango gift card sented to email: ${data.recipient.email}`);
           retryController.removeById(queryCondition);
         } else if (retryObj.retries === 5) {
           const body = {
