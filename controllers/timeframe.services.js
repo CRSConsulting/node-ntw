@@ -19,11 +19,21 @@ function timeframeService(options) {
     getAll,
     insert,
     getOne,
-    update
+    update,
+    insertNow
   };
 
   function getAll() {
     return Timeframe.find();
+  }
+
+  function insertNow(keyword) {
+    const timeframe = new Timeframe({
+      startTime: new Date(),
+      keyword,
+      used: false
+    });
+    return timeframe.save();
   }
 
   function insert(data) {
