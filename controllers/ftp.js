@@ -10,12 +10,6 @@ const mobilesService = require('./mobiles.services')({
 });
 
 
-// const JSFtp = require('jsftp');
-// const ftp = new JSFtp({
-//   host: '67.225.219.184',
-//   user: 'nodeftp@testing.com',
-//   pass: 'nodeFTP111'
-// });
 exports.writeFile = (req, res) => {
   mobilesService.getAll()
     .then((dataObj) => {

@@ -2,9 +2,6 @@ const {
   ReadPreference,
 } = require('mongodb');
 
-const tangoController = require('./tango');
-// const promiseRetry = require('promise-retry');
-
 module.exports = retryService;
 
 function retryService(options) {

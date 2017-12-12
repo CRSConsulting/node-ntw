@@ -33,7 +33,6 @@ function messageService(options) {
       isAuthenticated: false,
       winnersList: req._id
     };
-    // console.log('tokenObj', tokenObj);
     tokenService.insert(tokenObj);
     const toEmailObj = firstPlace.email;
     const subjectObj = `Hello: ${firstPlace.first_name}`;

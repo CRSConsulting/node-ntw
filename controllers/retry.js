@@ -15,7 +15,7 @@ exports.getAll = () => {
       if (retry[0] === undefined) { return console.log('No retries needed'); }
       retry.forEach((cur, i) => {
         if (cur.retries <= 6 && cur.isValid === false) {
-          console.log('retry in process...');
+          // console.log('retry in process...');
           return tangoController.insertTangoRetry(cur);
         }
         if (cur.isValid === true && cur.sendEmail === false) {
@@ -28,13 +28,12 @@ exports.getAll = () => {
           // sendEmail sets to true, because we only want to send the email once
           const updateRetryObj = module.exports.updateById(queryCondition, body);
           const sendEmail = messageController.sendRetryEmail(cur);
-          console.log('check your email for retries that exceeded 6x');
+          // console.log('check your email for retries that exceeded 6x');
           return Promise.all([updateRetryObj, sendEmail]);
         }
         return console.log('No retries needed');
       });
     })
-    .then(data => console.log('=======', data))
     .catch((err) => {
       console.log('Error: from exports.getAll :', err);
     });

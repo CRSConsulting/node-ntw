@@ -30,7 +30,6 @@ function datesService(options) {
     return date.save();
   }
   function getOne(queryCondition) {
-    console.log(queryCondition);
     return Date.findOne(queryCondition);
   }
 }
