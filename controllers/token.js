@@ -23,6 +23,7 @@ exports.getExpired = (req, res) =>
   tokenService.getExpired()
     .then((token) => {
       if (token[0] === undefined) { return Promise.reject('No tokens have expired'); }
+      console.log(token);
       token.forEach((cur) => {
         notify.moveToNextWinner(cur, res);
       });

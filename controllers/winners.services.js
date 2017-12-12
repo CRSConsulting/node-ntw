@@ -1,10 +1,7 @@
 const {
   ReadPreference,
 } = require('mongodb');
-const Tango = require('../models/Tango');
-const tangosService = require('./tangos.services')({
-  modelService: Tango,
-});
+
 
 module.exports = winnersService;
 
@@ -31,16 +28,8 @@ function winnersService(options) {
   }
 
   function insert(data) {
-    tangosService.getOne({ keyword: data[0].keyword })
-      .then((tango) => {
-        const winners = new Winners({
-          winners: data,
-          prize: tango.prize,
-          giftId: tango.giftId,
-          winnerIndex: 0
-        });
-        return winners.save();
-      });
+    const winners = new Winners(data);
+    return winners.save();
   }
   function getOne(queryCondition) {
     return Winners.findOne(queryCondition);

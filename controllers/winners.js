@@ -1,4 +1,4 @@
-const Winners = require('../models/Winners');
+const Winners = require('../models/Winner');
 const winnersService = require('../controllers/winners.services')({
   modelService: Winners
 });

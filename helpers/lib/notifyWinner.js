@@ -19,7 +19,7 @@ exports.getSessionToken = getSessionToken;
 
 const sendUserMessages = (sessionCall, winners, res) => {
   console.log('insertwinner 4th then()');
-  console.log('winners', winners);
+  console.log(sessionCall);
   const winner = winners.winners[winners.winnerIndex];
   console.log('====firstPlace====', winner);
   const body = JSON.parse(sessionCall[0].slice(867));
