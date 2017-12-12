@@ -7,7 +7,9 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
-const errorHandler = require('errorhandler');
+// const errorHandler = require('errorhandler'); // use this in DEVELOPMENT
+const defaultErrorHandler = require('./error-handlers/default');
+const notFoundHandler = require('./error-handlers/notfound');
 const lusca = require('lusca');
 const dotenv = require('dotenv');
 const MongoStore = require('connect-mongo')(session);
@@ -46,7 +48,7 @@ const retryController = require('./controllers/retry');
 //   retryController.getAll(req, res);
 // });
 
-// start job
+// // start job
 // const startCronJob = cron.job.start();
 
 // // stop job
@@ -229,7 +231,12 @@ app.get('/ftp', ftpController.writeFile);
 /**
  * Error Handler.
  */
-app.use(errorHandler());
+// Use errorHandler for development
+// app.use(errorHandler());
+
+app.use(notFoundHandler);
+// Final middleware is our catch-all error handler
+app.use(defaultErrorHandler);
 
 /**
  * Start Express server.

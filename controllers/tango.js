@@ -54,10 +54,12 @@ exports.insertTango = (req, res) => {
   let queryCondition;
   winnerService.getOne({ _id: res.locals.winnersList })
     .then((winner) => {
+      console.log('#exports.insertTango :', winner);
       winnerObj = winner.winners.shift();
       return retryService.getOne({ email: 'john.crs.consulting@gmail.com' });
     })
     .then((retry) => {
+      console.log('retry', retry);
       retryObj = retry;
       if (!retryObj || retryObj.isValid === false) {
         queryCondition = {
@@ -106,7 +108,7 @@ exports.insertTango = (req, res) => {
       }
       function handleResponse(data, response) {
         if (response.statusCode === 201) {
-          const recipient = `Congrats you have just won a giftcard. Check your email: ${data.recipient.email}`;
+          // const recipient = `Congrats you have just won a giftcard. Check your email: ${data.recipient.email}`;
           res.render('tango', { email: data.recipient.email });
         } else {
           if (!retryObj) {
@@ -164,6 +166,7 @@ exports.insertTangoRetry = (retryObj) => {
   };
   tangosService.getOne(queryCondition)
     .then((tango) => {
+      console.log('#exports.insertTangoRetry :', tango);
       const args = {
         data: {
           accountIdentifier: 'ntw-one',

@@ -6,7 +6,6 @@ const tokenService = require('../controllers/token.services')({
 exports.getAll = (req, res) =>
   tokenService.getAll()
     .then((token) => {
-      console.log('tokenService.getAll()', token);
       res.json(token);
     })
     .catch((err) => {
@@ -16,7 +15,6 @@ exports.getAll = (req, res) =>
 exports.insert = (req, res) =>
   tokenService.insert()
     .then((token) => {
-      console.log('tokenService.getAll()', token);
       res.json(token);
     })
     .catch((err) => {

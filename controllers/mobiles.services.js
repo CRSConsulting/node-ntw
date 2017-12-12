@@ -11,21 +11,15 @@ module.exports = mobilesService;
 
 function mobilesService(options) {
   let Mobile;
-  // let Timeframe;
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
   }
 
-  // if (!options.timeService) {
-  //   throw new Error('Options.timeService is required');
-  // }
-
   Mobile = options.modelService;
-  // Timeframe = options.timeService;
 
   return {
     getAll,
-    getDups,
+    // getDups,
     generateTimer,
     findRunningRaffle,
     getRaffleContestants,
@@ -39,9 +33,9 @@ function mobilesService(options) {
     return Mobile.find({}).limit(1000).read(ReadPreference.NEAREST);
   }
 
-  function getDups() {
-    return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
-  }
+  // function getDups() {
+  //   return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
+  // }
 
   function findExistingRaffle(kw) {
     return Timeframe.findOne({ startTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
