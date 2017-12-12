@@ -48,8 +48,8 @@ const retryController = require('./controllers/retry');
 //   retryController.getAll(req, res);
 // });
 
-// // start job
-// const startCronJob = cron.job.start();
+// start job
+const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
