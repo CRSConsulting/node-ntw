@@ -3,9 +3,9 @@ const iplocation = Promise.promisifyAll(require('iplocation'));
 
 
 exports.checkIp = (req, res, next) => {
-  const ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+  let ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
   // MA IP
-  // ip = '69.43.65.102';
+  ip = '69.43.65.102';
   // // NY IP
   // ip = '72.229.28.185';
   // // FL IP
