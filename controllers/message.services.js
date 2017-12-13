@@ -31,7 +31,8 @@ function messageService(options) {
       expiration_date: dateExpires,
       email: firstPlace.email,
       isAuthenticated: false,
-      winnersList: req._id
+      winnersList: req._id,
+      attempted: false
     };
     tokenService.insert(tokenObj);
     const toEmailObj = firstPlace.email;

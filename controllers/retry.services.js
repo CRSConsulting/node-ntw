@@ -2,10 +2,13 @@ const {
   ReadPreference,
 } = require('mongodb');
 
+// const promiseRetry = require('promise-retry');
+
 module.exports = retryService;
 
 function retryService(options) {
   let Retry;
+  const retryIntervals = [0, 5, 30, 4 * 60, 24 * 60, 48 * 60];
 
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
@@ -19,7 +22,8 @@ function retryService(options) {
     insert,
     getOne,
     removeOne,
-    updateOne
+    updateOne,
+    createDateArray
   };
 
   function getAll() {
@@ -31,6 +35,7 @@ function retryService(options) {
     return retry.save();
   }
   function getOne(queryCondition) {
+    console.log('queryCondition', queryCondition);
     return Retry.findOne(queryCondition);
   }
 
@@ -42,5 +47,11 @@ function retryService(options) {
     return Retry.findOneAndUpdate(queryCondition, doc, {
       new: true
     });
+  }
+
+  function createDateArray(currentTime) {
+    const tangoSendTime = new Date(currentTime.getTime() + (48 * 60 * 60000));
+    const retryDates = retryIntervals.map(interval => new Date(tangoSendTime.getTime() + (interval * 60000)));
+    return retryDates;
   }
 }

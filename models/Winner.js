@@ -12,7 +12,10 @@ const winnersSchema = new Schema({
       keyword: String,
       isValid: Boolean
     }
-  ]
+  ],
+  prize: Number,
+  giftId: String,
+  winnerIndex: Number
 });
 
 

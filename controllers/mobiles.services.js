@@ -16,6 +16,49 @@ function mobilesService(options) {
   }
 
   Mobile = options.modelService;
+  const extraFields = [
+    'shortcode',
+    'type',
+    'volunteer_fundraiser',
+    'team',
+    'alternative_team_id',
+    'fee_rate',
+    'pledged_amount',
+    'processing_fee',
+    'gender',
+    'billing_status',
+    'billing_type',
+    'donation',
+    'source',
+    'form',
+    'form_payment_type',
+    'form_name',
+    'form_type',
+    'form_id',
+    'fulfillment_texts',
+    'donation_notes',
+    'account',
+    'account_id',
+    'campaign_name',
+    'account_plan',
+    'account_plan_price',
+    'frequency',
+    'anonymous',
+    'billing_transaction',
+    'billing_transaction_reference',
+    'billing_transaction_code',
+    'parent_name',
+    'payment_gateway',
+    'veteran2',
+    'veteran_2',
+    'accept',
+    'info',
+    'vet_2',
+    'a',
+    'vet2',
+    'question_2_vet',
+    'question_2',
+  ];
 
   return {
     getAll,
@@ -42,7 +85,7 @@ function mobilesService(options) {
   }
 
   function generateTimer(jsonData, baseKey) {
-    const startAmount = 3; // amount to trigger timer creation
+    const startAmount = 5; // amount to trigger timer creation
     const test = findExistingRaffle(baseKey)
       .then((time) => {
         if (!time) return { message: 'Not within timeframe window' };
