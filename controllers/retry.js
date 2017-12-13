@@ -16,7 +16,7 @@ const retryController = require('./retry');
 exports.getAll = () => {
   retryService.getAll()
     .then((retry) => {
-      if (retry[0] === undefined) { return console.log('No retries needed'); ;}
+      if (retry[0] === undefined) { return console.log('No retries needed'); }
       retry.forEach((cur, i) => {
         if (cur.retries <= 6 && new Date(cur.retryTimes[cur.retries]).getTime() < new Date().getTime()) {
           console.log('retry in process...');
