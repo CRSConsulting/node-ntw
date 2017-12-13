@@ -19,6 +19,10 @@ const tokenSchema = new Schema({
     type: Boolean,
     required: true
   },
+  attempted: {
+    type: Boolean,
+    required: true
+  },
   winnersList: {
     type: Schema.Types.ObjectId,
     ref: 'Winners'

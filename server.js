@@ -7,7 +7,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
-// const errorHandler = require('errorhandler'); // use this in DEVELOPMENT
+const errorHandler = require('errorhandler'); // use this in DEVELOPMENT
 const defaultErrorHandler = require('./error-handlers/default');
 const notFoundHandler = require('./error-handlers/notfound');
 const lusca = require('lusca');
@@ -33,23 +33,25 @@ const moment = require('moment');
 const schedule = require('node-schedule');
 
 const retryController = require('./controllers/retry');
+const tokenController = require('./controllers/token');
 
-// const rule = new schedule.RecurrenceRule();
+const rule = new schedule.RecurrenceRule();
 // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
 // rule.hour = 0;
 // rule.minute = 5;
 
 // This job runs every 7 minutes
-// rule.minute = new schedule.Range(0, 59, 1);
+rule.minute = new schedule.Range(0, 59, 2);
 
-// const j = schedule.scheduleJob(rule, (req, res) => {
-//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-//   // const startCronJob = cron.job.start();
-//   retryController.getAll(req, res);
-// });
+const j = schedule.scheduleJob(rule, (req, res) => {
+  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+  const startCronJob = cron.job.start();
+  retryController.getAll(req, res);
+  tokenController.getExpired(req, res);
+});
 
 // start job
-const startCronJob = cron.job.start();
+// const startCronJob = cron.job.start();
 
 // // stop job
 // const stopCronJob = cron.job.stop();
@@ -71,7 +73,7 @@ const dateController = require('./controllers/date');
 const timeframeController = require('./controllers/timeframe');
 
 const messageController = require('./controllers/message');
-const tokenController = require('./controllers/token');
+
 const ipController = require('./controllers/ip');
 const ftpController = require('./controllers/ftp');
 /**
@@ -160,7 +162,6 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
-
 /**
  * Primary app routes.
  */
@@ -189,22 +190,17 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 // Mobile
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
-//  John's code, app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
 app.get('/api/mobile/sms/:keyword', mobileController.insertWinnerSMS);
-// John's code, app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
 app.get('/api/mobile/raffle/:keyword', mobileController.findWinnerIfAvailable);
 app.get('/api/mobile/master', mobileController.master);
-
 // Tango
 app.get('/api/tango', tangoController.getAll);
 app.post('/api/tango', tangoController.insert);
 app.get('/api/tango/:id', tangoController.getOne);
-
 // Date
 app.get('/api/date', dateController.getAll);
 app.post('/api/date', dateController.insert);
 app.get('/api/date/:id', dateController.getOne);
-
 // Default API endpoints
 app.get('/api', apiController.getApi);
 app.post('/campaign', apiController.postCampaign);
@@ -218,25 +214,21 @@ app.post('/api/retry', retryController.insert);
 app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
 // Message
-
-app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail, tangoController.insertTango);
+app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail, retryController.createTangoRetry);
 app.post('/api/message/', messageController.sendEmail);
-
 // Token
 app.get('/api/token', tokenController.getAll);
 app.post('/api/token', tokenController.insert);
-
 // FTP
 app.get('/ftp', ftpController.writeFile);
 /**
  * Error Handler.
  */
-// Use errorHandler for development
-// app.use(errorHandler());
-
-app.use(notFoundHandler);
-// Final middleware is our catch-all error handler
-app.use(defaultErrorHandler);
+// Development
+app.use(errorHandler());
+// Production
+// app.use(notFoundHandler);
+// app.use(defaultErrorHandler);
 
 /**
  * Start Express server.

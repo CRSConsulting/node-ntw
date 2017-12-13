@@ -12,11 +12,17 @@ function tokenService(options) {
     getOne,
     insert,
     updateOne,
-    removeOne
+    removeOne,
+    getExpired,
+    updateAttempted
   };
 
   function getAll() {
     return Token.find();
+  }
+
+  function getExpired() {
+    return Token.find({ expiration_date: { $lte: new Date() }, attempted: false }).populate('winnersList');
   }
 
   function getOne(queryCondition) {
@@ -31,7 +37,11 @@ function tokenService(options) {
   function updateOne(queryCondition, doc) {
     return Token.findOneAndUpdate(queryCondition, doc, {
       new: true
-    });
+    }).populate('winnersList');
+  }
+
+  function updateAttempted(tokenId) {
+    return Token.update({ _id: tokenId }, { attempted: true });
   }
 
   function removeOne(queryCondition) {

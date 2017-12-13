@@ -2,6 +2,7 @@ const {
   ReadPreference,
 } = require('mongodb');
 
+
 module.exports = winnersService;
 
 function winnersService(options) {
@@ -27,7 +28,7 @@ function winnersService(options) {
   }
 
   function insert(data) {
-    const winners = new Winners({ winners: data });
+    const winners = new Winners(data);
     return winners.save();
   }
   function getOne(queryCondition) {
@@ -38,10 +39,7 @@ function winnersService(options) {
     return Winners.findOneAndRemove(queryCondition);
   }
 
-  function updateOne(queryCondition, doc) {
-    return Winners.findOneAndUpdate(queryCondition, doc, {
-      new: true
-    });
+  function updateOne(data) {
+    return Winners.update({ _id: data._id }, { winnerIndex: data.winnerIndex }).exec();
   }
 }
-

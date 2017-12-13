@@ -9,6 +9,7 @@ const retrySchema = new Schema({
   email: String,
   transaction_id: String,
   retries: Number,
+  retryTimes: [Date],
   startTime: Date,
   amount: Number,
   isValid: Boolean,
