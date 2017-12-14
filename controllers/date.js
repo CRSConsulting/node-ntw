@@ -20,7 +20,7 @@ exports.getAll = (req, res) => {
   datesService.getAll()
     .then((tangos) => {
       const data = tangos;
-      res.json(data);
+      res.render('pages/data-table', data);
     }).catch((err) => {
       res.status(500).send(err);
     });

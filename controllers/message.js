@@ -27,7 +27,6 @@ exports.sendRetryEmail = (req, res) =>
 exports.verifyEmail = (req, res, next) =>
   tokenService.getOne({ token_string: req.query.token })
     .then((token) => {
-      console.log('#exports.verifyEmail token:', token);
       const dateNow = Date.now();
       if (token && (dateNow < token.expiration_date)) {
         const updateAuth = {
@@ -38,7 +37,6 @@ exports.verifyEmail = (req, res, next) =>
           .then((token) => {
             if (token.isAuthenticated === true) {
               res.locals = token;
-              console.log('#exports.verifyEmail inside .then() res.locals :', res.locals);
               next();
             } else {
               return Promise.reject('Invalid Token');

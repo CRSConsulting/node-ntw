@@ -103,10 +103,6 @@ function mobilesService(options) {
           if (specKeys.length >= startAmount) {
             const currentTime = new Date(specKeys[startAmount - 1].transaction_date).getTime();
             const end = currentTime + (15 * 60000);
-            // const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
-            // end is 15 minutes after transaction date of startAmount object
-            // count = 0;
-            // set end time and specific keyword
             newTimer.endTime = end;
             newTimer.keyword = uniqueKeys[i];
             timeframeService.update(newTimer);

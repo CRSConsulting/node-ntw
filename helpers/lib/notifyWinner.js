@@ -18,10 +18,8 @@ const getSessionToken = () => calls.getAsync(`curl -v -D - -H 'Authorization: To
 exports.getSessionToken = getSessionToken;
 
 const sendUserMessages = (sessionCall, winners, res) => {
-  console.log('sendUserMessages called');
   // console.log(sessionCall);
   const winner = winners.winners[winners.winnerIndex];
-  console.log('====firstPlace====', winner);
   const body = JSON.parse(sessionCall[0].slice(867));
   const sessionToken = body.user.session_token;
   // const phoneNumber = firstPlace.phone;
@@ -51,7 +49,6 @@ exports.moveToNextWinner = (token, res) => {
       winnersService.updateOne(winners);
     })
     .then(() => {
-      console.log(updateToken.token_string);
       return tokenService.updateOne({ _id: updateToken._id }, { attempted: true });
     })
     .then(token => console.log('newtoken', token))

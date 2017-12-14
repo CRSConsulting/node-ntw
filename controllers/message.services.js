@@ -37,18 +37,17 @@ function messageService(options) {
     tokenService.insert(tokenObj);
     const toEmailObj = firstPlace.email;
     const subjectObj = `Hello: ${firstPlace.first_name}`;
-    const textObj = `${'This is a email verfication. \n\n' +
-            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'http://' + 'localhost:3000/' + 'api/message/verify' + '?token='}${decodeURIComponent(token)}\n\n` +
-            'If you did not request this, please ignore this email.\n';
+    const textObj = `${'http://' + 'localhost:3000/' + 'api/message/verify' + '?token='}${decodeURIComponent(token)}`;
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
       to: 'johnyu.programmer@gmail.com',
-      from: 'test@example.com',
+      from: 'noreply@braveworks.org',
       subject: subjectObj,
-      text: textObj
+      template_id: '7393b5ed-4a09-4b93-8e0e-1c74e36444f6',
+      html: textObj,
     };
+    
     sgMail.send(msg);
 
     return { message: 'Email sent' };
