@@ -7,7 +7,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
-const errorHandler = require('errorhandler'); // use this in DEVELOPMENT
+const errorHandler = require('errorhandler');
 const defaultErrorHandler = require('./error-handlers/default');
 const notFoundHandler = require('./error-handlers/notfound');
 const lusca = require('lusca');
@@ -50,7 +50,7 @@ const j = schedule.scheduleJob(rule, (req, res) => {
   tokenController.getExpired(req, res);
 });
 
-// start job
+// // start job
 // const startCronJob = cron.job.start();
 
 // // stop job
@@ -215,6 +215,7 @@ app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
 // Message
 app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail, retryController.createTangoRetry);
+// app.get('/api/message/verify', ipController.checkIp);
 app.post('/api/message/', messageController.sendEmail);
 // Token
 app.get('/api/token', tokenController.getAll);
@@ -224,16 +225,18 @@ app.get('/ftp', ftpController.writeFile);
 /**
  * Error Handler.
  */
-// Development
-app.use(errorHandler());
-// Production
-// app.use(notFoundHandler);
-// app.use(defaultErrorHandler);
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(errorHandler());
+} else {
+  app.use(notFoundHandler);
+  app.use(defaultErrorHandler);
+}
+
 
 /**
  * Start Express server.
  */
-
 app.listen(app.get('port'), () => {
   console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');

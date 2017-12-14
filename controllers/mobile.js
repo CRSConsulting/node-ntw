@@ -48,7 +48,8 @@ exports.getAll = (req, res) =>
 
 
 exports.getKeywordAndInsert = (req, res) =>
-  calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}", "start_date": "${moment().format('MM/DD/YYYY')}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+  // calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}", "start_date": "${moment().format('MM/DD/YYYY')}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+  calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
       console.log('getKeywordAndInsert(), 1st then()');
       const body = JSON.parse(mobiles[0].slice(958));

@@ -1,0 +1,47 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='theme-color' content='#4DA5F4')
+    meta(name='csrf-token', content=_csrf)
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js')
+    script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js')
+  body
+    script(src='https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css')
+    script(src='https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js')
+    script(src='https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js')
+    script(src='http://code.jquery.com/jquery.js')
+    script.
+        $(document).ready(function() {
+            $('#pickle').DataTable();
+        });
+    .container
+        .jumbotron
+            h2 Bootstrap/Datatables Test Page
+        table#pickle.table.table-hover.table-striped.table-bordered
+            thead
+                tr
+                    th #
+                    th Venue Name
+                    th Total Monies Raised
+                    th Best Performing Prize
+            tbody
+                tr
+                    th(scope='row') 1
+                    td BOSS RC-1
+                    td Loop
+                    td Yes
+                tr
+                    th(scope='row') 2
+                    td Line 6 DL4
+                    td Delay
+                    td Yes
+                tr
+                    th(scope='row') 3
+                    td Polara
+                    td Reverb
+                    td Yes

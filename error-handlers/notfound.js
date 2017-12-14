@@ -9,10 +9,9 @@ function notFound(request, response) {
       resource: request.originalUrl
     }
   );
-
   return response
     .status(404)
-    .render('/pages/notFound');
+    .render('pages/not-found');
 }
 
 module.exports = notFound;

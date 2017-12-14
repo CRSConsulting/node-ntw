@@ -46,7 +46,6 @@ exports.getAll = () => {
 exports.createTangoRetry = (req, res) => {
   winnerService.getOne({ _id: res.locals.winnersList })
     .then((winner) => {
-      console.log('#createTangoRetry winner:', winner);
       const winnerObj = winner.winners[winner.winnerIndex];
       const data = {
         first_name: winnerObj.first_name,
@@ -59,7 +58,6 @@ exports.createTangoRetry = (req, res) => {
         isValid: false,
         sendEmail: false
       };
-      console.log('#createTangoRetry winner:', data);
       module.exports.insert(data);
       res.render('pages/tango');
     })
@@ -70,7 +68,7 @@ exports.createTangoRetry = (req, res) => {
 
 exports.insert = (req, res) => {
   retryService.insert(req)
-    .then((retry) => { console.log('retryController.insert req:', req); return retry; })
+    .then(retry => retry)
     .catch((err) => {
       res.status(500).send(err);
     });
