@@ -35,20 +35,20 @@ const schedule = require('node-schedule');
 const retryController = require('./controllers/retry');
 const tokenController = require('./controllers/token');
 
-const rule = new schedule.RecurrenceRule();
-// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
-// rule.hour = 0;
-// rule.minute = 5;
+// const rule = new schedule.RecurrenceRule();
+// // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// // rule.hour = 0;
+// // rule.minute = 5;
 
-// This job runs every 7 minutes
-rule.minute = new schedule.Range(0, 59, 2);
+// // This job runs every 7 minutes
+// rule.minute = new schedule.Range(0, 59, 2);
 
-const j = schedule.scheduleJob(rule, (req, res) => {
-  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-  const startCronJob = cron.job.start();
-  retryController.getAll(req, res);
-  tokenController.getExpired(req, res);
-});
+// const j = schedule.scheduleJob(rule, (req, res) => {
+//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+//   const startCronJob = cron.job.start();
+//   retryController.getAll(req, res);
+//   tokenController.getExpired(req, res);
+// });
 
 // // start job
 // const startCronJob = cron.job.start();
@@ -166,6 +166,7 @@ app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
  * Primary app routes.
  */
 app.get('/', homeController.index);
+app.get('/reports', homeController.reports);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
