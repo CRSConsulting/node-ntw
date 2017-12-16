@@ -22,7 +22,6 @@ const sendUserMessages = (sessionCall, winners, res) => {
   const winner = winners.winners[winners.winnerIndex];
   const body = JSON.parse(sessionCall[0].slice(867));
   const sessionToken = body.user.session_token;
-  console.log('sendUserMessages', winner.phone);
   // const phoneNumber = winner.phone;
   const phoneNumber = 6178204019;
   const message = 'YOU WON!! Thank you for your submission to our Brave Works Sweepstakes. Next, you will be sent an email verification request to verify your email to ensure we have the correct address where to send your prize. Depending on your submission of all the information required by law to collect your prize, your prize will be awarded via email within 48 hours after your email address verification. CONGRATULATIONS!';
