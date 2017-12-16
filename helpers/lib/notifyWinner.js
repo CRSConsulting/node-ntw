@@ -53,7 +53,7 @@ exports.moveToNextWinner = (token, res) => {
     })
     .then(token => console.log('newtoken', token))
     .catch((err) => {
-      console.log(err);
+      console.log('err', err);
       // res.status(500).send(err);
     });
 };
