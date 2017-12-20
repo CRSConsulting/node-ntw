@@ -9,26 +9,32 @@ html
     title #{title} - NTW Project
     link(rel='shortcut icon', href='/favicon.png')
     link(rel='stylesheet', href='/css/main.css')
-    link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css")
-    link(href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.css" rel="stylesheet" type="text/css")
-    script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js')
-    script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js')
+    link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous")
+    link(href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css', rel='stylesheet')
+    script(src='https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css')
+    block scripts
+    script(src='http://code.jquery.com/jquery.js')
+    script(src='https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js')
+    script(src='https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.2/moment.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js')
   body
     include partials/header
-
     .container
       include partials/flash
       block content
-
+      script.
+        $('#myTable').DataTable();
+        $('#myTable_filter').hide();
+        //- $('.dataTables_length').hide(); <--- search bar
+        $('#datetimepicker1').datetimepicker();
+        $('#datetimepicker2').datetimepicker();
 
     include partials/footer
-    script(src='http://code.jquery.com/jquery.js')
-    script(src='https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css')
-    script(src='https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js')
-    script(src='https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js')
     script(src='/js/lib/jquery-3.1.1.min.js')
     script(src='/js/lib/bootstrap.min.js')
-    //- script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.js")
     script(src='/js/main.js')
 
