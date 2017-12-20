@@ -76,6 +76,7 @@ const messageController = require('./controllers/message');
 
 const ipController = require('./controllers/ip');
 const ftpController = require('./controllers/ftp');
+const reportController = require('./controllers/report');
 /**
  * API keys and Passport configuration.
  */
@@ -223,6 +224,22 @@ app.get('/api/token', tokenController.getAll);
 app.post('/api/token', tokenController.insert);
 // FTP
 app.get('/ftp', ftpController.writeFile);
+// Reports UI Frontend
+// app.get('/api/report', reportController.index);
+app.get('/api/report/venue', reportController.venue);
+app.get('/api/report/time', reportController.time);
+app.get('/api/report/prize', reportController.prize);
+app.get('/api/report/events', reportController.events);
+app.get('/api/report/entry', reportController.entry);
+app.get('/api/report/donor', reportController.donor);
+
+app.post('/api/report/venue', reportController.venuePost);
+app.post('/api/report/time', reportController.timePost);
+app.post('/api/report/prize', reportController.prizePost);
+app.post('/api/report/events', reportController.eventsPost);
+app.post('/api/report/entry', reportController.entryPost);
+app.post('/api/report/donor', reportController.donorPost);
+
 /**
  * Error Handler.
  */
