@@ -43,7 +43,7 @@ rule.minute = new schedule.Range(0, 59, 2);
 
 const j = schedule.scheduleJob(rule, (req, res) => {
   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-  const startCronJob = cron.job.start();
+//  const startCronJob = cron.job.start();
   retryController.getAll(req, res);
 
   tokenController.getExpired(req, res);

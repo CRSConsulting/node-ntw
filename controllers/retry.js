@@ -4,7 +4,7 @@ const retryService = require('./retry.services')({
 });
 
 const messageController = require('./message');
-const tangoController = require('./tango');
+const tangoController = require('./tango-test');
 
 const retryController = require('./retry');
 

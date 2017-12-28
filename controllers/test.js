@@ -6,7 +6,7 @@ const timeframeService = require('./timeframe.services')({
 });
 
 const newTimer = {
-  keyword: 'MOLINE',
+  keyword: 'BRAVE',
   startTime: new Date(),
   used: false
 };

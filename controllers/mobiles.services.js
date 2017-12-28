@@ -6,6 +6,7 @@ const timeframeService = require('./timeframe.services')({
   modelService: Timeframe
 });
 const randy = require('randy');
+const zipcode = require('zippity-do-dah');
 
 module.exports = mobilesService;
 
@@ -159,6 +160,12 @@ function mobilesService(options) {
             }
             const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
             if (multiEntriesEmail.length === unpaidDupeMax) {
+              chances = 0;
+            }
+            console.log(a);
+            const address = zipcode.zipcode(a.zipcode);
+            console.log(address);
+            if (!address.state || address.state === 'FL' || address.state === 'NY') {
               chances = 0;
             }
           }
