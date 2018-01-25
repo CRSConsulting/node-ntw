@@ -1,0 +1,29 @@
+#venueModal.fade.modal(tabindex='-1', role='dialog',aria-labelledby='venueName',aria-hidden='true')
+  .modal-dialog(role='document')
+    .modal-content
+      form#venueForm
+        .modal-header
+            .form-group
+            h3#venueTitle.modal-title.col-sm-2.col-form-label Venue
+            .col-md-8
+              input#venueName.form-control.large-input(type='text', name='name', required)
+              input#venueId(type='hidden',name='id')
+            button.close(type='button',data-dismiss='modal',aria-label='close')
+                span(aria-hidden='true') &times;
+        .modal-body
+          .row
+            .col-xs-4
+                label(for='keyword') Keyword
+                input#venueKeyword.form-control(name='keyword', required)
+            .col-xs-4
+                label(for='city') City
+                input#venueCity.form-control(name='city',required)
+            .col-xs-4
+                label(for='state') State
+                span.venue
+                select#venueState.form-control(name='state', required)
+                    option(value='', disabled, selected) -- state --
+                    each state in states
+                        option #{state} 
+        .modal-footer
+            input.btn-save.btn-primary.btn(type='button',section='venue', value='Save')

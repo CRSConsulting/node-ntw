@@ -8,7 +8,7 @@ module.exports = retryService;
 
 function retryService(options) {
   let Retry;
-  const retryIntervals = [0, 5, 30, 4*60, 24*60, 48*60];
+  const retryIntervals = [0, 5, 30, 4 * 60, 24 * 60, 48 * 60];
 
   if (!options.modelService) {
     throw new Error('Options.modelService is required');

@@ -1,0 +1,15 @@
+.row
+  table#userTable.table.table-hover.table-striped.table-bordered
+    thead
+      tr
+        th User
+        th Email
+    tbody
+      each user in users
+        tr.edit-row(data-section='user')
+          td #{user.name}
+            input(type='hidden' data-object=user)
+          td #{user.email} 
+      tr
+        td(colspan=3) 
+          button#addUser.btn-add.btn-primary.btn(type='button',data-toggle='modal', data-target='#userModal') Add New User

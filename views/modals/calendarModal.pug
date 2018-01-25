@@ -1,0 +1,86 @@
+#eventModal.fade.modal(tabindex='-1', role='dialog',aria-labelledby='eventTitle',aria-hidden='true')
+  .modal-dialog(role='document')
+    .modal-content
+      form#eventForm
+        .modal-header
+          .form-group
+            .row
+              h3.modal-title.col-sm-2.col-form-label Date
+              .col-md-4
+                span.date
+                  #date.input-group.date
+                    input#eventDate.form-control(type='text', name='date')
+            button.close(type='button',data-dismiss='modal',aria-label='close')
+                span(aria-hidden='true') &times;
+          .row
+            h3#eventTitle.modal-title.col-sm-2.col-form-label Event
+            .col-md-8
+              input#eventName.form-control.large-input(type='text', name='name', required)
+              input#eventId(type='hidden',name='id')
+        .modal-body
+          .row
+            .col-xs-4
+              h4 Start Time
+                span.startTime
+                select#startTime.form-control(name='startTime', required)
+                  option(value='', disabled, selected) -- start time --
+                  each time in times
+                    option #{time}
+            .col-md-8
+              h4 Venue
+                span.venue
+                select#venue.form-control(name='venue', required)
+                  option(value='', disabled, selected) -- venue --
+                  each venue in venues
+                    option #{venue.name}
+          .row
+            .col-xs-4
+              h4 Announcer
+              label.radio-inline
+                input(type='radio', name='announcer', value='true') 
+                |Yes
+              label.radio-inline
+                input(type='radio', name='announcer', value='false', checked)
+                |No
+            .col-xs-4
+              h4 Seat Grab
+              label.radio-inline
+                input(type='radio', name='seatGrab', value='true') 
+                |Yes
+              label.radio-inline
+                input(type='radio', name='seatGrab', value='false', checked)
+                |No
+            .col-xs-4
+              h4 Thermometer
+              label.radio-inline
+                input(type='radio', name='thermometer', value='true') 
+                |Yes
+              label.radio-inline
+                input(type='radio', name='thermometer', value='false', checked)
+                |No
+          .spacer
+          h3 Drawings
+          .row
+            .col-xs-4
+              h4 Drawing 1
+              .input-group.date
+                select#drawingOne.drawing-time.form-control(name='drawingOne', required)
+                  option(value='', disabled, selected) -- drawing one --
+                  each time in times
+                    option #{time}
+            .col-xs-4  
+              h4 Drawing 2
+              .input-group.date
+                select#drawingTwo.drawing-time.form-control(name='drawingTwo', required)
+                  option(value='', disabled, selected) -- drawing two --
+                  each time in times
+                    option #{time}
+            .col-xs-4
+              h4 Drawing 3
+              .input-group.date
+                select#drawingThree.drawing-time.form-control(name='drawingThree', required)
+                  option(value='', disabled, selected) -- drawing three --
+                  each time in times
+                    option #{time}
+        .modal-footer 
+            input.btn-save.btn-primary.btn(type='button',section='calendar', value='Save')

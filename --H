@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 HTTP/1.1 500 Internal Server Error
 Date: Fri, 08 Dec 2017 20:22:05 GMT
 Content-Type: text/html; charset=utf-8
@@ -12,3 +13,18 @@ X-Powered-By: Phusion Passenger 5.0.30
 Server: cloudflare-nginx
 CF-RAY: 3ca26f498ffe7892-LAX
 
+=======
+HTTP/1.1 500 Internal Server Error
+Date: Fri, 08 Dec 2017 20:22:05 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 728
+Connection: keep-alive
+Set-Cookie: __cfduid=d72f638ec81d2536b38174e3cbc58edce1512764525; expires=Sat, 08-Dec-18 20:22:05 GMT; path=/; domain=.app.mobilecause.com; HttpOnly
+Status: 500 Internal Server Error
+X-Request-Id: 2b08287005a1ecf33df44062449ab766
+X-Runtime: 0.260507
+X-Rack-Cache: miss
+X-Powered-By: Phusion Passenger 5.0.30
+Server: cloudflare-nginx
+CF-RAY: 3ca26f498ffe7892-LAX
+>>>>>>> 8ceb103b25d3a21cf14cccaac129796802698a38

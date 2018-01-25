@@ -1,0 +1,28 @@
+#userModal.fade.modal(tabindex='-1', role='dialog',aria-labelledby='userName',aria-hidden='true')
+  .modal-dialog(role='document')
+    .modal-content
+      form#userForm
+        .modal-header
+            .form-group
+            h3#userTitle.modal-title.col-sm-2.col-form-label User
+            .col-md-8
+              input#userName.form-control.large-input(type='text', name='name', required)
+            button.close(type='button',data-dismiss='modal',aria-label='close')
+                span(aria-hidden='true') &times;
+        .modal-body
+          .row
+            .col-xs-4
+                label(for='keyword') Email
+                input#venueKeyword.form-control(name='keyword', required)
+            .col-xs-4
+                label(for='city') City
+                input#venueCity.form-control(name='city',required)
+            .col-xs-4
+                label(for='state') State
+                span.venue
+                select#venueState.form-control(name='state', required)
+                    option(value='', disabled, selected) -- state --
+                    each state in states
+                        option #{state} 
+        .modal-footer
+            input.btn-save.btn-primary.btn(type='button',section='venue', value='Save')

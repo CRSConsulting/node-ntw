@@ -77,7 +77,7 @@ exports.insertTangoRetry = (retryObj) => {
             firstName: 'NTW',
             lastName: '',
           },
-          // utid: tango.giftId,
+          // utid: null,
           utid: tango.giftId,
           // Amazon GC "U666425"
           // VISA GC "U426141"

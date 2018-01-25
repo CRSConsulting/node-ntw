@@ -25,7 +25,6 @@ exports.postCampaign = (req, res) => {
     req.flash('errors', errors);
     return res.redirect('/api');
   }
-  console.log('req.body', req);
   // const message = {
   //   to: req.body.number,
   //   from: '+13472235148',
@@ -41,74 +40,6 @@ exports.postCampaign = (req, res) => {
   //   res.redirect('/api/twilio');
   // });
 };
-
-/**
- * GET /api/lastfm
- * Last.fm API example.
- */
-// exports.getLastfm = (req, res, next) => {
-//   const lastfm = new LastFmNode({
-//     api_key: process.env.LASTFM_KEY,
-//     secret: process.env.LASTFM_SECRET
-//   });
-//   const artistInfo = () =>
-//     new Promise((resolve, reject) => {
-//       lastfm.request('artist.getInfo', {
-//         artist: 'Roniit',
-//         handlers: {
-//           success: resolve,
-//           error: reject
-//         }
-//       });
-//     });
-//   const artistTopTracks = () =>
-//     new Promise((resolve, reject) => {
-//       lastfm.request('artist.getTopTracks', {
-//         artist: 'Roniit',
-//         handlers: {
-//           success: (data) => {
-//             resolve(data.toptracks.track.slice(0, 10));
-//           },
-//           error: reject
-//         }
-//       });
-//     });
-//   const artistTopAlbums = () =>
-//       new Promise((resolve, reject) => {
-//         lastfm.request('artist.getTopAlbums', {
-//           artist: 'Roniit',
-//           handlers: {
-//             success: (data) => {
-//               resolve(data.topalbums.album.slice(0, 3));
-//             },
-//             error: reject
-//           }
-//         });
-//       });
-//   Promise.all([
-//     artistInfo(),
-//     artistTopTracks(),
-//     artistTopAlbums()
-//   ])
-//   .then(([artistInfo, artistTopAlbums, artistTopTracks]) => {
-//     const artist = {
-//       name: artistInfo.artist.name,
-//       image: artistInfo.artist.image.slice(-1)[0]['#text'],
-//       tags: artistInfo.artist.tags.tag,
-//       bio: artistInfo.artist.bio.summary,
-//       stats: artistInfo.artist.stats,
-//       similar: artistInfo.artist.similar.artist,
-//       topAlbums: artistTopAlbums,
-//       topTracks: artistTopTracks
-//     };
-//     res.render('api/lastfm', {
-//       title: 'Last.fm API',
-//       artist
-//     });
-//   })
-//   .catch(next);
-// };
-
 
 /**
  * GET /api/twilio

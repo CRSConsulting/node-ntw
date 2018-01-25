@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
 const errorHandler = require('errorhandler');
+const defaultErrorHandler = require('./error-handlers/default');
+const notFoundHandler = require('./error-handlers/notfound');
 const lusca = require('lusca');
 const dotenv = require('dotenv');
 const MongoStore = require('connect-mongo')(session);
@@ -21,7 +23,7 @@ const sass = require('node-sass-middleware');
 const methodOverride = require('method-override');
 const helmet = require('helmet');
 // const multer = require('multer');
-
+ 
 // const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 const cron = require('./config/cron');
@@ -29,27 +31,26 @@ const cron = require('./config/cron');
 const moment = require('moment');
 
 const schedule = require('node-schedule');
-
+ 
 const retryController = require('./controllers/retry');
 const tokenController = require('./controllers/token');
 
-const rule = new schedule.RecurrenceRule();
-// rule.dayOfWeek = [0, new schedule.Range(1, 6)];
-// rule.hour = 0;
-// rule.minute = 5;
+// const rule = new schedule.RecurrenceRule();
+// // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+// // rule.hour = 0;
+// // rule.minute = 5;
 
-// This job runs every 7 minutes
-rule.minute = new schedule.Range(0, 59, 2);
+// // This job runs every 7 minutes
+// rule.minute = new schedule.Range(0, 59, 2);
 
-const j = schedule.scheduleJob(rule, (req, res) => {
-  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-  const startCronJob = cron.job.start();
-  retryController.getAll(req, res);
+// const j = schedule.scheduleJob(rule, (req, res) => {
+//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+//   const startCronJob = cron.job.start();
+//   retryController.getAll(req, res);
+//   tokenController.getExpired(req, res);
+// });
 
-  tokenController.getExpired(req, res);
-});
-
-// start job
+// // start job
 // const startCronJob = cron.job.start();
 
 // // stop job
@@ -73,6 +74,11 @@ const timeframeController = require('./controllers/timeframe');
 
 const messageController = require('./controllers/message');
 const ipController = require('./controllers/ip');
+const ftpController = require('./controllers/ftp');
+const reportController = require('./controllers/report');
+const adminController = require('./controllers/admin');
+const venueController = require('./controllers/venue');
+const calendarController = require('./controllers/calendar');
 /**
  * API keys and Passport configuration.
  */
@@ -159,11 +165,13 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
-
 /**
  * Primary app routes.
  */
 app.get('/', homeController.index);
+app.get('/reports', homeController.reports);
+app.get('/calendar', calendarController.index);
+app.get('/admin', adminController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
@@ -188,22 +196,17 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 // Mobile
 app.get('/api/mobile', mobileController.getAll);
 app.get('/api/mobile/keyword/:keyword', mobileController.getKeywordAndInsert);
-//  John's code, app.get('/api/mobile/sms', mobileController.insertWinnerSMS);
 app.get('/api/mobile/sms/:keyword', mobileController.insertWinnerSMS);
-// John's code, app.get('/api/mobile/raffle', mobileController.getRaffleWinner);
 app.get('/api/mobile/raffle/:keyword', mobileController.findWinnerIfAvailable);
 app.get('/api/mobile/master', mobileController.master);
-
 // Tango
 app.get('/api/tango', tangoController.getAll);
 app.post('/api/tango', tangoController.insert);
 app.get('/api/tango/:id', tangoController.getOne);
-
 // Date
 app.get('/api/date', dateController.getAll);
 app.post('/api/date', dateController.insert);
 app.get('/api/date/:id', dateController.getOne);
-
 // Default API endpoints
 app.get('/api', apiController.getApi);
 app.post('/campaign', apiController.postCampaign);
@@ -217,22 +220,49 @@ app.post('/api/retry', retryController.insert);
 app.get('/api/retry/:id', retryController.getOne);
 app.delete('/api/retry/:id', retryController.removeById);
 // Message
-
 app.get('/api/message/verify', ipController.checkIp, messageController.verifyEmail, retryController.createTangoRetry);
+// app.get('/api/message/verify', ipController.checkIp);
 app.post('/api/message/', messageController.sendEmail);
-
 // Token
 app.get('/api/token', tokenController.getAll);
 app.post('/api/token', tokenController.insert);
+// FTP
+app.get('/ftp', ftpController.writeFile);
+// Reports UI Frontend
+// app.get('/api/report', reportController.index);
+app.get('/api/report/venue', reportController.venue);
+app.get('/api/report/time', reportController.time);
+app.get('/api/report/prize', reportController.prize);
+app.get('/api/report/events', reportController.events);
+app.get('/api/report/entry', reportController.entry);
+app.get('/api/report/donor', reportController.donor);
+
+app.post('/api/report/venue', reportController.venuePost);
+app.post('/api/report/time', reportController.timePost);
+app.post('/api/report/prize', reportController.prizePost);
+app.post('/api/report/events', reportController.eventsPost);
+app.post('/api/report/entry', reportController.entryPost);
+app.post('/api/report/donor', reportController.donorPost);
+// app.post('/api/user/save', userController.post);
+app.post('/api/venue/save', venueController.post);
+app.post('/api/calendar/save', calendarController.post);
+app.patch('/api/venue/save', venueController.patch);
+app.patch('/api/calendar/save', calendarController.patch);
 /**
  * Error Handler.
  */
-app.use(errorHandler());
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(errorHandler());
+} else {
+  app.use(notFoundHandler);
+  app.use(defaultErrorHandler);
+}
+
 
 /**
  * Start Express server.
  */
-
 app.listen(app.get('port'), () => {
   console.log('%s Server is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');

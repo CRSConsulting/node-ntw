@@ -13,3 +13,18 @@ exports.index = (req, res) => {
     ]
   });
 };
+
+exports.reports = (req, res) => {
+  res.render('pages/reports', {
+    title: 'Reports',
+    user: req.user,
+    vegetables: [
+      'carrot',
+      'potato',
+      'beet'
+    ]
+  });
+};
+
+
+

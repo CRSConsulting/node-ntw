@@ -38,7 +38,6 @@ exports.getAll = () => {
         return console.log('No retries needed');
       });
     })
-    // .then(data => console.log('=======', data))
     .catch((err) => {
       console.log('Error: from exports.getAll :', err);
     });
@@ -53,13 +52,14 @@ exports.createTangoRetry = (req, res) => {
         last_name: winnerObj.last_name,
         keyword: winnerObj.keyword,
         // email: winner.email,
-        email: 'ian@crs-consulting.com',
+        email: 'john.crs.consulting@gmail.com',
         retries: 0,
         retryTimes: retryService.createDateArray(new Date()),
         isValid: false,
         sendEmail: false
       };
       module.exports.insert(data);
+      res.render('pages/tango');
     })
     .catch((err) => {
       res.status(404).send(err);

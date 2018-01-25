@@ -43,4 +43,3 @@ function winnersService(options) {
     return Winners.update({ _id: data._id }, { winnerIndex: data.winnerIndex }).exec();
   }
 }
-
