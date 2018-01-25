@@ -1,0 +1,61 @@
+extends ../layout
+
+block content
+    .container
+        h2 Reports: #{display.title}
+        .spacer
+        #row-data-table.row
+            #div-table.col-md-12
+                #first
+                    .dropdown.dropdown-first
+                    h4#report-title Filter By Report
+                    button#dropdownMenu1.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='true')
+                        | Report Type
+                        span.caret
+                    ul.dropdown-menu.drop-down-modal1(aria-labelledby='dropdownMenu1')
+                        li
+                            a(href='/api/report/venue') Venues
+                        li
+                            a(href='/api/report/time') Time
+                        li
+                            a(href='/api/report/prize') Raffle Prizes
+                        li
+                            a(href='/api/report/events') Events
+                        li
+                            a(href='/api/report/entry') Entry Time Average
+                        li
+                            a(href='/api/report/donor') Donors (Multiple Entry)
+            form(action="#{display.formAction}", method="post")
+                #second
+                    h4 Start Date
+                        #datetimepicker1.input-group.date
+                            input.form-control(type='text', name='startDate')
+                            span.input-group-addon
+                                 span.glyphicon.glyphicon-calendar
+                #third
+                    h4 End Date
+                        #datetimepicker2.input-group.date
+                            input.form-control(type='text', name='endDate')
+                            span.input-group-addon
+                                span.glyphicon.glyphicon-calendar
+                        button#btn-run.btn-primary.btn.btn-default(type='submit') Run
+        table#myTable.table.table-hover.table-striped.table-bordered
+            thead
+                tr
+                    th #
+                    th #{display.columnOne}
+                    th #{display.columnTwo}
+                    th #{display.columnThree}
+                    if display.columnFour !== undefined
+                        th #{display.columnFour}
+                    else
+                        th
+            tbody
+                each item, i in items
+                    tr
+                        td= i+1
+                        td= item.columnOne
+                        td= item.columnTwo
+                        td= item.columnThree
+                        if item.columnFour != null
+                        td= item.columnFour

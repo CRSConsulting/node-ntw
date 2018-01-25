@@ -11,7 +11,6 @@ const tokenService = require('./token.services')({
 exports.sendEmail = (req, res) =>
   messageService.sendEmail(req)
     .then((message) => {
-      console.log('send email ctrl: ', message);
       res.json(message);
     })
     .catch((err) => {
@@ -20,9 +19,7 @@ exports.sendEmail = (req, res) =>
 
 exports.sendRetryEmail = (req, res) =>
   messageService.sendRetryEmail(req)
-    .then((message) => {
-      return message;
-    })
+    .then(message => message)
     .catch((err) => {
       console.log('err', err);
     });
@@ -36,14 +33,15 @@ exports.verifyEmail = (req, res, next) =>
           isAuthenticated: true,
           attempted: true
         };
-        tokenService.updateOne({ token_string: req.query.token }, updateAuth).then((token) => {
-          if (token.isAuthenticated === true) {
-            res.locals = token;
-            next();
-          } else {
-            return Promise.reject('Invalid Token');
-          }
-        })
+        tokenService.updateOne({ token_string: req.query.token }, updateAuth)
+          .then((token) => {
+            if (token.isAuthenticated === true) {
+              res.locals = token;
+              next();
+            } else {
+              return Promise.reject('Invalid Token');
+            }
+          })
           .catch((err) => {
             res.status(400).send('err', err);
           });

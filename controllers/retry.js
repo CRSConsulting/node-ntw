@@ -3,8 +3,13 @@ const retryService = require('./retry.services')({
   modelService: Retry,
 });
 
+const Winner = require('../models/Winner');
+const winnerService = require('./winners.services')({
+  modelService: Winner,
+});
+
 const messageController = require('./message');
-const tangoController = require('./tango-test');
+const tangoController = require('./tango');
 
 const retryController = require('./retry');
 
@@ -13,7 +18,7 @@ exports.getAll = () => {
     .then((retry) => {
       if (retry[0] === undefined) { return console.log('No retries needed'); }
       retry.forEach((cur, i) => {
-        if (cur.retries <= 5 && new Date(cur.retryTimes[cur.retries]).getTime() < new Date().getTime()) {
+        if (cur.retries <= 6 && new Date(cur.retryTimes[cur.retries]).getTime() < new Date().getTime()) {
           console.log('retry in process...');
           return tangoController.insertTangoRetry(cur);
         }
@@ -33,9 +38,31 @@ exports.getAll = () => {
         return console.log('No retries needed');
       });
     })
-    // .then(data => console.log('=======', data))
     .catch((err) => {
       console.log('Error: from exports.getAll :', err);
+    });
+};
+
+exports.createTangoRetry = (req, res) => {
+  winnerService.getOne({ _id: res.locals.winnersList })
+    .then((winner) => {
+      const winnerObj = winner.winners[winner.winnerIndex];
+      const data = {
+        first_name: winnerObj.first_name,
+        last_name: winnerObj.last_name,
+        keyword: winnerObj.keyword,
+        // email: winner.email,
+        email: 'john.crs.consulting@gmail.com',
+        retries: 0,
+        retryTimes: retryService.createDateArray(new Date()),
+        isValid: false,
+        sendEmail: false
+      };
+      module.exports.insert(data);
+      res.render('pages/tango');
+    })
+    .catch((err) => {
+      res.status(404).send(err);
     });
 };
 

@@ -12,7 +12,7 @@ const mobileSchema = new Schema({
   alternative_team_id: String,
   transaction_date: Date,
   donation_date: Date,
-  collected_amount: String,
+  collected_amount: Number,
   pledged_amount: String,
   processing_fee: String,
   fee_rate: String,

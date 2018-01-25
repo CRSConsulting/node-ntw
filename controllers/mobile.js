@@ -6,24 +6,11 @@ const notify = helpers.Notify;
 const Mobile = require('../models/Mobile');
 const Timeframe = require('../models/Timeframe');
 const Promise = require('bluebird');
+// const cmd = require('node-cmd');
+
 const mobilesService = require('./mobiles.services')({
   timeService: Timeframe,
-  modelService: Mobile, // passing in this model object is allowed b/c we pass in 'options' to our service
-});
-
-const Token = require('../models/Token');
-const tokenService = require('./token.services')({
-  modelService: Token
-});
-
-const Winners = require('../models/Winner');
-const winnersService = require('./winners.services')({
-  modelService: Winners
-});
-
-const Tango = require('../models/Tango');
-const tangosService = require('./tangos.services')({
-  modelService: Tango,
+  modelService: Mobile,
 });
 
 const Message = require('../models/Message');
@@ -32,6 +19,20 @@ const messageService = require('./message.services')({
 });
 
 
+const Tango = require('../models/Tango');
+const tangosService = require('./tangos.services')({
+  modelService: Tango,
+});
+
+const Winner = require('../models/Winner');
+const winnersService = require('./winners.services')({
+  modelService: Winner
+});
+
+// const getAsync = Promise.promisify(cmd.get, {
+//   multiArgs: true,
+//   context: cmd,
+// });
 const randy = require('randy');
 const fetch = require('node-fetch');
 const moment = require('moment');
@@ -47,10 +48,12 @@ exports.getAll = (req, res) =>
 
 
 exports.getKeywordAndInsert = (req, res) =>
-  calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}", "start_date": "${moment().format('MM/DD/YYYY')}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+  // calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}", "start_date": "${moment().format('MM/DD/YYYY')}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
+  calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"keyword":"${req.params.keyword}"}' "https://app.mobilecause.com/api/v2/reports/transactions.json?"`)
     .then((mobiles) => {
       console.log('getKeywordAndInsert(), 1st then()');
-      const body = JSON.parse(mobiles[0].slice(958));
+      console.log(`{${ mobiles[0].split('{')[1]}`);
+      const body = JSON.parse(`{${mobiles[0].split('{')[1]}`);
       const { id } = body;
       return calls.delay(20000).then(() => calls.getAsync(`curl -v -D - -H 'Authorization: Token token="${process.env.MOBILE_TOKEN_PRIVATE}"' -H "Accept: application/json" -H "Content-type: application/json" -X GET -d '{"id":${id}}' "https://app.mobilecause.com/api/v2/reports/results.json?"`)).catch((err) => {
         res.status(404).send(err);
@@ -66,18 +69,24 @@ exports.getKeywordAndInsert = (req, res) =>
             return a;
           }
         }
+        if (key === 'collected_amount') {
+          console.log('we collect now');
+          a = Number(value.replace(/[^0-9.-]+/g, '')); // convert dollar to number
+          console.log(a);
+          return a;
+        }
         return value;
       }
-      const mobilesObj = JSON.parse(mobiles[0].slice(958), dateTimeReviver);
-
+      const body = mobiles[0].slice(mobiles[0].indexOf('{') - 1);
+      const mobilesObj = JSON.parse(body, dateTimeReviver);
       if (mobilesObj.length === 0) {
         return Promise.reject('NO objects receieved');
       }
       return mobilesObj;
     })
     .then((jsonData) => {
-      console.log('JSONs RECEIVED', jsonData.length);
-      console.log('JSON for ', req.params.keyword);
+      // console.log('JSONs RECEIVED', jsonData.length);
+      // console.log('JSON for ', req.params.keyword);
       console.log('getKeywordAndInsert(), 3rd then()');
       const data = jsonData;
       const newTimer = mobilesService.generateTimer(data, req.params.keyword);
@@ -107,25 +116,15 @@ exports.insertWinnerSMS = (req, res) =>
     .then((foundTime) => {
       console.log('insertwinner 1st then()');
       if (foundTime) {
-        console.log(foundTime);
-        const test = mobilesService.getRaffleContestants(foundTime);
-        return Promise.all([test, foundTime]);
+        const getRaffle = mobilesService.getRaffleContestants(foundTime);
+        return Promise.all([getRaffle, foundTime]);
       }
       return Promise.reject('No Raffles need to be drawn at this instance');
     })
     .then((promises) => {
       console.log('insertwinner 2nd then()');
       const mobiles = promises[0];
-      // console.log('mobiles :', mobiles);
       const time = promises[1];
-      // if (mobiles.length > 0) {
-      //   const raffleArr = mobilesService.addWeightToRaffle(mobiles);
-      //   const shuffle = randy.shuffle(raffleArr);
-      //   const winner = randy.choice(shuffle);
-      //   time.used = true;
-      //   mobilesService.raffleComplete(time);
-      //   return winner;
-      // }
       if (mobiles.length > 0) {
         console.log(`Selecting winner out of ${mobiles.length} contestants`);
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
@@ -139,6 +138,7 @@ exports.insertWinnerSMS = (req, res) =>
       return Promise.reject('No PARTICIPANTS IN RAFFLE. SOMETHING HAS GONE WRONG');
     })
     .then((mobiles) => {
+      console.log('insertwinner 3rd then()');
       const tangoData = mobiles[0];
       const winners = mobiles[1];
       console.log(mobiles);
@@ -151,13 +151,14 @@ exports.insertWinnerSMS = (req, res) =>
       return winnersService.insert(winner);
     })
     .then((mobiles) => {
-      console.log('insertwinner third then()');
+      console.log('insertwinner 4th then()');
       const winners = mobiles;
       const call = notify.getSessionToken();
       return Promise.all([call, winners]);
     })
     .then(mobiles => notify.sendUserMessages(mobiles[0], mobiles[1], res))
     .then((mobiles) => {
+      console.log('insertwinner 6th then()');
       res.json(mobiles);
     })
     .catch((err) => {
@@ -202,12 +203,10 @@ exports.findWinnerIfAvailable = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err);
       res.status(500).send(err);
     });
 };
 function handleErrors(response) {
-  // console.log('response', response.ok);
   if (!response.ok) {
     throw Error(response.statusText);
   }
@@ -217,18 +216,13 @@ function handleErrors(response) {
 exports.master = (req, res) => {
   fetch(`http://localhost:3000/api/mobile/keyword/${req}`)
     .then(handleErrors)
-    .then((response) => {
-      console.log('1st fetch');
-      response.json();
+    .then((res) => {
+      res.json();
     })
-    .then((json) => {
-      console.log('2nd fetch');
-      fetch(`http://localhost:3000/api/mobile/sms/${req}`);
-    })
+    .then(json => fetch(`http://localhost:3000/api/mobile/sms/${req}`))
     .then(handleErrors)
     .catch((err) => {
-      console.log('err master function', err);
-      // res.status(500).send(err);
+      console.log('exports.master catch() :', err);
     });
 };
 

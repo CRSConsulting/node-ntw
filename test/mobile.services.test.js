@@ -15,7 +15,7 @@ const request = require('request');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
-describe.only('mobileService', () => {
+describe('mobileService', () => {
   describe('#getAll', () => {
     it('should return a list of data', (done) => {
       mobilesService.getAll()
@@ -67,12 +67,18 @@ describe.only('mobileService', () => {
 
       mobilesService.generateTimer(data, 'BRAVE')
         .then((result) => {
-          console.log('result', result);
           const error = result[0].message;
-          const message = 'Not Enough To Start';
-          _.isString(error).should.be.true;
-          _.isEqual(error, message).should.be.true;
-          done();
+          if (error === 'Endtime already set') {
+            const message = 'Endtime already set';
+            _.isString(error).should.be.true;
+            _.isEqual(error, message).should.be.true;
+            done();
+          } else if (error === 'Not Enough To Start') {
+            const message = 'Not Enough To Start';
+            _.isString(error).should.be.true;
+            _.isEqual(error, message).should.be.true;
+            done();
+          }
         })
         .catch(done);
     });

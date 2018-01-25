@@ -61,32 +61,28 @@ function mobilesService(options) {
     throw new Error('Options.modelService is required');
   }
 
-  if (!options.timeService) {
-    throw new Error('Options.timeService is required');
-  }
-
   Mobile = options.modelService;
-  // Timeframe = options.timeService;
 
   return {
     getAll,
-    getDups,
+    // getDups,
     generateTimer,
     findRunningRaffle,
     getRaffleContestants,
     findExistingRaffle,
     raffleComplete,
     addWeightToRaffle,
-    selectFiveWinners
+    selectFiveWinners,
+    getTotalCollectedAll
   };
 
   function getAll() {
     return Mobile.find({}).limit(1000).read(ReadPreference.NEAREST);
   }
 
-  function getDups() {
-    return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
-  }
+  // function getDups() {
+  //   return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
+  // }
 
   function findExistingRaffle(kw) {
     return Timeframe.findOne({ startTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
@@ -112,10 +108,6 @@ function mobilesService(options) {
           if (specKeys.length >= startAmount) {
             const currentTime = new Date(specKeys[startAmount - 1].transaction_date).getTime();
             const end = currentTime + (15 * 60000);
-            // const end = new Date(specKeys[startAmount - 1].transaction_date.getTime() + (15 * 60000));
-            // end is 15 minutes after transaction date of startAmount object
-            // count = 0;
-            // set end time and specific keyword
             newTimer.endTime = end;
             newTimer.keyword = uniqueKeys[i];
             timeframeService.update(newTimer);
@@ -135,6 +127,38 @@ function mobilesService(options) {
     return Mobile.find({ donation_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   }
 
+  function getTotalCollectedAll() {
+    return Mobile.aggregate(
+      [
+        { $match: { collected_amount: { $gte: 1 } } },
+        {
+          $group: {
+            _id: {
+              email: '$email',
+              keyword: '$keyword'
+            },
+            keywordAmount: { $sum: '$collected_amount' }
+          }
+        },
+        { $sort: { keywordAmount: -1 } },
+        {
+          $group: {
+            _id: '$_id.email',
+            keywords: {
+              $push: {
+                keyword: '$_id.keyword',
+                amount: '$keywordAmount',
+
+              },
+            },
+            totalAmount: { $sum: '$keywordAmount' },
+
+          },
+
+        },
+      ]);
+  }
+
   function raffleComplete(time) {
     return Timeframe.update({ _id: time._id }, { used: true }).exec();
   }
@@ -146,8 +170,7 @@ function mobilesService(options) {
     return unweighted.reduce(
       (r, a) => {
         if (a.collected_amount && a.collected_amount !== null) { // if money was donated
-          const currency = a.collected_amount;
-          const number = Number(currency.replace(/[^0-9.-]+/g, '')); // convert dollar to number
+          const number = a.collected_amount;
           let chances = 1;
           if (number >= twentyMinimum) {
             chances = 20;
