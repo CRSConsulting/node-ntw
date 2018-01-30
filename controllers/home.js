@@ -14,14 +14,10 @@ exports.index = (req, res) => {
   });
 };
 
-exports.reports = (req, res) => {
-  res.render('pages/reports', {
-    title: 'Reports',
+exports.denied = (req, res) => {
+  res.render('pages/permission-denied', {
+    title: 'Permission Denied',
     user: req.user,
-    vegetables: [
-      'carrot',
-      'potato',
-      'beet'
-    ]
   });
 };
+

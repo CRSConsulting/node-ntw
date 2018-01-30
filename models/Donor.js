@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const mobileSchema = new Schema({
+const donorSchema = new Schema({
   keyword: String,
   donation_date: Date,
-  donation_amount: String,
+  donation_amount: Number,
   last_4: String,
   phone: String,
   first_name: String,
@@ -15,15 +15,14 @@ const mobileSchema = new Schema({
   state: String,
   zip: String,
   email: String,
-  chances: String,
-  multiple_entries: String,
+  chances: Number,
+  multiple_entries: Boolean,
   venue: String,
   venue_city: String,
   venue_state: String,
-  event_date: String,
   event_start: Date,
   prize_time: Date,
-  transaction_time: Date,
+  trigger_time: Date,
   artist: String,
   seat_grab: Boolean,
   drawing_number: Number,
@@ -37,10 +36,10 @@ const mobileSchema = new Schema({
   change_artist: String,
   cc_status: String
 }, {
-  collection: 'mobileCause',
+  collection: 'donor',
   read: 'nearest',
 });
 
-const Mobile = mongoose.model('Mobile', mobileSchema);
+const Donor = mongoose.model('Donor', donorSchema);
 
-module.exports = Mobile;
+module.exports = Donor;

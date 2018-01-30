@@ -24,4 +24,33 @@
 //     console.log('#btnI', currentDate);
 //   });
 console.log('Hello World from main.js file');
+
+$('.modal').on('hidden.bs.modal', function () {
+    $(this).find('input[type=text], input[type=email], input[typepassword], select').val('');
+    $(this).find('input[type=text], input[type=email], input[typepassword], select').removeAttr('readonly');
+    $(this).find('input[type=radio], input[type=checkbox]').prop('checked', false);
+    if (this.id === 'venueModal') {
+        $('#venueName').val('');
+        $('#venueCity').val('');
+        $('#venueKeyword').val('');
+        $('#venueState').val('');
+        $('#venueId').val('');
+    } else if (this.id === 'eventModal') {
+        $('#eventName').val('');
+        $('#venue').val('');
+        $('input[name=announcer][value=false').prop('checked', true);
+        $('input[name=seatGrab][value=false').prop('checked', true);
+        $('input[name=thermometer][value=false').prop('checked', true);
+        $('#drawingOne').val('');
+        $('#drawingTwo').val('');
+        $('#drawingThree').val('');
+    } else if (this.id === 'userModal') {
+        console.log('hello');
+        $('#email').val('');
+        $('#password').val('');
+        $('#confirmPassword').val('');
+        $('input[type=checkbox]').prop('checked', false);
+        console.log('sorry');
+    }
+})
 // });

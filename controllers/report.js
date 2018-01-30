@@ -2,11 +2,11 @@ const Report = require('../models/Report');
 const reportService = require('./report.services')({
   modelService: Report,
 });
-const Winners = require('../models/Winner');
-const winnersService = require('../controllers/winners.services')({
-  modelService: Winners
+const Donor = require('../models/Donor');
+const donorService = require('../controllers/donor.services')({
+  modelService: Donor
 });
-
+const moment = require('moment');
 // exports.index = (req, res) => {
 //   winnersService.getAll()
 //     .then((reports) => {
@@ -26,15 +26,21 @@ const winnersService = require('../controllers/winners.services')({
 // };
 
 exports.venue = (req, res) => {
-  winnersService.getAll()
+  const startTime = req.body.startTime || new Date(0);
+  const endTime = req.body.endTime || new Date();
+  donorService.getVenueReportData(startTime, endTime)
     .then((reports) => {
       const display = { formAction: '/api/report/venue', title: 'Venues', columnOne: 'Venue Name', columnTwo: 'Total Monies Raised', columnThree: 'Best Performing Prize', columnFour: null };
-      const items = [
-        { columnOne: 'I-Wireless - Moline, IL', columnTwo: '$110,000.00', columnThree: '$500 Amazon Gift Card', columnFour: null },
-        { columnOne: 'Allen Event Center - Dallas, TX', columnTwo: '$26,760.50', columnThree: '$750 Amazon Gift Card', columnFour: null },
-        { columnOne: 'Bridgestone - Nashville, TN', columnTwo: '$15,520.00', columnThree: '$500 Visa Gift Card', columnFour: null },
-        { columnOne: 'Allen Country War - Fort Wayne, IN', columnTwo: '$9,870.55', columnThree: '$1250 Visa Gift Card', columnFour: null },
-      ];
+
+      const items = reports.map((report) => {
+        console.log(report);
+        const columnThree = `Prize ${report.drawing[0].drawing_number}: $${report.drawing[0].prize_amount} ${report.drawing[0].prize_type},`;
+        return {
+          columnOne: `${report._id.venue} - ${report._id.venue_city}, ${report._id.venue_state}`,
+          columnTwo: `${report.totalAmount}`,
+          columnThree
+        };
+      });
       res.render('pages/reports', {
         items, display
       });
@@ -42,16 +48,24 @@ exports.venue = (req, res) => {
       res.status(500).send(err);
     });
 };
+
 exports.time = (req, res) => {
-  winnersService.getAll()
-    .then((reports) => {
+  const startTime = req.body.startTime || new Date(0);
+  const endTime = req.body.endTime || new Date();
+  donorService.getTimeReportData(startTime, endTime)
+    .then((reports) => {    
       const display = { formAction: '/api/report/time', title: 'Time', columnOne: 'Drawing Start Time', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
-      const items = [
-        { columnOne: '7:00pm EST (12:00am GMT)', columnTwo: '$110,000.00', columnThree: '10265', columnFour: null },
-        { columnOne: '8:00pm EST (1:00am GMT)', columnTwo: '$26,760.50', columnThree: '8168', columnFour: null },
-        { columnOne: '5:00pm EST (1:00am GMT)', columnTwo: '$15,520.00', columnThree: '984', columnFour: null },
-        { columnOne: '7:30pm EST (12:30am GMT)', columnTwo: '$9,870.55', columnThree: '19183', columnFour: null },
-      ];
+      const items = reports.map((report) => {
+        const mom = moment(report._id.prize_time);
+        const columnOne = donorService.convertHoursToTime(mom.hours(), mom.minutes());
+        const columnTwo = `$${report.totalAmount}`;
+        const columnThree = `${report.totalEntries}`;
+        return {
+          columnOne,
+          columnTwo,
+          columnThree,
+        };
+      });
       res.render('pages/reports', {
         items, display
       });
@@ -59,16 +73,23 @@ exports.time = (req, res) => {
       res.status(500).send(err);
     });
 };
+
 exports.prize = (req, res) => {
-  winnersService.getAll()
+  const startTime = req.body.startTime || new Date(0);
+  const endTime = req.body.endTime || new Date();
+  reportService.getPrizeReportData(startTime, endTime)
     .then((reports) => {
       const display = { formAction: '/api/report/prize', title: 'Raffle Prizes', columnOne: 'Prize # and Type', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
-      const items = [
-        { columnOne: 'Prize 1, $500 Amazon Gift Card', columnTwo: '$110,000.00', columnThree: '10265', columnFour: null },
-        { columnOne: 'Prize 3, $750 Amazon Gift Card', columnTwo: '$26,760.50', columnThree: '8168', columnFour: null },
-        { columnOne: 'Prize 1, $500 Visa Gift Card', columnTwo: '$15,520.00', columnThree: '984', columnFour: null },
-        { columnOne: 'Prize 2, $1250 Visa Gift Card', columnTwo: '$9,870.55', columnThree: '19183', columnFour: null },
-      ];
+      const items = reports.map((report) => {
+        const columnOne = `Prize ${report._id.drawing_number}: $${report._id.prize_amount} ${report._id.prize_type}`;
+        const columnTwo = `$${report.totalAmount}`;
+        const columnThree = `${report.totalEntries}`;
+        return {
+          columnOne,
+          columnTwo,
+          columnThree,
+        };
+      });
       res.render('pages/reports', {
         items, display
       });
@@ -76,16 +97,21 @@ exports.prize = (req, res) => {
       res.status(500).send(err);
     });
 };
+
 exports.events = (req, res) => {
-  winnersService.getAll()
+  const startTime = req.body.startTime || new Date(0);
+  const endTime = req.body.endTime || new Date();
+  reportService.getEventReportData(startTime, endTime)
     .then((reports) => {
+      const items = reports.map((report) => {
+        return {
+          columnOne: `${report._id.venue}, ${report._id.artist}`,
+          columnTwo: `$${report.totalAmount}`,
+          columnThree: `${report.totalEntries}`,
+          columnFour: `${report._id.month}/${report._id.day}/${report._id.year}`
+        };
+      });
       const display = { formAction: '/api/report/events', title: 'Events', columnOne: 'Event(Venue, Artist/Event)', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: 'Date' };
-      const items = [
-        { columnOne: 'Moline, Taylor Swift', columnTwo: '$110,000.00', columnThree: '10265', columnFour: '10/12/2017' },
-        { columnOne: 'Moline, White Sox vs Dodgers', columnTwo: '$26,760.50', columnThree: '8168', columnFour: '11/12/2017' },
-        { columnOne: 'Bridgestone, Tom Jones', columnTwo: '$15,520.00', columnThree: '984', columnFour: '11/20/2017' },
-        { columnOne: 'Moline, Jack Johnson', columnTwo: '$9,870.55', columnThree: '19183', columnFour: '01/05/2018' },
-      ];
       res.render('pages/reports', {
         items, display
       });
@@ -94,57 +120,77 @@ exports.events = (req, res) => {
     });
 };
 exports.entry = (req, res) => {
-  winnersService.getAll()
+  const startTime = req.body.startTime || new Date(0);
+  const endTime = req.body.endTime || new Date();
+  reportService.getEntryTimeReportData(startTime, endTime)
     .then((reports) => {
-      const display = { formAction: '/api/report/entry', title: 'Entry Time Averages', columnOne: 'Prize # and Type', columnTwo: 'Prize Start Time', columnThree: 'Avgerage Trigger Start Time', columnFour: 'Average Entry Time' };
-      const items = [
-        { columnOne: 'Prize 1, $500 Amazon', columnTwo: '7:00pm EST (12:00am GMT)', columnThree: '7:00pm EST (12:00am GMT)', columnFour: '7:00pm EST (12:00am GMT)' },
-        { columnOne: 'Prize 2, $750 Visa', columnTwo: '7:00pm EST (12:00am GMT)', columnThree: '7:00pm EST (12:00am GMT)', columnFour: '7:00pm EST (12:00am GMT)' },
-        { columnOne: 'Prize 3, $1250 Amazon', columnTwo: '7:00pm EST (12:00am GMT)', columnThree: '7:00pm EST (12:00am GMT)', columnFour: '7:00pm EST (12:00am GMT)' },
-        { columnOne: 'Prize 4, $1250 Visa', columnTwo: '7:00pm EST (12:00am GMT)', columnThree: '7:00pm EST (12:00am GMT)', columnFour: '7:00pm EST (12:00am GMT)' },
-      ];
+      const items = reports.map((report) => {
+        const columnOne = `Prize ${report._id.drawing_number}: $${report._id.prize_amount} ${report._id.prize_type}`;
+        const mom = moment(report._id.prize_time);
+        const columnTwo = donorService.convertHoursToTime(mom.hours(),mom.minutes());
+        const columnThree = donorService.convertHoursToTime(report.triggerAvgHours, report.triggerAvgMinutes);
+        const columnFour = donorService.convertHoursToTime(report.entryAvgHours, report.entryAvgMinutes);
+        return {
+          columnOne,
+          columnTwo,
+          columnThree,
+          columnFour
+        };
+      });
+      const display = { formAction: '/api/report/entry', title: 'Entry Time Averages', columnOne: 'Prize # and Type', columnTwo: 'Prize Start Time', columnThree: 'Average Trigger Start Time', columnFour: 'Average Entry Time' };
       res.render('pages/reports', {
         items, display
       });
     }).catch((err) => {
+      console.log(err);
       res.status(500).send(err);
     });
 };
 exports.donor = (req, res) => {
-  winnersService.getAll()
+  const startTime = req.body.startTime || new Date(0);
+  const endTime = req.body.endTime || new Date();
+  reportService.getDonorReportData(startTime, endTime)
     .then((reports) => {
       const display = { formAction: '/api/report/donor', title: 'Donors (Multiple Entry)', columnOne: 'Donor Name', columnTwo: 'Prize # and Type in Order of Weight', columnThree: 'Total Monies Collected', columnFour: 'Total Number of Entries' };
-      const items = [
-        { columnOne: 'John Doe', columnTwo: 'Prize 1, $500 AMZ, Prize 2, $750 VISA, Prize 3, $1250 AMZ', columnThree: '$120', columnFour: '5' },
-        { columnOne: 'Someone Longnamed', columnTwo: 'Prize 1, $500 AMZ, Prize 2, $750 VISA, Prize 3, $1250 AMZ', columnThree: '$55', columnFour: '3' },
-        { columnOne: 'John Yu', columnTwo: 'Prize 1, $500 AMZ, Prize 2, $750 VISA, Prize 3, $1250 AMZ', columnThree: '$354.50', columnFour: '10' },
-        { columnOne: 'Allen Fake', columnTwo: 'Prize 1, $500 AMZ, Prize 2, $750 VISA, Prize 3, $1250 AMZ', columnThree: '$165', columnFour: '4' },
-      ];
+      const items = reports.map((report) => {
+        console.log(report);
+        const columnTwo = report.drawings.reduce((str, draw) => {
+          str += `Prize ${draw.drawing_number}: $${draw.prize_amount} ${draw.prize_type},`;
+          return str;
+        }, '').slice(0, -1);
+        return {
+          columnOne: `${report._id.email}`,
+          columnTwo,
+          columnThree: `${report.totalAmount}`,
+          columnFour: `${report.totalEntries}`
+        }
+      });
       res.render('pages/reports', {
         items, display
       });
     }).catch((err) => {
+      console.log(err);
       res.status(500).send(err);
     });
 };
 
-// POST METHODS
+// // POST METHODS
 
-exports.venuePost = (req, res) => {
-  console.log('venuePost req.body: ', req.body);
-};
-exports.timePost = (req, res) => {
-  console.log('timePost req.body: ', req.body);
-};
-exports.prizePost = (req, res) => {
-  console.log('prizePost req.body: ', req.body);
-};
-exports.eventsPost = (req, res) => {
-  console.log('eventsPost req.body: ', req.body);
-};
-exports.entryPost = (req, res) => {
-  console.log('entryPost req.body: ', req.body);
-};
-exports.donorPost = (req, res) => {
-  console.log('donorPost req.body: ', req.body);
-};
+// exports.venuePost = (req, res) => {
+//   console.log('venuePost req.body: ', req.body);
+// };
+// exports.timePost = (req, res) => {
+//   console.log('timePost req.body: ', req.body);
+// };
+// exports.prizePost = (req, res) => {
+//   console.log('prizePost req.body: ', req.body);
+// };
+// exports.eventsPost = (req, res) => {
+//   console.log('eventsPost req.body: ', req.body);
+// };
+// exports.entryPost = (req, res) => {
+//   console.log('entryPost req.body: ', req.body);
+// };
+// exports.donorPost = (req, res) => {
+//   console.log('donorPost req.body: ', req.body);
+// };

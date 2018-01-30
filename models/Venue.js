@@ -3,14 +3,15 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const venueSchema = new Schema({
-  venue: String,
-  prize: Number,
-  giftId: String
+  name: String,
+  keyword: String,
+  city: String,
+  state: String
 }, {
-  collection: 'tango',
+  collection: 'venue',
   read: 'nearest',
 });
 
-const Occasion = mongoose.model('occasion', occasionSchema);
+const Venue = mongoose.model('venue', venueSchema);
 
-module.exports = Occasion;
+module.exports = Venue;

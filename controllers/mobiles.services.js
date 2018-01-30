@@ -1,62 +1,24 @@
 const {
   ReadPreference,
 } = require('mongodb');
-const Timeframe = require('../models/Timeframe');
-const timeframeService = require('./timeframe.services')({
-  modelService: Timeframe
+const Calendar = require('../models/Calendar');
+const calendarService = require('./calendar.services')({
+  modelService: Calendar
 });
+
+const Tango = require('../models/Tango');
+const tangoService = require('./tangos.services')({
+  modelService: Tango
+});
+
 const randy = require('randy');
 const zipcode = require('zippity-do-dah');
+const moment = require('moment');
 
 module.exports = mobilesService;
 
 function mobilesService(options) {
   let Mobile;
-  // let Timeframe;
-  const extraFields = [
-    'shortcode',
-    'type',
-    'volunteer_fundraiser',
-    'team',
-    'alternative_team_id',
-    'fee_rate',
-    'pledged_amount',
-    'processing_fee',
-    'gender',
-    'billing_status',
-    'billing_type',
-    'donation',
-    'source',
-    'form',
-    'form_payment_type',
-    'form_name',
-    'form_type',
-    'form_id',
-    'fulfillment_texts',
-    'donation_notes',
-    'account',
-    'account_id',
-    'campaign_name',
-    'account_plan',
-    'account_plan_price',
-    'frequency',
-    'anonymous',
-    'billing_transaction',
-    'billing_transaction_reference',
-    'billing_transaction_code',
-    'parent_name',
-    'payment_gateway',
-    'veteran2',
-    'veteran_2',
-    'accept',
-    'info',
-    'vet_2',
-    'a',
-    'vet2',
-    'question_2_vet',
-    'question_2',
-  ];
-
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
   }
@@ -65,37 +27,39 @@ function mobilesService(options) {
 
   return {
     getAll,
-    // getDups,
+    deleteAll,
     generateTimer,
-    findRunningRaffle,
     getRaffleContestants,
-    findExistingRaffle,
     raffleComplete,
     addWeightToRaffle,
     selectFiveWinners,
-    getTotalCollectedAll
+    getAllGroupedByEmailAndDate,
+    findRunningRaffle
   };
 
   function getAll() {
     return Mobile.find({}).limit(1000).read(ReadPreference.NEAREST);
+  }
+ 
+  function deleteAll(removeIds) {
+    return Mobile.find({ _id: { $in: removeIds } });
   }
 
   // function getDups() {
   //   return Mobile.aggregate([{ $group: { _id: { transaction_id: '$transaction_id', keyword: '$keyword', billing_transaction: '$billing_transaction', }, count: { $sum: 1, }, }, }, { $match: { count: { $gte: 2, }, }, }]);
   // }
 
-  function findExistingRaffle(kw) {
-    return Timeframe.findOne({ startTime: { $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
-  }
-
   function generateTimer(jsonData, baseKey) {
     const startAmount = 5; // amount to trigger timer creation
-    const test = findExistingRaffle(baseKey)
-      .then((time) => {
+    const test = calendarService.getAllofToday()
+      .then((times) => {
+        const calendar = times.find(cal => cal.venue.keyword === baseKey);
+        const timeIndex = calendar.drawings.findIndex(drawing => moment(drawing).isBefore(new Date()) && drawing.used === false);
+        const time = calendar.drawings[timeIndex];
         if (!time) return { message: 'Not within timeframe window' };
         if (time.endTime) return { message: 'Endtime already set' };
         const newTimer = time;
-        const dataAfterStart = jsonData.filter(mobile => new Date(mobile.transaction_date).getTime() > new Date(time.startTime).getTime());
+        const dataAfterStart = jsonData.filter(mobile => new Date(mobile.transaction_date).getTime() > new Date(time.time).getTime());
         if (dataAfterStart.length < startAmount) return { message: 'Not Enough To Start' };
         const uniqueKeys = [...new Set(dataAfterStart.map(item => // get list of keyword variants (e.g. BRAVE1, BRAVE2, etc..)
           item.keyword
@@ -110,57 +74,60 @@ function mobilesService(options) {
             const end = currentTime + (15 * 60000);
             newTimer.endTime = end;
             newTimer.keyword = uniqueKeys[i];
-            timeframeService.update(newTimer);
-            return newTimer;
+            const tangoQueryCondition = {
+              keyword: uniqueKeys[i]
+            };
+            const tango = tangoService.getOne(tangoQueryCondition);
+            return Promise.all([calendar, tango, timeIndex]);
           }
         }
         return { message: 'Not enough to start' };
+      })
+      .then((all) => {
+        if (all.message) return;
+
+        const calendar = all[0];
+        const tango = all[1];
+        const timeIndex = all[2];
+        calendar.drawings[timeIndex].prizeType = tango.prize_type;
+        calendar.drawings[timeIndex].prizeAmount = tango.prize;
+        calendarService.update(calendar);
+        return calendar.drawings[timeIndex];
       });
     return Promise.all([test]);
-  }
-
-  function findRunningRaffle(kw) {
-    return Timeframe.findOne({ endTime: { $exists: true, $lte: new Date() }, used: false, keyword: new RegExp(`^${kw}`) });
   }
 
   function getRaffleContestants(timeframe) {
     return Mobile.find({ donation_date: { $lte: timeframe.endTime, $gte: timeframe.startTime }, keyword: timeframe.keyword });
   }
 
-  function getTotalCollectedAll() {
+  function getAllGroupedByEmailAndDate() {
     return Mobile.aggregate(
       [
-        { $match: { collected_amount: { $gte: 1 } } },
         {
           $group: {
             _id: {
               email: '$email',
-              keyword: '$keyword'
+              keyword: '$keyword',
+              date: { $dateToString: { format: '%Y-%m-%d', date: '$donation_date' } },
             },
-            keywordAmount: { $sum: '$collected_amount' }
           }
-        },
-        { $sort: { keywordAmount: -1 } },
-        {
-          $group: {
-            _id: '$_id.email',
-            keywords: {
-              $push: {
-                keyword: '$_id.keyword',
-                amount: '$keywordAmount',
-
-              },
-            },
-            totalAmount: { $sum: '$keywordAmount' },
-
-          },
-
-        },
+        }
       ]);
   }
 
-  function raffleComplete(time) {
-    return Timeframe.update({ _id: time._id }, { used: true }).exec();
+  function raffleComplete(cal, calIndex) {
+    return calendarService.setDrawingToUsed(cal, calIndex);
+  }
+
+  function findRunningRaffle(keyword) {
+    Calendar.findRunningRaffle()
+      .then((calendars) => {
+        const cal = calendars.find(calendar => calendar.venue.keyword === keyword);
+        const index = cal.drawings.findIndex(drawing => drawing.used === false);
+        return [cal, index];
+      })
+      .catch(err => console.log(err));
   }
 
   function addWeightToRaffle(unweighted) {
@@ -177,11 +144,11 @@ function mobilesService(options) {
           } else if (number >= fiveMinimum) {
             chances = 5;
           } else if (number === 0) {
-            const multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate phone entries
+            const multiEntries = r.filter(mobile => (mobile.phone === a.phone && mobile.collected_amount === 0)); // get count in weighted array of duplicate phone entries
             if (multiEntries.length === unpaidDupeMax) {
               chances = 0;
             }
-            const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === '$0.00')); // get count in weighted array of duplicate email entries
+            const multiEntriesEmail = r.filter(mobile => (mobile.email === a.email && mobile.collected_amount === 0)); // get count in weighted array of duplicate email entries
             if (multiEntriesEmail.length === unpaidDupeMax) {
               chances = 0;
             }

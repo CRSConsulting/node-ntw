@@ -1,15 +1,43 @@
+const Promise = require('bluebird');
 const Mobile = require('../models/Mobile');
 const mobilesService = require('./mobiles.services')({
-    modelService: Mobile,
+  modelService: Mobile,
 });
 
 const Donor = require('../models/Donor');
 const donorService = require('./donor.services')({
-    modelService: Donor,
+  modelService: Donor,
 });
+
+const Calendar = require('../models/Calendar');
+const calendarService = require('./calendar.services')({
+  modelService: Calendar,
+});
+
 exports.transformAll = (req, res) => {
-    mobilesService.getAll()
-    .then((mobiles) => {
-        const donors = donorService.transform(mobiles);
+  const calendars = calendarService.getAllWithVenues();
+  const mobiles = mobilesService.getAll();
+  const uniqueMobiles = mobilesService.getAllGroupedByEmailAndDate();
+  Promise.all([mobiles, uniqueMobiles, calendars])
+    .then((all) => {
+      const returnArr = donorService.transform(all[0], all[1], all[2]);
+      return returnArr;
     })
+    .then((all) => {
+      const donors = donorService.insertAll(all[0]);
+      console.log(all[1]);
+      console.log('donors', all[0].length);
+      return Promise.all([donors, all[1]]);
+    })
+    .then((all) => {
+      // const mobiles = mobilesService.deleteAll(all[1]);
+      return Promise.all([all[0], mobiles]);
+    })
+    .then((all) => {
+      res.send(all[0]);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send(err);
+    });
 };

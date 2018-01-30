@@ -3,7 +3,9 @@ const crypto = bluebird.promisifyAll(require('crypto'));
 const nodemailer = require('nodemailer');
 const passport = require('passport');
 const User = require('../models/User');
-
+const userService = require('./user.services')({
+  modelService: User,
+});
 /**
  * GET /login
  * Login page.
@@ -83,32 +85,50 @@ exports.postSignup = (req, res, next) => {
 
   if (errors) {
     req.flash('errors', errors);
-    return res.redirect('/signup');
+    res.send(errors);
   }
 
   const user = new User({
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    perms: req.body.perms
   });
-
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) { return next(err); }
     if (existingUser) {
-      req.flash('errors', { msg: 'Account with that email address already exists.' });
-      return res.redirect('/signup');
+      return res.send({ msg: 'Account with that email address already exists.' });
     }
-    user.save((err) => {
+    user.save((err, u) => {
       if (err) { return next(err); }
-      req.logIn(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        res.redirect('/');
-      });
+      res.send(u);
     });
   });
 };
 
+/**
+ * PATCH user
+ * Edit existing user.
+ */
+exports.patch = (req, res) => {
+  if (req.body.password) {
+    req.assert('password', 'Password must be at least 4 characters long').len(4);
+    req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
+  }
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    res.send(errors);
+  }
+  console.log(req.body);
+
+  const updateUser = req.body;
+  const updateId = updateUser.id;
+  const user = userService.update(updateId, updateUser);
+  res.send(user);
+
+};
 /**
  * GET /account
  * Profile page.

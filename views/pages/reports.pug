@@ -29,16 +29,12 @@ block content
                 #second
                     h4 Start Date
                         #datetimepicker1.input-group.date
-                            input.form-control(type='text', name='startDate')
-                            span.input-group-addon
-                                 span.glyphicon.glyphicon-calendar
+                            input#startDate.form-control(type='text', name='startTime')
                 #third
                     h4 End Date
                         #datetimepicker2.input-group.date
-                            input.form-control(type='text', name='endDate')
-                            span.input-group-addon
-                                span.glyphicon.glyphicon-calendar
-                        button#btn-run.btn-primary.btn.btn-default(type='submit') Run
+                            input#endDate.form-control(type='text', name='endTime')
+                        button#btn-run.btn-primary.btn.btn-default(type='button') Run
         table#myTable.table.table-hover.table-striped.table-bordered
             thead
                 tr
@@ -59,3 +55,4 @@ block content
                         td= item.columnThree
                         if item.columnFour != null
                         td= item.columnFour
+        script(src='/js/reports.js') 

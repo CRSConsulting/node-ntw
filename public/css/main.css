@@ -8938,79 +8938,51 @@ textarea {
 .fa {
   margin-right: 6px; }
 
- /*
+/*
 
 ============All the css below are written by John==================
 */
-
 #first {
   float: left;
-  margin: 57px -22px;
+  margin: 30px 16px;
   padding: 10px;
   height: 90px;
-  width: 250px;
- }
- 
- #second {
+  width: 250px; }
+
+#second {
   float: left;
-  margin: 41px 85px;
+  margin: -167px 514px;
   padding: 10px;
   height: 90px;
-  width: 250px;
- }
- 
- #third {
+  width: 250px; }
+
+#third {
   float: right;
-  margin: -131px 170px;
+  margin: -167px 67px;
   padding: 10px;
   height: 90px;
-  width: 250px;
- }
- 
- #btn-run {
+  width: 250px; }
+
+#btn-run {
   float: right;
-  margin: 10px -194px;
-  padding: 10px;
- }
- 
- #dropdownMenu1 {
-  margin: 0px 14px;
- }
- 
- #dropdownMenu2 {
-  margin: 10px 20px;
- }
- 
- #dropdownMenu3 {
-  margin: 10px 20px;
- }
- 
- .drop-down-modal1{
-  margin: -100px 117px !important;
- }
- 
- .drop-down-modal2{
-  margin: -100px 419px !important;
- }
- 
- .drop-down-modal3{
-  margin: -100px 812px !important;
- }
- 
- .spacer {
- border-bottom: 4px solid #ccc;
- margin: 20px 0px;
- }
- #report-title{
-  margin: 4px 0px;
- }
- #div-table {
-  margin: -37px 0px;
- }
- #row-data-table{
-  margin: -47px 0px !important;
- }
- @media (min-width: 1200px) {
- }
- 
-  
+  margin: -38px -90px;
+  padding: 10px; }
+
+#dropdownMenu1 {
+  margin: 7px 0px; }
+
+.drop-down-modal1 {
+  margin: -44px 40px !important; }
+
+.spacer {
+  border-bottom: 4px solid #ccc;
+  margin: 20px 0px; }
+
+#report-title {
+  margin: 4px 0px; }
+
+#div-table {
+  margin: 50px 0px; }
+
+#row-data-table {
+  margin: -68px 0px !important; }

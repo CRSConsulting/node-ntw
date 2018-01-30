@@ -1,0 +1,19 @@
+extends ../layout 
+
+block content
+  .container
+    h2 Admin
+    .spacer
+    ul.nav.nav-pills.nav-justified
+      li.nav-item
+        a#users-tab.nav-link(href='#users', data-toggle='tab', aria-controls='users', aria-selected='false') Users
+      li.nav-item
+        a#venues-tab.nav-link(href='#venues', data-toggle='tab', aria-controls='venues', aria-selected='false') Venues
+    .tab-content
+      #users.tab-pane.fade.active(role='tabpanel',aria-labelledby='users-tab')
+        include ../partials/admin.users.pug
+      #venues.tab-pane.fade.active(role='tabpanel',aria-labelledby='venues-tab')
+        include ../partials/admin.venues.pug
+    include ../modals/venueModal
+    include ../modals/userModal
+  script(src='/js/admin.js') 

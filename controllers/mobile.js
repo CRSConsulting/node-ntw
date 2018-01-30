@@ -4,12 +4,10 @@ const calls = helpers.Calls;
 const notify = helpers.Notify;
 
 const Mobile = require('../models/Mobile');
-const Timeframe = require('../models/Timeframe');
 const Promise = require('bluebird');
 // const cmd = require('node-cmd');
 
 const mobilesService = require('./mobiles.services')({
-  timeService: Timeframe,
   modelService: Mobile,
 });
 
@@ -70,7 +68,6 @@ exports.getKeywordAndInsert = (req, res) =>
           }
         }
         if (key === 'collected_amount') {
-          console.log('we collect now');
           a = Number(value.replace(/[^0-9.-]+/g, '')); // convert dollar to number
           console.log(a);
           return a;
@@ -116,21 +113,24 @@ exports.insertWinnerSMS = (req, res) =>
     .then((foundTime) => {
       console.log('insertwinner 1st then()');
       if (foundTime) {
-        const getRaffle = mobilesService.getRaffleContestants(foundTime);
-        return Promise.all([getRaffle, foundTime]);
+        const cal = foundTime[0];
+        const calIndex = foundTime[1];
+        const getRaffle = mobilesService.getRaffleContestants(cal[calIndex]);
+        return Promise.all([getRaffle, cal, calIndex]);
       }
       return Promise.reject('No Raffles need to be drawn at this instance');
     })
     .then((promises) => {
       console.log('insertwinner 2nd then()');
       const mobiles = promises[0];
-      const time = promises[1];
+      const cal = promises[1];
+      const calIndex = promises[2];
       if (mobiles.length > 0) {
         console.log(`Selecting winner out of ${mobiles.length} contestants`);
         const raffleArr = mobilesService.addWeightToRaffle(mobiles);
         console.log(`Weighted arr has ${raffleArr.length} contestants`);
         const winners = mobilesService.selectFiveWinners(raffleArr);
-        mobilesService.raffleComplete(time);
+        mobilesService.raffleComplete(cal, calIndex);
         const tangoData = tangosService.getOne({ keyword: mobiles[0].keyword });
         console.log('insertWinnerSMS checking for selectFiveWinners :', winners);
         return Promise.all([tangoData, winners]);

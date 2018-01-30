@@ -23,7 +23,7 @@ const sass = require('node-sass-middleware');
 const methodOverride = require('method-override');
 const helmet = require('helmet');
 // const multer = require('multer');
-
+ 
 // const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 const cron = require('./config/cron');
@@ -31,24 +31,24 @@ const cron = require('./config/cron');
 const moment = require('moment');
 
 const schedule = require('node-schedule');
-
+ 
 const retryController = require('./controllers/retry');
 const tokenController = require('./controllers/token');
 
-const rule = new schedule.RecurrenceRule();
+// const rule = new schedule.RecurrenceRule();
 // // rule.dayOfWeek = [0, new schedule.Range(1, 6)];
 // // rule.hour = 0;
 // // rule.minute = 5;
 
 // // This job runs every 7 minutes
-rule.minute = new schedule.Range(0, 59, 2);
+// rule.minute = new schedule.Range(0, 59, 2);
 
-const j = schedule.scheduleJob(rule, (req, res) => {
-  console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
-  const startCronJob = cron.job.start();
+// const j = schedule.scheduleJob(rule, (req, res) => {
+//   console.log(`${moment().format('YYYY-MM-DD HH:mm:ss.SS - ')}Job is currently executing`);
+//   const startCronJob = cron.job.start();
 //   retryController.getAll(req, res);
 //   tokenController.getExpired(req, res);
-});
+// });
 
 // // start job
 // const startCronJob = cron.job.start();
@@ -76,6 +76,10 @@ const messageController = require('./controllers/message');
 const ipController = require('./controllers/ip');
 const ftpController = require('./controllers/ftp');
 const reportController = require('./controllers/report');
+const adminController = require('./controllers/admin');
+const venueController = require('./controllers/venue');
+const calendarController = require('./controllers/calendar');
+const donorController = require('./controllers/donor');
 /**
  * API keys and Passport configuration.
  */
@@ -102,6 +106,7 @@ process.on('SIGNT', () => {
     process.exit(0);
   });
 });
+
 /**
  * Express configuration.
  */
@@ -161,12 +166,26 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+function requireRole(role) {
+  return (req, res, next) => {
+    if (req.user && req.user.perms.indexOf(role) >= 0) {
+      next();
+    } else {
+      res.redirect('/denied');
+    }
+  };
+}
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 /**
  * Primary app routes.
  */
 app.get('/', homeController.index);
-app.get('/reports', homeController.reports);
+app.get('/denied', homeController.denied);
+app.get('/donorTransform', donorController.transformAll);
+// app.get('/reports', passportConfig.isAuthenticated, requireRole('reports'), homeController.reports);
+app.get('/calendar', passportConfig.isAuthenticated, requireRole('calendar'), calendarController.index);
+app.get('/admin', passportConfig.isAuthenticated, adminController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
@@ -174,8 +193,6 @@ app.get('/forgot', userController.getForgot);
 app.post('/forgot', userController.postForgot);
 app.get('/reset/:token', userController.getReset);
 app.post('/reset/:token', userController.postReset);
-app.get('/signup', userController.getSignup);
-app.post('/signup', userController.postSignup);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
@@ -225,20 +242,27 @@ app.post('/api/token', tokenController.insert);
 app.get('/ftp', ftpController.writeFile);
 // Reports UI Frontend
 // app.get('/api/report', reportController.index);
-app.get('/api/report/venue', reportController.venue);
-app.get('/api/report/time', reportController.time);
-app.get('/api/report/prize', reportController.prize);
-app.get('/api/report/events', reportController.events);
-app.get('/api/report/entry', reportController.entry);
-app.get('/api/report/donor', reportController.donor);
+app.get('/api/report/venue', passportConfig.isAuthenticated, requireRole('reports'), reportController.venue);
+app.get('/api/report/time', passportConfig.isAuthenticated, requireRole('reports'), reportController.time);
+app.get('/api/report/prize', passportConfig.isAuthenticated, requireRole('reports'), reportController.prize);
+app.get('/api/report/events', passportConfig.isAuthenticated, requireRole('reports'), reportController.events);
+app.get('/api/report/entry', passportConfig.isAuthenticated, requireRole('reports'), reportController.entry);
+app.get('/api/report/donor', passportConfig.isAuthenticated, requireRole('reports'), reportController.donor);
 
-app.post('/api/report/venue', reportController.venuePost);
-app.post('/api/report/time', reportController.timePost);
-app.post('/api/report/prize', reportController.prizePost);
-app.post('/api/report/events', reportController.eventsPost);
-app.post('/api/report/entry', reportController.entryPost);
-app.post('/api/report/donor', reportController.donorPost);
+app.post('/api/report/venue', passportConfig.isAuthenticated, requireRole('reports'), reportController.venue);
+app.post('/api/report/time', passportConfig.isAuthenticated, requireRole('reports'), reportController.time);
+app.post('/api/report/prize', passportConfig.isAuthenticated, requireRole('reports'), reportController.prize);
+app.post('/api/report/events', passportConfig.isAuthenticated, requireRole('reports'), reportController.events);
+app.post('/api/report/entry', passportConfig.isAuthenticated, requireRole('reports'), reportController.entry);
+app.post('/api/report/donor', passportConfig.isAuthenticated, requireRole('reports'), reportController.donor);
+// app.post('/api/user/save', userController.post);
+app.post('/api/venue/save', venueController.post);
+app.post('/api/calendar/save', calendarController.post);
+app.post('/api/user/save', userController.postSignup);
 
+app.patch('/api/venue/save', venueController.patch);
+app.patch('/api/calendar/save', calendarController.patch);
+app.patch('/api/user/save', userController.patch);
 /**
  * Error Handler.
  */
