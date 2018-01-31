@@ -4,12 +4,14 @@
       tr
         th Venue
         th Keyword
+        th Upcoming Events
     tbody
       each venue in venues
         tr.edit-row(data-section='venue')
           td #{venue.name}
             input(type='hidden' data-object=venue)
           td #{venue.keyword} 
-      tr
+          td #{venue.drawings}
+      tr.final-row
         td(colspan=3) 
           button#addVenue.btn-add.btn-primary.btn(type='button',data-toggle='modal', data-target='#venueModal') Add New Venue

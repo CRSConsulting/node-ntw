@@ -45,6 +45,11 @@ function reportService(options) {
     return Donor.aggregate(
       [
         {
+          $match: {
+            donation_date: { $gte: start, $lte: end }
+          }
+        },
+        {
           $group: {
             _id: {
               email: '$email',
@@ -75,7 +80,7 @@ function reportService(options) {
             totalEntries: { $sum: '$keywordChances' }
           },
         },
-      ])
+      ]);
   }
 
   /* 

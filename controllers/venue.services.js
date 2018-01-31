@@ -17,6 +17,7 @@ function venueService(options) {
 
   return {
     getAll,
+    getAllWithDrawings,
     insert,
     getOne,
     update,
@@ -26,6 +27,42 @@ function venueService(options) {
 
   function getAll() {
     return Venue.find();
+  }
+
+  function getAllWithDrawings() {
+    return Venue.aggregate(
+      {
+        $lookup:
+          {
+            from: 'calendar',
+            localField: '_id',
+            foreignField: 'venue',
+            as: 'calendars'
+          }
+      },
+      {
+        $unwind: '$calendars'
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          keyword: 1,
+          city: 1,
+          state: 1,
+          upcomingDrawings: { $cond: [{ $gte: ['$calendar.startTime', new Date()] }, 1, 0] },
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          name: { $first: '$name' },
+          keyword: { $first: '$keyword' },
+          city: { $first: '$city' },
+          state: { $first: '$state' },
+          drawings: { $sum: '$upcomingDrawings' },
+        }
+      });
   }
 
   function insert(data) {

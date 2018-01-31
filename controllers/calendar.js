@@ -39,11 +39,17 @@ exports.post = (req, res) => {
 };
 
 exports.patch = (req, res) => {
-  console.log(req.body);
   const updateCalendar = req.body;
   const updateId = updateCalendar.id;
   calendarService.update(updateId, updateCalendar)
-    .then(calendar => res.send(calendar))
+    .then((calendar) => {
+      if (calendar.nModified === 1) {
+        updateCalendar._id = updateId;
+        res.send(updateCalendar);
+      } else {
+        res.send({ msg: 'no update' });
+      }
+    })
     .catch((err) => {
       console.log('oops');
       console.log(err);

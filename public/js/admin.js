@@ -51,7 +51,15 @@ $(document).ready(() => {
       contentType: 'application/json',
       success: (data) => {
         console.log(data);
-        $("").insertBefore(`#${type}Table .final-row`);
+        if (reqType === 'POST') {
+          let newRow;
+          if (type === 'venue') {
+            newRow = `<tr class='edit-row' data-section='venue'><td>${data.name} <input type='hidden' data-object='${data}' /></td><td>${data.keyword}</td><td>0</td></tr>`;
+          } else if (type === 'venue') {
+            newRow = `<tr class='edit-row' data-section='user'><td>${data.email} <input type='hidden' data-object='${data}' /></td></tr>`;
+          }
+          $(newRow).insertBefore(`#${type}Table .final-row`);
+        }
         $(this).closest('.modal').modal('toggle');
       },
       error: (error) => {

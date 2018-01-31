@@ -44,6 +44,7 @@ $('.modal').on('hidden.bs.modal', function () {
         $('#drawingOne').val('');
         $('#drawingTwo').val('');
         $('#drawingThree').val('');
+        $('#calIndex').val(-1);
     } else if (this.id === 'userModal') {
         console.log('hello');
         $('#email').val('');

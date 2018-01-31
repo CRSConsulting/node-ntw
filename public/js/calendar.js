@@ -8,13 +8,10 @@ $(document).ready(() => {
       end: moment(cal.endTime).utcOffset('-0800').toDate()
     };
   }
-  let frontendArray = [];
-  function generateFA() {
-    frontendArray = calendars.map((cal) => {
-      return formatForFrontend(cal);
-    });
-    return frontendArray;
-  }
+  let frontendArray = calendars.map((cal) => {
+    return formatForFrontend(cal);
+  });
+    
 
   function checkDrawingTimes() {
     const startTime = formatDate('startTime');
@@ -37,7 +34,6 @@ $(document).ready(() => {
     return moment($('#eventDate').val() + ' ' + $(`#${id}`).val(), 'M/D/YYYY h:mm A');
   }
 
-  
 
   $('#eventForm').validate({
     rules: {
@@ -78,8 +74,9 @@ $(document).ready(() => {
 
   function showModal(date) {
     const dateparts = date.split('T');
-    const formatDate = moment(dateparts[0]).format('M/D/YYYY');
-    const formatTime = moment(dateparts[1], 'HH:mm:ss').format('h:mm A');
+    const formatDate = moment(date).utcOffset('-0800').format('M/D/YYYY');
+    const formatTime = moment(date).utcOffset('-0800').format('h:mm A');
+    console.log('utc offset');
     $('#eventModal #eventDate').val(formatDate);
     $('#eventModal #startTime').val(formatTime);
     $('#eventModal').modal();
@@ -95,18 +92,21 @@ $(document).ready(() => {
     editable: true,
     eventLimit: true, // allow "more" link when too many events
     dayClick: (date, jsEvent, view) => {
-      if (view.name === 'agendaDay') {
-        showModal(date.format());
-      }
+      showModal(date.format());
     },
-    events: generateFA(),
+    events: frontendArray,
     eventClick: (calEvent, jsEvent, view) => {
-      const caldate = calendars.find((cal) => {
+      const backIndex = calendars.findIndex((cal) => {
         return cal.name === calEvent.title && moment(cal.startTime).isSame(calEvent.start);
       });
+      const caldate = calendars[backIndex];
+      const objIndex = frontendArray.findIndex((obj => obj.title === calEvent.title && moment(calEvent.start).isSame(obj.start)));
+
       $('#eventId').val(caldate._id);
       $('#eventName').val(caldate.name);
       $('#venue').val(caldate.venue);
+      $('#calIndex').val(objIndex);
+      $('#backIndex').val(backIndex);
       $(`input[name=announcer][value=${caldate.announcer}`).prop('checked', true);
       $(`input[name=seatGrab][value=${caldate.seatGrab}`).prop('checked', true);
       $(`input[name=thermometer][value=${caldate.thermometer}`).prop('checked', true);
@@ -147,9 +147,28 @@ $(document).ready(() => {
       ]
     };
     let reqType = 'POST';
-    if ($('#id').val() !== '' && $("#id").val() !== undefined) {
-      newForm.id = $('#id').val();
+    if ($('#eventId').val() !== '' && $('#eventId').val() !== undefined) {
+      const backIndex = $('#backIndex').val();
+      newForm.id = $('#eventId').val();
       reqType = 'PATCH';
+      console.log($('#eventId').val());
+      const oldEvent = calendars[backIndex];
+      if (newForm.name !== oldEvent.name) {
+        if (oldEvent.updateName) {
+          newForm.updateName = oldEvent.updateName;
+          newForm.updateName.push(oldEvent.name);
+        } else {
+          newForm.updateName = [oldEvent.name];
+        }
+      }
+      if (moment(newForm.startTime).diff(oldEvent.startTime, 'days') !== 0) {
+        if (oldEvent.updateDate) {
+          newForm.updateDate = oldEvent.updateDate;
+          newForm.updateDate.push(oldEvent.startTime);
+        } else {
+          newForm.updateDate = [oldEvent.startTime];
+        }
+      }
     }
     console.log(newForm);
     $.ajax({
@@ -158,16 +177,29 @@ $(document).ready(() => {
       type: reqType,
       contentType: 'application/json',
       success: (data) => {
+        if (data.msg) {
+          alert('The update was unable to be saved. Please contact an administrator.');
+          return;
+        }
         console.log(data);
         $(this).closest('.modal').modal('toggle');
         const newCalEvent = formatForFrontend(data);
         if (reqType === 'POST') {
-          $('#calendar').fullCalendar('renderEvent', newCalEvent);
+          frontendArray.push(newCalEvent);
         } else {
-          const objIndex = frontendArray.findIndex((obj => obj.title === newCalEvent.title && moment(newCalEvent.start).isSame(obj.start)));
+          console.log('it was a patch job');
+          const objIndex = $('#calIndex').val();
+          const backIndex = $('#backIndex').val();
+          console.log(objIndex);
+          console.log(frontendArray);
           //Update object's name property.
           frontendArray[objIndex] = newCalEvent;
+          calendars[backIndex] = data;
         }
+        $('#calendar').fullCalendar('removeEvents');
+        $('#calendar').fullCalendar('addEventSource', frontendArray);
+        $('#calendar').fullCalendar('refetchEvents');
+        console.log('attempted refetch');
       },
       error: (error) => {
         console.log(error);

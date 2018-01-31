@@ -13,14 +13,15 @@
       ul.nav.navbar-nav
         li(class=(title === 'Home') ? 'active' : undefined)
           a(href='/') Home
-        li(class=(title === 'API Examples') ? 'active' : undefined)
-          a(href='/api') Campaigns
-        li(class=(title === 'Reports') ? 'active' : undefined)
-          a(href='/api/report/venue') Venue Reports
-        li(class=(title === 'Contact') ? 'active' : undefined)
-          a(href='/contact') Contact
-        li
-          a(href='/status') Status
+        if user && user.perms.indexOf('reports') >= 0
+          li(class=(title === 'Reports') ? 'active' : undefined)
+           a(href='/api/report/venue') Venue Reports
+        if user && user.perms.indexOf('calendar') >= 0
+          li(class=(title === 'Calendar') ? 'active' : undefined)
+           a(href='/calendar') Calendar
+        if user && user.perms.indexOf('admin') >= 0
+          li(class=(title === 'Admin') ? 'active' : undefined)
+            a(href='/admin') Admin
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title === 'Login') ? 'active' : undefined)
@@ -28,10 +29,6 @@
         else
           li.dropdown(class=(title === 'Account Management') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
-              if user.profile.picture
-                img(src=user.profile.picture)
-              else
-                img(src=user.gravatar(60))
               span= user.profile.name || user.email || user.id
               i.caret
             ul.dropdown-menu

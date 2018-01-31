@@ -125,8 +125,13 @@ exports.patch = (req, res) => {
 
   const updateUser = req.body;
   const updateId = updateUser.id;
-  const user = userService.update(updateId, updateUser);
-  res.send(user);
+  userService.update(updateId, updateUser)
+    .then(user => res.send(user))
+    .catch((err) => {
+      console.log('oops');
+      console.log(err);
+      res.send(err);
+    });
 
 };
 /**

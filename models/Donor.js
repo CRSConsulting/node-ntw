@@ -32,8 +32,8 @@ const donorSchema = new Schema({
   vet_related: String,
   thermometer: Boolean,
   announcer: Boolean,
-  update_event_date: Date,
-  change_artist: String,
+  update_event_date: [Date],
+  change_artist: [String],
   cc_status: String
 }, {
   collection: 'donor',

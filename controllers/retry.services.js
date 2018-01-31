@@ -13,7 +13,7 @@ function retryService(options) {
   if (!options.modelService) {
     throw new Error('Options.modelService is required');
   }
-
+ 
   Retry = options.modelService;
 
 

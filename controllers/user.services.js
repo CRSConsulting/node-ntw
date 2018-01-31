@@ -2,6 +2,8 @@ const {
   ReadPreference,
 } = require('mongodb');
 
+const bcrypt = require('bcrypt-nodejs');
+const crypto = require('crypto');
 
 module.exports = userService;
 
@@ -34,20 +36,24 @@ function userService(options) {
 
   function update(id, data) {
     delete data._id;
-    User.findById(id, (err, doc) => {
-      console.log('imhere');
-      console.log(doc);
-      if (err) {
-        console.log(err);
-        return err;
-      }
-      doc.password = data.password || doc.password;
-      doc.perms = data.perms;
-      doc.save((err, u) => {
-        if (err) { console.log(err); }
-        return u;
+    if (data.password) {
+      console.log('password update');
+      bcrypt.genSalt(10, (err, salt) => {
+        if (err) {
+          console.log(err);
+          return err;
+        }
+        bcrypt.hash(data.password, salt, null, (err, hash) => {
+          if (err) {
+            console.log(err);
+            return err;
+          }
+          data.password = hash;
+          return User.update({ _id: id }, data).exec();
+        });
       });
-    });
+    }
+    return User.update({ _id: id }, data).exec();
   }
 
   function getOne(queryCondition) {

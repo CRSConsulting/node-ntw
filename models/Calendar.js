@@ -21,8 +21,8 @@ const calendarSchema = new Schema({
     prizeType: String,
     prizeAmount: Number
   }],
-  updateName: String,
-  updateDate: Date,
+  updateName: [String],
+  updateDate: [Date],
 }, {
   collection: 'calendar',
   read: 'nearest',

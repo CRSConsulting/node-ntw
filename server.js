@@ -185,7 +185,7 @@ app.get('/denied', homeController.denied);
 app.get('/donorTransform', donorController.transformAll);
 // app.get('/reports', passportConfig.isAuthenticated, requireRole('reports'), homeController.reports);
 app.get('/calendar', passportConfig.isAuthenticated, requireRole('calendar'), calendarController.index);
-app.get('/admin', passportConfig.isAuthenticated, adminController.index);
+app.get('/admin', passportConfig.isAuthenticated, requireRole('admin'), adminController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);

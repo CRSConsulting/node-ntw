@@ -18,7 +18,7 @@ const Promise = require('bluebird');
 
 exports.index = (req, res) => {
   const adminData = adminService.get();
-  const venues = venueService.getAll();
+  const venues = venueService.getAllWithDrawings();
 
   const users = userService.getAll();
   const states = venueService.getStates();
