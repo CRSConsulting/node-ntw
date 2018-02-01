@@ -63,6 +63,7 @@ function reportService(options) {
             keywordChances: { $sum: 1 },
           }
         },
+        { $sort: { keywordAmount: -1 } },
         {
           $group: {
             _id: {
@@ -216,8 +217,10 @@ function reportService(options) {
         {
           $group: {
             _id: {
-              prize_time: '$prize_time',
+              prize_hour: { $hour: '$prize_time' },
+              prize_minute: { $minute: '$prize_time' }
             },
+            prize_time: { $first: '$prize_time' },
             totalAmount: { $sum: '$donation_amount' },
             totalEntries: { $sum: 1 },
           }

@@ -67,10 +67,10 @@ exports.time = (req, res) => {
   }
   reportService.getTimeReportData(startTime, endTime)
     .then((reports) => {    
+      console.log(reports);
       const display = { formAction: '/api/report/time', title: 'Time', columnOne: 'Drawing Start Time', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
       const items = reports.map((report) => {
-        const mom = moment(report._id.prize_time);
-        const columnOne = donorService.convertHoursToTime(report._id.prize_time.getUTCHours(), mom.minutes());
+        const columnOne = donorService.convertHoursToTime(report._id.prize_hour, report._id.prize_minute);
         const columnTwo = `$${report.totalAmount}`;
         const columnThree = `${report.totalEntries}`;
         return {
@@ -195,9 +195,9 @@ exports.donor = (req, res) => {
       const items = reports.map((report) => {
         console.log(report);
         const columnTwo = report.drawings.reduce((str, draw) => {
-          str += `Prize ${draw.drawing_number}: $${draw.prize_amount} ${draw.prize_type},`;
+          str += `Prize ${draw.drawing_number}: $${draw.prize_amount} ${draw.prize_type}, `;
           return str;
-        }, '').slice(0, -1);
+        }, '').slice(0, -2);
         return {
           columnOne: `${report.first_name} ${report.last_name} (${report._id.email})`,
           columnTwo,
