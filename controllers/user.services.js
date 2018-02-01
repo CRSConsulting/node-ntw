@@ -34,8 +34,9 @@ function userService(options) {
     return user.save();
   }
 
-  function update(id, data) {
+  function update(id, data, callback) {
     delete data._id;
+    delete data.confirmPassword;
     if (data.password) {
       console.log('password update');
       bcrypt.genSalt(10, (err, salt) => {
@@ -48,12 +49,16 @@ function userService(options) {
             console.log(err);
             return err;
           }
+          console.log('made it here');
+          console.log(hash);
           data.password = hash;
-          return User.update({ _id: id }, data).exec();
+          console.log(data);
+          return callback(User.update({ _id: id }, data).exec());
         });
       });
+    } else {
+      return callback(User.update({ _id: id }, data).exec());
     }
-    return User.update({ _id: id }, data).exec();
   }
 
   function getOne(queryCondition) {

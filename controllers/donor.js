@@ -16,7 +16,7 @@ const calendarService = require('./calendar.services')({
 
 exports.transformAll = (req, res) => {
   const calendars = calendarService.getAllWithVenues();
-  const mobiles = mobilesService.getAll();
+  const mobiles = mobilesService.getAllUnmoved();
   const uniqueMobiles = mobilesService.getAllGroupedByEmailAndDate();
   Promise.all([mobiles, uniqueMobiles, calendars])
     .then((all) => {
@@ -30,10 +30,11 @@ exports.transformAll = (req, res) => {
       return Promise.all([donors, all[1]]);
     })
     .then((all) => {
-      // const mobiles = mobilesService.deleteAll(all[1]);
+      const mobiles = mobilesService.updateAll(all[1]);
       return Promise.all([all[0], mobiles]);
     })
     .then((all) => {
+      console.log(all[1]);
       res.send(all[0]);
     })
     .catch((err) => {

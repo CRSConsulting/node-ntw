@@ -25,7 +25,7 @@ function donorService(options) {
   function transform(mobiles, uniqueMobiles, calendars) {
     console.log(mobiles.length);
     const donors = [];
-    const deleteIds = [];
+    const updateIds = [];
     for (let i = 0; i < uniqueMobiles.length; i += 1) { // loop through unique combinations of email and keyword
       const baseKey = uniqueMobiles[i]._id.keyword.replace(/[0-9]/g, ''); // get base keyword
       const specificCalendar = calendars.find(cal => cal.venue.keyword === baseKey && moment(uniqueMobiles[i]._id.date).diff(cal.startTime, 'days') === 0); // find event based on base keyword
@@ -54,7 +54,7 @@ function donorService(options) {
           chances += (zeroEntries.length < 20 ? zeroEntries.length : 20); // make sure only 20 total nonpaid entries get through
           const multipleEntries = chances !== 1;
           for (let x = 0; x < specificMobiles.length; x += 1) {
-            deleteIds.push(new ObjectId(specificMobiles[x]._id));
+            updateIds.push(new ObjectId(specificMobiles[x]._id));
 
             donors.push({
               keyword: specificMobiles[x].keyword,
@@ -86,14 +86,14 @@ function donorService(options) {
               vet_related: specificMobiles[x].related_to_a_veteran,
               thermometer: specificCalendar.thermometer,
               update_event_date: calUpdateDate,
-              change_artist: specificCalendar.updateName ? specificCalendar.updateName : '',
+              change_artist: specificCalendar.updateName ? specificCalendar.updateName : [],
               cc_status: 'Y',
             });
           }
         }
       }
     }
-    return [donors, deleteIds];
+    return [donors, updateIds];
   }
 
   function insertAll(data) {
@@ -109,6 +109,8 @@ function donorService(options) {
     if (hour > 12) {
       UTCHour = hour - 12;
       UTCampm = 'pm';
+    } else if (hour === 0) {
+      UTCHour = 12;
     }
     let timeMinute = minute;
     if (minute < 10) {
@@ -122,6 +124,8 @@ function donorService(options) {
       ESTampm = 'am';
     } else if (ESTHour > 12) {
       ESTHour -= 12;
+    } else if (ESTHour === 0) {
+      ESTHour = 12;
     }
     return `${ESTHour}:${timeMinute}${ESTampm} EST (${UTCHour}:${timeMinute}${UTCampm} UTC)`;
   }

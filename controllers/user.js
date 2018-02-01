@@ -87,7 +87,6 @@ exports.postSignup = (req, res, next) => {
     req.flash('errors', errors);
     res.send(errors);
   }
-  console.log('we here');
   const user = new User({
     email: req.body.email,
     password: req.body.password,
@@ -98,11 +97,9 @@ exports.postSignup = (req, res, next) => {
       console.log(err);
       res.send(err);
     }
-    console.log('hello here');
     if (existingUser) {
       return res.send({ msg: 'Account with that email address already exists.' });
     }
-    console.log('hiya');
     user.save((err, u) => {
       if (err) { 
         console.log(err);
@@ -133,14 +130,9 @@ exports.patch = (req, res) => {
 
   const updateUser = req.body;
   const updateId = updateUser.id;
-  userService.update(updateId, updateUser)
-    .then(user => res.send(user))
-    .catch((err) => {
-      console.log('oops');
-      console.log(err);
-      res.send(err);
-    });
-
+  userService.update(updateId, updateUser, (user) => {
+    res.send(req.body);
+  });
 };
 /**
  * GET /account

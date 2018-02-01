@@ -54,6 +54,7 @@ const mobileSchema = new Schema({
   payment_gateway: String,
   are_you_a_veteran: String,
   raffle_count: String,
+  moved: Boolean
 }, {
   collection: 'mobileCause',
   read: 'nearest',

@@ -6,13 +6,14 @@ block content
         .spacer
         #row-data-table.row
             #div-table.col-md-12
-                #first
+              form(action="#{display.formAction}", method="post")
+                .col-md-3
                     .dropdown.dropdown-first
-                    h4#report-title Filter By Report
-                    button#dropdownMenu1.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='true')
+                    h4 Filter By Report
+                      button.form-control.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='true')
                         | Report Type
                         span.caret
-                    ul.dropdown-menu.drop-down-modal1(aria-labelledby='dropdownMenu1')
+                      ul.dropdown-menu.drop-down-modal1(aria-labelledby='dropdownMenu1')
                         li
                             a(href='/api/report/venue') Venues
                         li
@@ -25,16 +26,16 @@ block content
                             a(href='/api/report/entry') Entry Time Average
                         li
                             a(href='/api/report/donor') Donors (Multiple Entry)
-            form(action="#{display.formAction}", method="post")
-                #second
+                .col-md-3
                     h4 Start Date
                         #datetimepicker1.input-group.date
                             input#startDate.form-control(type='text', name='startTime')
-                #third
+                .col-md-3
                     h4 End Date
                         #datetimepicker2.input-group.date
                             input#endDate.form-control(type='text', name='endTime')
-                        button#btn-run.btn-primary.btn.btn-default(type='button') Run
+                .col-md-3(style='padding-top:27px')    
+                    input.btn-save.btn-primary.btn(type='submit',value='Run')
         table#myTable.table.table-hover.table-striped.table-bordered
             thead
                 tr

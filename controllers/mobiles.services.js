@@ -27,22 +27,27 @@ function mobilesService(options) {
 
   return {
     getAll,
-    deleteAll,
+    updateAll,
     generateTimer,
     getRaffleContestants,
     raffleComplete,
     addWeightToRaffle,
     selectFiveWinners,
     getAllGroupedByEmailAndDate,
-    findRunningRaffle
+    findRunningRaffle,
+    getAllUnmoved
   };
 
   function getAll() {
     return Mobile.find({}).limit(1000).read(ReadPreference.NEAREST);
   }
- 
-  function deleteAll(removeIds) {
-    return Mobile.find({ _id: { $in: removeIds } });
+
+  function getAllUnmoved() {
+    return Mobile.find({ moved: { $exists: false } }).read(ReadPreference.NEAREST);
+  }
+
+  function updateAll(removeIds) {
+    return Mobile.update({ _id: { $in: removeIds } }, { moved: true }, { multi: true });
   }
 
   // function getDups() {

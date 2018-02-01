@@ -57,8 +57,10 @@ function reportService(options) {
               prize_amount: '$prize_amount',
               drawing_number: '$drawing_number',
             },
+            first_name: { $first: '$first_name' },
+            last_name: { $first: '$last_name' },
             keywordAmount: { $sum: '$donation_amount' },
-            keywordChances: { $first: '$chances' },
+            keywordChances: { $sum: 1 },
           }
         },
         {
@@ -76,10 +78,13 @@ function reportService(options) {
 
               },
             },
+            first_name: { $first: '$first_name' },
+            last_name: { $first: '$last_name' },
             totalAmount: { $sum: '$keywordAmount' },
             totalEntries: { $sum: '$keywordChances' }
           },
         },
+        { $sort: { totalAmount: -1 } }
       ]);
   }
 
@@ -162,25 +167,12 @@ function reportService(options) {
               year: { $year: '$event_start' },
               month: { $month: '$event_start' },
               day: { $dayOfMonth: '$event_start' },
-              email: '$email'
-            },
-
-            chances: { $first: '$chances' }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              venue: '$_id.venue',
-              artist: '$_id.artist',
-              year: '$_id.year',
-              month: '$_id.month',
-              day: '$_id.day'
             },
             totalAmount: { $sum: '$donation_amount' },
-            totalEntries: { $sum: '$chances' }
+            totalEntries: { $sum: 1 }
           }
         },
+        { $sort: { totalAmount: -1 } }
       ]);
   }
 
@@ -201,23 +193,12 @@ function reportService(options) {
               prize_type: '$prize_type',
               prize_amount: '$prize_amount',
               drawing_number: '$drawing_number',
-              email: '$email'
             },
-            userAmounts: { $sum: '$donation_amount' },
-            chances: { $first: '$chances' },
+            totalAmount: { $sum: '$donation_amount' },
+            totalEntries: { $sum: 1 },
           }
         },
-        {
-          $group: {
-            _id: {
-              prize_type: '$prize_type',
-              prize_amount: '$prize_amount',
-              drawing_number: '$drawing_number',
-            },
-            totalAmount: { $sum: '$userAmounts' },
-            totalEntries: { $sum: '$chances' }
-          }
-        },
+        { $sort: { totalAmount: -1 } }
       ]);
   }
 
@@ -236,22 +217,12 @@ function reportService(options) {
           $group: {
             _id: {
               prize_time: '$prize_time',
-              email: '$email'
             },
-            userAmounts: { $sum: '$donation_amount' },
-            chances: { $first: '$chances' },
+            totalAmount: { $sum: '$donation_amount' },
+            totalEntries: { $sum: 1 },
           }
         },
-        {
-          $group: {
-            _id: {
-              prize_time: '$prize_time',
-              drawing_number: '$drawing_number',
-            },
-            totalAmount: { $sum: '$userAmounts' },
-            totalEntries: { $sum: '$chances' }
-          }
-        },
+        { $sort: { totalAmount: -1 } }
       ]);
   }
 
@@ -261,6 +232,11 @@ function reportService(options) {
   function getVenueReportData(start, end) {
     return Donor.aggregate(
       [
+        {
+          $match: {
+            donation_date: { $gte: start, $lte: end }
+          }
+        },
         {
           $group: {
             _id: {
@@ -272,7 +248,7 @@ function reportService(options) {
               drawing_number: '$drawing_number',
             },
             keywordAmount: { $sum: '$donation_amount' },
-            keywordChances: { $first: '$chances' },
+            keywordChances: { $sum: 1 },
           }
         },
         {
@@ -295,6 +271,7 @@ function reportService(options) {
             totalAmount: { $sum: '$keywordAmount' },
           },
         },
+        { $sort: { totalAmount: -1 } }
       ]);
   }
 }

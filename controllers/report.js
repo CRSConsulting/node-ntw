@@ -26,18 +26,24 @@ const moment = require('moment');
 // };
 
 exports.venue = (req, res) => {
-  const startTime = req.body.startTime || new Date(0);
-  const endTime = req.body.endTime || new Date();
-  donorService.getVenueReportData(startTime, endTime)
+  let startTime = new Date(0);
+  let endTime = new Date();
+  if (req.body.startTime) {
+    startTime = new Date(req.body.startTime);
+  }
+  if (req.body.endTime) {
+    endTime = new Date(req.body.endTime);
+  }
+  reportService.getVenueReportData(startTime, endTime)
     .then((reports) => {
       const display = { formAction: '/api/report/venue', title: 'Venues', columnOne: 'Venue Name', columnTwo: 'Total Monies Raised', columnThree: 'Best Performing Prize', columnFour: null };
 
       const items = reports.map((report) => {
         console.log(report);
-        const columnThree = `Prize ${report.drawing[0].drawing_number}: $${report.drawing[0].prize_amount} ${report.drawing[0].prize_type},`;
+        const columnThree = `Prize ${report.drawings[0].drawing_number}: $${report.drawings[0].prize_amount} ${report.drawings[0].prize_type}`;
         return {
           columnOne: `${report._id.venue} - ${report._id.venue_city}, ${report._id.venue_state}`,
-          columnTwo: `${report.totalAmount}`,
+          columnTwo: `$${report.totalAmount}`,
           columnThree
         };
       });
@@ -45,19 +51,26 @@ exports.venue = (req, res) => {
         items, display
       });
     }).catch((err) => {
+      console.log(err);
       res.status(500).send(err);
     });
 };
 
 exports.time = (req, res) => {
-  const startTime = req.body.startTime || new Date(0);
-  const endTime = req.body.endTime || new Date();
-  donorService.getTimeReportData(startTime, endTime)
+  let startTime = new Date(0);
+  let endTime = new Date();
+  if (req.body.startTime) {
+    startTime = new Date(req.body.startTime);
+  }
+  if (req.body.endTime) {
+    endTime = new Date(req.body.endTime);
+  }
+  reportService.getTimeReportData(startTime, endTime)
     .then((reports) => {    
       const display = { formAction: '/api/report/time', title: 'Time', columnOne: 'Drawing Start Time', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
       const items = reports.map((report) => {
         const mom = moment(report._id.prize_time);
-        const columnOne = donorService.convertHoursToTime(mom.hours(), mom.minutes());
+        const columnOne = donorService.convertHoursToTime(report._id.prize_time.getUTCHours(), mom.minutes());
         const columnTwo = `$${report.totalAmount}`;
         const columnThree = `${report.totalEntries}`;
         return {
@@ -70,13 +83,20 @@ exports.time = (req, res) => {
         items, display
       });
     }).catch((err) => {
+      console.log(err);
       res.status(500).send(err);
     });
 };
 
 exports.prize = (req, res) => {
-  const startTime = req.body.startTime || new Date(0);
-  const endTime = req.body.endTime || new Date();
+  let startTime = new Date(0);
+  let endTime = new Date();
+  if (req.body.startTime) {
+    startTime = new Date(req.body.startTime);
+  }
+  if (req.body.endTime) {
+    endTime = new Date(req.body.endTime);
+  }
   reportService.getPrizeReportData(startTime, endTime)
     .then((reports) => {
       const display = { formAction: '/api/report/prize', title: 'Raffle Prizes', columnOne: 'Prize # and Type', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
@@ -99,8 +119,16 @@ exports.prize = (req, res) => {
 };
 
 exports.events = (req, res) => {
-  const startTime = req.body.startTime || new Date(0);
-  const endTime = req.body.endTime || new Date();
+  let startTime = new Date(0);
+  let endTime = new Date();
+  if (req.body.startTime) {
+    startTime = new Date(req.body.startTime);
+  }
+  if (req.body.endTime) {
+    endTime = new Date(req.body.endTime);
+  }
+  console.log(startTime);
+  console.log(endTime);
   reportService.getEventReportData(startTime, endTime)
     .then((reports) => {
       const items = reports.map((report) => {
@@ -120,14 +148,20 @@ exports.events = (req, res) => {
     });
 };
 exports.entry = (req, res) => {
-  const startTime = req.body.startTime || new Date(0);
-  const endTime = req.body.endTime || new Date();
+  let startTime = new Date(0);
+  let endTime = new Date();
+  if (req.body.startTime) {
+    startTime = new Date(req.body.startTime);
+  }
+  if (req.body.endTime) {
+    endTime = new Date(req.body.endTime);
+  }
   reportService.getEntryTimeReportData(startTime, endTime)
     .then((reports) => {
       const items = reports.map((report) => {
         const columnOne = `Prize ${report._id.drawing_number}: $${report._id.prize_amount} ${report._id.prize_type}`;
         const mom = moment(report._id.prize_time);
-        const columnTwo = donorService.convertHoursToTime(mom.hours(),mom.minutes());
+        const columnTwo = donorService.convertHoursToTime(report._id.prize_time.getUTCHours(), mom.minutes());
         const columnThree = donorService.convertHoursToTime(report.triggerAvgHours, report.triggerAvgMinutes);
         const columnFour = donorService.convertHoursToTime(report.entryAvgHours, report.entryAvgMinutes);
         return {
@@ -147,8 +181,14 @@ exports.entry = (req, res) => {
     });
 };
 exports.donor = (req, res) => {
-  const startTime = req.body.startTime || new Date(0);
-  const endTime = req.body.endTime || new Date();
+  let startTime = new Date(0);
+  let endTime = new Date();
+  if (req.body.startTime) {
+    startTime = new Date(req.body.startTime);
+  }
+  if (req.body.endTime) {
+    endTime = new Date(req.body.endTime);
+  }
   reportService.getDonorReportData(startTime, endTime)
     .then((reports) => {
       const display = { formAction: '/api/report/donor', title: 'Donors (Multiple Entry)', columnOne: 'Donor Name', columnTwo: 'Prize # and Type in Order of Weight', columnThree: 'Total Monies Collected', columnFour: 'Total Number of Entries' };
@@ -159,9 +199,9 @@ exports.donor = (req, res) => {
           return str;
         }, '').slice(0, -1);
         return {
-          columnOne: `${report._id.email}`,
+          columnOne: `${report.first_name} ${report.last_name} (${report._id.email})`,
           columnTwo,
-          columnThree: `${report.totalAmount}`,
+          columnThree: `$${report.totalAmount}`,
           columnFour: `${report.totalEntries}`
         }
       });

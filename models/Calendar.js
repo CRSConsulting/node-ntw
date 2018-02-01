@@ -19,7 +19,7 @@ const calendarSchema = new Schema({
     keyword: String,
     used: { type: Boolean, default: false },
     prizeType: String,
-    prizeAmount: Number
+    prizeAmount: Number,
   }],
   updateName: [String],
   updateDate: [Date],
