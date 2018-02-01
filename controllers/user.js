@@ -87,19 +87,27 @@ exports.postSignup = (req, res, next) => {
     req.flash('errors', errors);
     res.send(errors);
   }
-
+  console.log('we here');
   const user = new User({
     email: req.body.email,
     password: req.body.password,
     perms: req.body.perms
   });
   User.findOne({ email: req.body.email }, (err, existingUser) => {
-    if (err) { return next(err); }
+    if (err) {
+      console.log(err);
+      res.send(err);
+    }
+    console.log('hello here');
     if (existingUser) {
       return res.send({ msg: 'Account with that email address already exists.' });
     }
+    console.log('hiya');
     user.save((err, u) => {
-      if (err) { return next(err); }
+      if (err) { 
+        console.log(err);
+        res.send(err); 
+      }
       res.send(u);
     });
   });
