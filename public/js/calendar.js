@@ -186,6 +186,7 @@ $(document).ready(() => {
         const newCalEvent = formatForFrontend(data);
         if (reqType === 'POST') {
           frontendArray.push(newCalEvent);
+          calendars.push(data);
         } else {
           console.log('it was a patch job');
           const objIndex = $('#calIndex').val();

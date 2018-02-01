@@ -37,6 +37,7 @@ $('.modal').on('hidden.bs.modal', function () {
         $('#venueId').val('');
     } else if (this.id === 'eventModal') {
         $('#eventName').val('');
+        $('#eventId').val('');
         $('#venue').val('');
         $('input[name=announcer][value=false').prop('checked', true);
         $('input[name=seatGrab][value=false').prop('checked', true);
