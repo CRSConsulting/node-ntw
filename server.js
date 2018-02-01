@@ -186,6 +186,7 @@ app.get('/donorTransform', donorController.transformAll);
 // app.get('/reports', passportConfig.isAuthenticated, requireRole('reports'), homeController.reports);
 app.get('/calendar', passportConfig.isAuthenticated, requireRole('calendar'), calendarController.index);
 app.get('/admin', passportConfig.isAuthenticated, adminController.index);
+// app.get('/admin', adminController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
@@ -198,7 +199,6 @@ app.post('/contact', contactController.postContact);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
 app.post('/account/profile', passportConfig.isAuthenticated, userController.postUpdateProfile);
 app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
-app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
 
 /**
@@ -256,13 +256,29 @@ app.post('/api/report/events', passportConfig.isAuthenticated, requireRole('repo
 app.post('/api/report/entry', passportConfig.isAuthenticated, requireRole('reports'), reportController.entry);
 app.post('/api/report/donor', passportConfig.isAuthenticated, requireRole('reports'), reportController.donor);
 // app.post('/api/user/save', userController.post);
+
+/*
+new objects
+*/
 app.post('/api/venue/save', venueController.post);
 app.post('/api/calendar/save', calendarController.post);
 app.post('/api/user/save', userController.postSignup);
 
+
+/*
+edit objects
+*/
 app.patch('/api/venue/save', venueController.patch);
 app.patch('/api/calendar/save', calendarController.patch);
 app.patch('/api/user/save', userController.patch);
+
+/*
+delete objects
+*/
+app.delete('/api/venue/save', venueController.delete);
+app.delete('/api/calendar/save', calendarController.delete);
+app.delete('/api/user/save', userController.delete);
+
 /**
  * Error Handler.
  */

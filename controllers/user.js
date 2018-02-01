@@ -24,6 +24,7 @@ exports.getLogin = (req, res) => {
  * Sign in using email and password.
  */
 exports.postLogin = (req, res, next) => {
+  console.log('here');
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
@@ -127,13 +128,19 @@ exports.patch = (req, res) => {
     res.send(errors);
   }
   console.log(req.body);
-
+  if (req.body.password === '') {
+    delete req.body.password;
+    delete req.body.confirmPassword;
+  }
   const updateUser = req.body;
   const updateId = updateUser.id;
   userService.update(updateId, updateUser, (user) => {
     res.send(req.body);
   });
 };
+
+
+
 /**
  * GET /account
  * Profile page.
@@ -210,13 +217,16 @@ exports.postUpdatePassword = (req, res, next) => {
  * POST /account/delete
  * Delete user account.
  */
-exports.postDeleteAccount = (req, res, next) => {
-  User.remove({ _id: req.user.id }, (err) => {
-    if (err) { return next(err); }
-    req.logout();
-    req.flash('info', { msg: 'Your account has been deleted.' });
-    res.redirect('/');
-  });
+exports.delete = (req, res) => {
+  if (req.body.id) {
+    User.remove({ _id: req.body.id }, (err, user) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      }
+      res.send(user);
+    });
+  }
 };
 
 /**

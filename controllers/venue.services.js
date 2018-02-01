@@ -41,7 +41,10 @@ function venueService(options) {
           }
       },
       {
-        $unwind: '$calendars'
+        $unwind: {
+          path: '$calendars',
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $project: {
@@ -50,7 +53,7 @@ function venueService(options) {
           keyword: 1,
           city: 1,
           state: 1,
-          upcomingDrawings: { $cond: [{ $gte: ['$calendar.startTime', new Date()] }, 1, 0] },
+          upcomingDrawings: { $cond: [{ $gte: ['$calendars.startTime', new Date()] }, 1, 0] },
         }
       },
       {
@@ -82,7 +85,7 @@ function venueService(options) {
   }
 
   function remove(id) {
-    return Venue.remove({_id: id});
+    return Venue.remove({ _id: id });
   }
 
   function getStates() {

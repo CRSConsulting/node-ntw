@@ -7,9 +7,8 @@
         th Upcoming Events
     tbody
       each venue in venues
-        tr.edit-row(data-section='venue')
+        tr.edit-row(data-section='venue', data-id=venue._id)
           td #{venue.name}
-            input(type='hidden' data-object=venue)
           td #{venue.keyword} 
           td #{venue.drawings}
       tr.final-row

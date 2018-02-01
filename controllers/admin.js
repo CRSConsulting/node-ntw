@@ -22,7 +22,7 @@ exports.index = (req, res) => {
 
   const users = userService.getAll();
   const states = venueService.getStates();
-  Promise.all([adminData, venues, users,states])
+  Promise.all([adminData, venues, users, states])
     .then((alldata) => {
       console.log(alldata);
       res.render('pages/admin', {
@@ -31,6 +31,8 @@ exports.index = (req, res) => {
         adminData: alldata[0],
         users: alldata[2],
         venues: alldata[1],
+        userFrontend: JSON.stringify(alldata[2]),
+        venueFrontend: JSON.stringify(alldata[1]),
         states: alldata[3]
       });
     });

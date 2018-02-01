@@ -85,4 +85,8 @@
                   each time in times
                     option #{time}
         .modal-footer 
-            input.btn-save.btn-primary.btn(type='button',section='calendar', value='Save')
+          .row
+            .col-md-6(style='text-align:left')
+              input.btn-delete.btn-danger.btn-primary.btn(type='button',section='calendar', value='Delete',style='display:none')
+            .col-md-6
+              input.btn-save.btn-success.btn-primary.btn(type='button',section='calendar', value='Save')

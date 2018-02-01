@@ -56,3 +56,17 @@ exports.patch = (req, res) => {
       res.send(err);
     });
 };
+
+exports.delete = (req, res) => {
+  console.log(req.body);
+  const deleteId = req.body.id;
+  calendarService.remove(deleteId)
+    .then((calendar) => {
+      res.send(calendar);
+    })
+    .catch((err) => {
+      console.log('oops');
+      console.log(err);
+      res.send(err);
+    });
+};

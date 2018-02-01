@@ -107,6 +107,7 @@ $(document).ready(() => {
       $('#venue').val(caldate.venue);
       $('#calIndex').val(objIndex);
       $('#backIndex').val(backIndex);
+      $('.hidden').show();
       $(`input[name=announcer][value=${caldate.announcer}`).prop('checked', true);
       $(`input[name=seatGrab][value=${caldate.seatGrab}`).prop('checked', true);
       $(`input[name=thermometer][value=${caldate.thermometer}`).prop('checked', true);
@@ -146,9 +147,16 @@ $(document).ready(() => {
         },
       ]
     };
+    const backIndex = $('#backIndex').val();
+    const conflictingEvent = calendars.find((calendar, index) => {
+      return index !== backIndex && calendar.venue === newForm.venue && (moment(calendar.startTime).isSame(newForm.startTime) || moment(calendar.startTime).isBetween(newForm.startTime, newForm.endTime) || moment(newForm.startTime).isBetween(calendar.startTime, calendar.endTime));
+    });
+    if (conflictingEvent) {
+      alert(`The event ${conflictingEvent.name} is already ongoing at the venue you have selected at the times you have selected. Please choose a different venue or start time for this event.`);
+      return;
+    }
     let reqType = 'POST';
     if ($('#eventId').val() !== '' && $('#eventId').val() !== undefined) {
-      const backIndex = $('#backIndex').val();
       newForm.id = $('#eventId').val();
       reqType = 'PATCH';
       console.log($('#eventId').val());

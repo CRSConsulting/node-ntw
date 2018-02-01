@@ -26,4 +26,8 @@
                     each state in states
                         option #{state} 
         .modal-footer
-            input.btn-save.btn-primary.btn(type='button',section='venue', value='Save')
+          .row
+            .col-md-6(style='text-align:left')
+              input.btn-delete.btn-danger.btn-primary.btn(type='button',section='venue', value='Delete', style='display:none')
+            .col-md-6
+              input.btn-save.btn-success.btn-primary.btn(type='button',section='venue', value='Save')

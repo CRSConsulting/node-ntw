@@ -16,4 +16,7 @@ block content
         include ../partials/admin.venues.pug
     include ../modals/venueModal
     include ../modals/userModal
+  script(type='text/javascript').
+    let users = !{userFrontend}
+    let venues = !{venueFrontend}
   script(src='/js/admin.js') 

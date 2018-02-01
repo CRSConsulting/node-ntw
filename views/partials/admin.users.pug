@@ -5,9 +5,8 @@
         th User
     tbody
       each user in users
-        tr.edit-row(data-section='user')
+        tr.edit-row(data-section='user', data-id=user._id)
           td #{user.email}
-            input(type='hidden' data-object=user)
       tr.final-row
         td
           button#addUser.btn-add.btn-primary.btn(type='button',data-toggle='modal', data-target='#userModal') Add New User
