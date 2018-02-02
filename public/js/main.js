@@ -32,7 +32,7 @@ $('.modal').on('hidden.bs.modal', function () {
     $(this).find('input[type=text], input[type=email], input[typepassword], select').val('');
     $(this).find('input[type=text], input[type=email], input[typepassword], select').removeAttr('readonly');
     $(this).find('input[type=radio], input[type=checkbox]').prop('checked', false);
-    $('.error').hide();
+    $('label.error').hide();
     if (this.id === 'venueModal') {
         $('#venueName').val('');
         $('#venueCity').val('');
