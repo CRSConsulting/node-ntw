@@ -2,7 +2,6 @@
 
 $(document).ready(() => {
   function formatForFrontend(cal) {
-    console.log(moment(cal.startTime).utcOffset('-0800').toDate());
     return {
       title: cal.name,
       start: moment(cal.startTime).utcOffset('-0800').toDate(),
@@ -78,8 +77,7 @@ $(document).ready(() => {
   }
 
   function showModal(date) {
-    const dateparts = date.split('T');
-    const formatDate = moment(date).utcOffset('-0800').format('M/D/YYYY');
+    const formatDate = moment(date).format('M/D/YYYY');
     const time = formatTime(date);
     $('#eventModal #eventDate').val(formatDate);
     $('#eventModal #startTime').val(time);
