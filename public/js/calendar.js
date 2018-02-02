@@ -81,8 +81,6 @@ $(document).ready(() => {
     const dateparts = date.split('T');
     const formatDate = moment(date).utcOffset('-0800').format('M/D/YYYY');
     const time = formatTime(date);
-    console.log(date);
-    console.log('utc offset', formatDate);
     $('#eventModal #eventDate').val(formatDate);
     $('#eventModal #startTime').val(time);
     $('#eventModal').modal();
@@ -188,8 +186,9 @@ $(document).ready(() => {
     };
     const backIndex = $('#backIndex').val();
     const conflictingEvent = calendars.find((calendar, index) => {
-      return index !== backIndex && calendar.venue === newForm.venue && (moment(calendar.startTime).isSame(newForm.startTime) || moment(calendar.startTime).isBetween(newForm.startTime, newForm.endTime) || moment(newForm.startTime).isBetween(calendar.startTime, calendar.endTime));
+      return index !== parseInt(backIndex) && calendar.venue === newForm.venue && (moment(calendar.startTime).isSame(newForm.startTime) || moment(calendar.startTime).isBetween(newForm.startTime, newForm.endTime) || moment(newForm.startTime).isBetween(calendar.startTime, calendar.endTime));
     });
+    console.log(conflictingEvent);
     if (conflictingEvent) {
       alert(`The event ${conflictingEvent.name} is already ongoing at the venue you have selected at the times you have selected. Please choose a different venue or start time for this event.`);
       return;
