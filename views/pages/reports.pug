@@ -3,10 +3,11 @@ extends ../layout
 block content
     .container
         h2 Reports: #{display.title}
+        h4  #{display.dateString}
         .spacer
         #row-data-table.row
             #div-table.col-md-12
-              form(action="#{display.formAction}", method="post")
+              form#dateForm(action="#{display.formAction}", method="post")
                 .col-md-3
                     .dropdown.dropdown-first
                     h4 Filter By Report
@@ -35,7 +36,7 @@ block content
                         #datetimepicker2.input-group.date
                             input#endDate.form-control(type='text', name='endTime')
                 .col-md-3(style='padding-top:27px')    
-                    input.btn-save.btn-primary.btn(type='submit',value='Run')
+                    input#btn-dates.btn-save.btn-primary.btn(type='button',value='Run')
         table#myTable.table.table-hover.table-striped.table-bordered
             thead
                 tr

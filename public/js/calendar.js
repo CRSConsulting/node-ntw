@@ -28,6 +28,10 @@ $(document).ready(() => {
       }
       return false;
     }
+    if (drawingOne.isSame(drawingTwo) || drawingTwo.isSame(drawingThree)) {
+      alert('Please ensure all drawing are at different times.');
+      return false;
+    }
   }
 
   function formatDate(id) {
@@ -96,6 +100,7 @@ $(document).ready(() => {
     },
     events: frontendArray,
     eventClick: (calEvent, jsEvent, view) => {
+      $('.btn-delete').show();
       const backIndex = calendars.findIndex((cal) => {
         return cal.name === calEvent.title && moment(cal.startTime).isSame(calEvent.start);
       });
@@ -115,6 +120,38 @@ $(document).ready(() => {
       $('#drawingTwo').val(formatTime(caldate.drawings[1].time));
       $('#drawingThree').val(formatTime(caldate.drawings[2].time));
       showModal(caldate.startTime);
+    }
+  });
+
+  $('.btn-delete').click(function () {
+    const type = $(this).attr('section');
+    const id = $('#eventId').val();
+    let r = false;
+    const calIndex = $('#calIndex').val();
+    const backIndex = $('#backIndex').val();
+    const deleteCalendar = calendars[backIndex];
+    r = confirm(`Are you sure you wish to delete event: ${deleteCalendar.name}?`);
+
+    if (r === true) {
+      $.ajax({
+        url: `/api/${type}/save`,
+        data: JSON.stringify({ id }),
+        type: 'DELETE',
+        contentType: 'application/json',
+        success: (data) => {
+          console.log(data);
+          calendars.splice(backIndex,1);
+          frontendArray.splice(calIndex,1);
+          $('#calendar').fullCalendar('removeEvents');
+          $('#calendar').fullCalendar('addEventSource', frontendArray);
+          $('#calendar').fullCalendar('refetchEvents');
+          $(this).closest('.modal').modal('toggle');
+          alert('Event successfully deleted');
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
     }
   });
 

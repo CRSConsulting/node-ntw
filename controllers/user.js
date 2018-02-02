@@ -96,7 +96,7 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) {
       console.log(err);
-      res.send(err);
+      return res.send(err);
     }
     if (existingUser) {
       return res.send({ msg: 'Account with that email address already exists.' });
@@ -104,8 +104,9 @@ exports.postSignup = (req, res, next) => {
     user.save((err, u) => {
       if (err) { 
         console.log(err);
-        res.send(err); 
-      }
+        return res.send(err); 
+      } 
+      
       res.send(u);
     });
   });

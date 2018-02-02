@@ -28,15 +28,25 @@ const moment = require('moment');
 exports.venue = (req, res) => {
   let startTime = new Date(0);
   let endTime = new Date();
+  let dateString = '';
   if (req.body.startTime) {
     startTime = new Date(req.body.startTime);
+    dateString = `Showing results for activity starting on: ${req.body.startTime}`;
   }
   if (req.body.endTime) {
     endTime = new Date(req.body.endTime);
+    if (dateString === '') {
+      dateString = `Showing results for activity ending on ${req.body.endTime}`;
+    } else {
+      dateString += ` and ending on ${req.body.endTime}`;
+    }
+  }
+  if (dateString != '') {
+    dateString += '.';
   }
   reportService.getVenueReportData(startTime, endTime)
     .then((reports) => {
-      const display = { formAction: '/api/report/venue', title: 'Venues', columnOne: 'Venue Name', columnTwo: 'Total Monies Raised', columnThree: 'Best Performing Prize', columnFour: null };
+      const display = { dateString, formAction: '/api/report/venue', title: 'Venues', columnOne: 'Venue Name', columnTwo: 'Total Monies Raised', columnThree: 'Best Performing Prize', columnFour: null };
 
       const items = reports.map((report) => {
         console.log(report);
@@ -59,16 +69,26 @@ exports.venue = (req, res) => {
 exports.time = (req, res) => {
   let startTime = new Date(0);
   let endTime = new Date();
+  let dateString = '';
   if (req.body.startTime) {
     startTime = new Date(req.body.startTime);
+    dateString = `Showing results for activity starting on: ${req.body.startTime}`;
   }
   if (req.body.endTime) {
     endTime = new Date(req.body.endTime);
+    if (dateString === '') {
+      dateString = `Showing results for activity ending on ${req.body.endTime}`;
+    } else {
+      dateString += ` and ending on ${req.body.endTime}`;
+    }
+  }
+  if (dateString != '') {
+    dateString += '.';
   }
   reportService.getTimeReportData(startTime, endTime)
     .then((reports) => {    
       console.log(reports);
-      const display = { formAction: '/api/report/time', title: 'Time', columnOne: 'Drawing Start Time', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
+      const display = { dateString, formAction: '/api/report/time', title: 'Time', columnOne: 'Drawing Start Time', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
       const items = reports.map((report) => {
         const columnOne = donorService.convertHoursToTime(report._id.prize_hour, report._id.prize_minute);
         const columnTwo = `$${report.totalAmount}`;
@@ -91,15 +111,25 @@ exports.time = (req, res) => {
 exports.prize = (req, res) => {
   let startTime = new Date(0);
   let endTime = new Date();
+  let dateString = '';
   if (req.body.startTime) {
     startTime = new Date(req.body.startTime);
+    dateString = `Showing results for activity starting on: ${req.body.startTime}`;
   }
   if (req.body.endTime) {
     endTime = new Date(req.body.endTime);
+    if (dateString === '') {
+      dateString = `Showing results for activity ending on ${req.body.endTime}`;
+    } else {
+      dateString += ` and ending on ${req.body.endTime}`;
+    }
+  }
+  if (dateString != '') {
+    dateString += '.';
   }
   reportService.getPrizeReportData(startTime, endTime)
     .then((reports) => {
-      const display = { formAction: '/api/report/prize', title: 'Raffle Prizes', columnOne: 'Prize # and Type', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
+      const display = { dateString, formAction: '/api/report/prize', title: 'Raffle Prizes', columnOne: 'Prize # and Type', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: null };
       const items = reports.map((report) => {
         const columnOne = `Prize ${report._id.drawing_number}: $${report._id.prize_amount} ${report._id.prize_type}`;
         const columnTwo = `$${report.totalAmount}`;
@@ -121,11 +151,21 @@ exports.prize = (req, res) => {
 exports.events = (req, res) => {
   let startTime = new Date(0);
   let endTime = new Date();
+  let dateString = '';
   if (req.body.startTime) {
     startTime = new Date(req.body.startTime);
+    dateString = `Showing results for activity starting on: ${req.body.startTime}`;
   }
   if (req.body.endTime) {
     endTime = new Date(req.body.endTime);
+    if (dateString === '') {
+      dateString = `Showing results for activity ending on ${req.body.endTime}`;
+    } else {
+      dateString += ` and ending on ${req.body.endTime}`;
+    }
+  }
+  if (dateString != '') {
+    dateString += '.';
   }
   console.log(startTime);
   console.log(endTime);
@@ -139,7 +179,7 @@ exports.events = (req, res) => {
           columnFour: `${report._id.month}/${report._id.day}/${report._id.year}`
         };
       });
-      const display = { formAction: '/api/report/events', title: 'Events', columnOne: 'Event(Venue, Artist/Event)', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: 'Date' };
+      const display = { dateString, formAction: '/api/report/events', title: 'Events', columnOne: 'Event(Venue, Artist/Event)', columnTwo: 'Total Monies Raised', columnThree: 'Total Number of Entries', columnFour: 'Date' };
       res.render('pages/reports', {
         items, display
       });
@@ -150,11 +190,21 @@ exports.events = (req, res) => {
 exports.entry = (req, res) => {
   let startTime = new Date(0);
   let endTime = new Date();
+  let dateString = '';
   if (req.body.startTime) {
     startTime = new Date(req.body.startTime);
+    dateString = `Showing results for activity starting on: ${req.body.startTime}`;
   }
   if (req.body.endTime) {
     endTime = new Date(req.body.endTime);
+    if (dateString === '') {
+      dateString = `Showing results for activity ending on ${req.body.endTime}`;
+    } else {
+      dateString += ` and ending on ${req.body.endTime}`;
+    }
+  }
+  if (dateString != '') {
+    dateString += '.';
   }
   reportService.getEntryTimeReportData(startTime, endTime)
     .then((reports) => {
@@ -171,7 +221,7 @@ exports.entry = (req, res) => {
           columnFour
         };
       });
-      const display = { formAction: '/api/report/entry', title: 'Entry Time Averages', columnOne: 'Prize # and Type', columnTwo: 'Prize Start Time', columnThree: 'Average Trigger Start Time', columnFour: 'Average Entry Time' };
+      const display = { dateString, formAction: '/api/report/entry', title: 'Entry Time Averages', columnOne: 'Prize # and Type', columnTwo: 'Prize Start Time', columnThree: 'Average Trigger Start Time', columnFour: 'Average Entry Time' };
       res.render('pages/reports', {
         items, display
       });
@@ -183,15 +233,25 @@ exports.entry = (req, res) => {
 exports.donor = (req, res) => {
   let startTime = new Date(0);
   let endTime = new Date();
+  let dateString = '';
   if (req.body.startTime) {
     startTime = new Date(req.body.startTime);
+    dateString = `Showing results for activity starting on: ${req.body.startTime}`;
   }
   if (req.body.endTime) {
     endTime = new Date(req.body.endTime);
+    if (dateString === '') {
+      dateString = `Showing results for activity ending on ${req.body.endTime}`;
+    } else {
+      dateString += ` and ending on ${req.body.endTime}`;
+    }
+  }
+  if (dateString != '') {
+    dateString += '.';
   }
   reportService.getDonorReportData(startTime, endTime)
     .then((reports) => {
-      const display = { formAction: '/api/report/donor', title: 'Donors (Multiple Entry)', columnOne: 'Donor Name', columnTwo: 'Prize # and Type in Order of Weight', columnThree: 'Total Monies Collected', columnFour: 'Total Number of Entries' };
+      const display = { dateString, formAction: '/api/report/donor', title: 'Donors (Multiple Entry)', columnOne: 'Donor Name', columnTwo: 'Prize # and Type in Order of Weight', columnThree: 'Total Monies Collected', columnFour: 'Total Number of Entries' };
       const items = reports.map((report) => {
         console.log(report);
         const columnTwo = report.drawings.reduce((str, draw) => {

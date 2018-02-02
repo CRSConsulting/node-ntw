@@ -6,6 +6,11 @@ $(document).ready(() => {
     // allow any non-whitespace characters as the host part
     return /^[a-zA-Z_]*$/.test(value);
   }, 'Please enter alphabetical characters only.');
+  jQuery.validator.addMethod("uniqueEmail", function (value, element) {
+    // allow any non-whitespace characters as the host part
+    const foundUser = users.find(user => user.email === value);
+    return !foundUser;
+  }, 'Please enter a unique email.');
   $('#venueForm').validate({
     rules: {
       name: {
@@ -27,13 +32,16 @@ $(document).ready(() => {
   $('#userForm').validate({
     rules: {
       email: {
-        required: true
+        required: true,
+        email: true,
+        uniqueEmail: true
       },
       password: {
-        required: true
+        required: true,
+        minLength: 4
       },
       confirmPassword: {
-        required: true
+        equalTo: '#password'
       },
     }
   });
@@ -173,7 +181,6 @@ $(function () {
         $(`#perm${y}`).prop('checked', true);
       });
       $('#password').rules('remove');
-      $('#confirmPassword').rules('remove');
       userIndex = $('#userTable tr').index(this);
 
     }
