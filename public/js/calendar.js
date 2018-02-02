@@ -2,6 +2,7 @@
 
 $(document).ready(() => {
   function formatForFrontend(cal) {
+    console.log(moment(cal.startTime).utcOffset('-0800').toDate());
     return {
       title: cal.name,
       start: moment(cal.startTime).utcOffset('-0800').toDate(),
@@ -71,18 +72,19 @@ $(document).ready(() => {
   });
 
   function formatTime(time) {
-    const date = moment(time).utcOffset('-0800').format('YYYY-MM-DDTHH:mm:ss.SSSSZ');
-    const dateparts = date.split('T');
-    return moment(dateparts[1], 'HH:mm:ss').format('h:mm A');
+    const date = moment(time).utcOffset('-0800').toDate().toString();
+    const dateparts = date.split(' ');
+    return moment(dateparts[4], 'HH:mm:ss').format('h:mm A');
   }
 
   function showModal(date) {
     const dateparts = date.split('T');
     const formatDate = moment(date).utcOffset('-0800').format('M/D/YYYY');
-    const formatTime = moment(date).utcOffset('-0800').format('h:mm A');
-    console.log('utc offset');
+    const time = formatTime(date);
+    console.log(date);
+    console.log('utc offset', formatDate);
     $('#eventModal #eventDate').val(formatDate);
-    $('#eventModal #startTime').val(formatTime);
+    $('#eventModal #startTime').val(time);
     $('#eventModal').modal();
   }
 

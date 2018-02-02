@@ -26,7 +26,7 @@
 console.log('Hello World from main.js file');
 
 $('.modal').on('hidden.bs.modal', function () {
-    $('.hidden').hide();
+    $('.btn-delete').hide();
     $(this).find('input[type=text], input[type=email], input[typepassword], select').val('');
     $(this).find('input[type=text], input[type=email], input[typepassword], select').removeAttr('readonly');
     $(this).find('input[type=radio], input[type=checkbox]').prop('checked', false);
