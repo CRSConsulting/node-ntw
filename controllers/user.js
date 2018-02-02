@@ -6,6 +6,8 @@ const User = require('../models/User');
 const userService = require('./user.services')({
   modelService: User,
 });
+const sgMail = require('@sendgrid/mail');
+
 /**
  * GET /login
  * Login page.
@@ -321,21 +323,17 @@ exports.postReset = (req, res, next) => {
 
   const sendResetPasswordEmail = (user) => {
     if (!user) { return; }
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD
-      }
-    });
-    const mailOptions = {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
       to: user.email,
-      from: 'john@crs-consulting.com',
+      from: 'noreply@braveworks.org',
       subject: 'Your Password has been changed',
       text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
     };
-    return transporter.sendMail(mailOptions)
+    
+    return sgMail.send(msg)
       .then(() => {
+        console.log('send');
         req.flash('success', { msg: 'Success! Your password has been changed.' });
       });
   };
@@ -370,14 +368,15 @@ exports.postForgot = (req, res, next) => {
   const errors = req.validationErrors();
 
   if (errors) {
+    console.log(errors);
     req.flash('errors', errors);
     return res.redirect('/forgot');
   }
-
+  console.log('down here');
   const createRandomToken = crypto
     .randomBytesAsync(16)
     .then(buf => buf.toString('hex'));
-
+  console.log('here');
   const setRandomToken = token =>
     User
       .findOne({ email: req.body.email })
@@ -391,29 +390,28 @@ exports.postForgot = (req, res, next) => {
         }
         return user;
       });
-
+  console.log('got here');
   const sendForgotPasswordEmail = (user) => {
     if (!user) { return; }
     const token = user.passwordResetToken;
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD
-      }
-    });
-    const mailOptions = {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
       to: user.email,
-      from: 'john@crs-consulting.com',
-      subject: 'Reset your password on NTW Project',
+      from: 'noreply@braveworks.org',
+      subject: 'Reset your password on NTW',
       text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
         Please click on the following link, or paste this into your browser to complete the process:\n\n
         http://${req.headers.host}/reset/${token}\n\n
         If you did not request this, please ignore this email and your password will remain unchanged.\n`
     };
-    return transporter.sendMail(mailOptions)
+    return sgMail.send(msg)
       .then(() => {
         req.flash('info', { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
+      })
+      .catch((err) => {
+        console.log('hi');
+        console.log(err);
+        return res.send(err);
       });
   };
 

@@ -9,7 +9,7 @@ $(document).ready(function() {
   jQuery.validator.addMethod("uniqueEmail", function (value, element) {
     // allow any non-whitespace characters as the host part
     const foundUser = users.find(function(user) {
-       user.email === value
+       return user.email === value
     });
     return !foundUser;
   }, 'Please enter a unique email.');

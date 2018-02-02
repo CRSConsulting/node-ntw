@@ -1,15 +1,13 @@
 const server = require('../server');
-const Report = require('../models/Donor');
-const reportService = require('../controllers/report.services')({
-  modelService: Report
-});
-
-console.log('hello');
-const startTime = new Date(0);
-const endTime = new Date();
-reportService.getEventReportData(startTime, endTime)
-  .then((reports) => {
-    console.log('hi');
-    console.log(reports);
-  })
-  .catch(err => console.log(err));
+// using SendGrid's v3 Node.js Library
+// https://github.com/sendgrid/sendgrid-nodejs
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const msg = {
+  to: 'ian@crs-consulting.com',
+  from: 'test@example.com',
+  subject: 'Sending with SendGrid is Fun',
+  text: 'and easy to do anywhere, even with Node.js',
+  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+};
+sgMail.send(msg);
