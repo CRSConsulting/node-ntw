@@ -30,6 +30,7 @@ $('.modal').on('hidden.bs.modal', function () {
     $(this).find('input[type=text], input[type=email], input[typepassword], select').val('');
     $(this).find('input[type=text], input[type=email], input[typepassword], select').removeAttr('readonly');
     $(this).find('input[type=radio], input[type=checkbox]').prop('checked', false);
+    $('.error').hide();
     if (this.id === 'venueModal') {
         $('#venueName').val('');
         $('#venueCity').val('');
@@ -53,6 +54,12 @@ $('.modal').on('hidden.bs.modal', function () {
         $('#email').val('');
         $('#password').val('');
         $('#confirmPassword').val('');
+        $("#email").rules("add", {
+            uniqueEmail: true
+        });
+        $("#password").rules("add", {
+            required: true
+        });
         $('input[type=checkbox]').prop('checked', false);
         console.log('sorry');
     }

@@ -180,13 +180,12 @@ $(function () {
       $(obj.perms).each((x, y) => {
         $(`#perm${y}`).prop('checked', true);
       });
-      $('#password').rules('remove');
+      $('#email').rules('remove', 'uniqueEmail');
+      $('#password').rules('remove', 'required');
       userIndex = $('#userTable tr').index(this);
 
     }
-
     $(`#${type}Modal`).modal('toggle');
-
   }))
 })
 });
