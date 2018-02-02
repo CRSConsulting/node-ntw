@@ -35,17 +35,25 @@ exports.postLogin = (req, res, next) => {
     req.flash('errors', errors);
     return res.redirect('/login');
   }
-
   passport.authenticate('local', (err, user, info) => {
-    if (err) { return next(err); }
+    if (err) {
+      req.flash('errors', err);
+      return next(err);
+    }
     if (!user) {
       req.flash('errors', info);
       return res.redirect('/login');
     }
+    console.log('over here');
     req.logIn(user, (err) => {
-      if (err) { return next(err); }
-      req.flash('success', { msg: 'Success! You are logged in.' });
-      res.redirect(req.session.returnTo || '/');
+      if (err) {
+        console.log(err);
+        return next(err);
+      } 
+      req.session.save(function () {
+        req.flash('success', { msg: 'Success! You are logged in.' });
+        res.redirect(req.session.returnTo || '/');
+      });
     });
   })(req, res, next);
 };
@@ -56,7 +64,12 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = (req, res) => {
   req.logout();
-  res.redirect('/');
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+    }
+    res.redirect('/');
+  });
 };
 
 /**
@@ -86,7 +99,7 @@ exports.postSignup = (req, res, next) => {
 
   if (errors) {
     req.flash('errors', errors);
-    res.send(errors);
+    return res.redirect('back');
   }
   const user = new User({
     email: req.body.email,
@@ -106,7 +119,7 @@ exports.postSignup = (req, res, next) => {
         console.log(err);
         return res.send(err); 
       } 
-      
+
       res.send(u);
     });
   });
@@ -125,7 +138,7 @@ exports.patch = (req, res) => {
   const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('errors', errors);
+    // req.flash('errors', errors);
     res.send(errors);
   }
   console.log(req.body);
