@@ -38,7 +38,7 @@ $(document).ready(() => {
       },
       password: {
         required: true,
-        minLength: 4
+        minlength: 4
       },
       confirmPassword: {
         equalTo: '#password'
