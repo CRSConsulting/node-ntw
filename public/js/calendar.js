@@ -1,6 +1,4 @@
-
-
-$(document).ready(() => {
+$(document).ready(function() {
   function formatForFrontend(cal) {
     return {
       title: cal.name,
