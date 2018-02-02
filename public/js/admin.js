@@ -164,7 +164,8 @@ $(document).ready(function() {
             users[findUser] = data;
           }
         }
-        $(this).closest('.modal').modal('toggle');
+        console.log($(this).closest('.modal'));
+        $('#' + type + 'Modal').modal('toggle');
       },
       error: function(error) {
         console.log(error);
@@ -174,6 +175,7 @@ $(document).ready(function() {
 $(function () {
   $(document).on('click', '.edit-row', (function() {
     $('.btn-danger').show();
+    console.log('hi');
     const type = $(this).data('section');
     const objId = $(this).data('id');
     if (type === 'venue') {
@@ -203,6 +205,8 @@ $(function () {
       userIndex = $('#userTable tr').index(this);
 
     }
+    console.log('hello');
+    console.log('#' + type + 'Modal');
     $('#'+type+'Modal').modal('toggle');
   }))
 })

@@ -142,7 +142,7 @@ $(document).ready(function() {
           $('#calendar').fullCalendar('removeEvents');
           $('#calendar').fullCalendar('addEventSource', frontendArray);
           $('#calendar').fullCalendar('refetchEvents');
-          $(this).closest('.modal').modal('toggle');
+          $('#eventModal').modal('toggle');
           alert('Event successfully deleted');
         },
         error: function(error) {
@@ -225,7 +225,7 @@ $(document).ready(function() {
           return;
         }
         console.log(data);
-        $(this).closest('.modal').modal('toggle');
+        $('#eventModal').modal('toggle');
         const newCalEvent = formatForFrontend(data);
         if (reqType === 'POST') {
           frontendArray.push(newCalEvent);

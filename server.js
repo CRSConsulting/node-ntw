@@ -17,6 +17,7 @@ const flash = require('express-flash');
 const path = require('path');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const secure = require('express-force-https');
 const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
@@ -89,7 +90,7 @@ const passportConfig = require('./config/passport');
  * Create Express server.
  */
 const app = express();
-
+app.use(secure);
 /**
  * Connect to MongoDB.
  */
