@@ -132,7 +132,7 @@ $(document).ready(function() {
     if (r === true) {
       $.ajax({
         url: '/api/'+type+'/save',
-        data: JSON.stringify({ id }),
+        data: JSON.stringify({ id : id }),
         type: 'DELETE',
         contentType: 'application/json',
         success: function(data) {
