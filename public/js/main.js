@@ -61,7 +61,15 @@ $('.modal').on('hidden.bs.modal', function () {
             required: true
         });
         $('input[type=checkbox]').prop('checked', false);
-        console.log('sorry');
     }
+})
+
+$('.modal').on('shown.bs.modal', function () {
+  if (this.id === 'userModal') {
+      if ($("#userId").val() == '') {
+        $('#email').val('');
+        $('#password').val('');
+      }
+  }
 })
 // });
