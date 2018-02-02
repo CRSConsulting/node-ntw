@@ -50,7 +50,7 @@ $('.modal').on('hidden.bs.modal', function () {
         $('#calIndex').val(-1);
         $('#backIndex').val(-1);
     } else if (this.id === 'userModal') {
-        console.log('hello');
+        $('#userId').val('');
         $('#email').val('');
         $('#password').val('');
         $('#confirmPassword').val('');
