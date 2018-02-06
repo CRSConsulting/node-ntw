@@ -25,7 +25,7 @@ function adminService(options) {
   }
 
   function update(data) {
-    return Admin.update({ _id: data._id }, { city: data.city, keyword: data.keyword, state: data.state }).exec();
+    return Admin.update({}, { startAmount: data.startAmount, duration: data.duration }).exec();
   }
 
 }

@@ -3,7 +3,11 @@
 const mongoose = require('mongoose');
 
 const adminSchema = new mongoose.Schema({
-  entriesToStart: Number,
+  startAmount: Number,
+  duration: Number
+}, {
+  collection: 'admin',
+  read: 'nearest',
 });
 
 const Admin = mongoose.model('admin', adminSchema);

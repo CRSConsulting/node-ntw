@@ -14,3 +14,14 @@
       tr.final-row
         td(colspan=3) 
           button#addVenue.btn-add.btn-primary.btn(type='button',data-toggle='modal', data-target='#venueModal') Add New Venue
+form#adminForm
+  .row.top-buffer-md
+    .col-md-2
+      label(for='startAmount') Entries To Start Raffle
+        input#startAmount.form-control(name='startAmount', type='text', value= adminData.startAmount)
+    .col-md-2
+      label.float-right(for='duration') Raffle Duration (min.)
+        input#duration.form-control(name='duration', type='text' value= adminData.duration)
+  .row
+    .col-md-4.top-buffer-sm.text-right
+      input#adminSave.btn-success.btn-primary.btn(type='button', value='Save')

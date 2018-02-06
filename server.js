@@ -186,7 +186,7 @@ app.get('/denied', homeController.denied);
 app.get('/donorTransform', donorController.transformAll);
 // app.get('/reports', passportConfig.isAuthenticated, requireRole('reports'), homeController.reports);
 app.get('/calendar', passportConfig.isAuthenticated, requireRole('calendar'), calendarController.index);
-app.get('/admin', passportConfig.isAuthenticated, adminController.index);
+app.get('/admin', passportConfig.isAuthenticated, requireRole('admin'), adminController.index);
 // app.get('/admin', adminController.index);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
@@ -272,7 +272,7 @@ edit objects
 app.patch('/api/venue/save', venueController.patch);
 app.patch('/api/calendar/save', calendarController.patch);
 app.patch('/api/user/save', userController.patch);
-
+app.patch('/api/admin/save', adminController.updateDrawingData);
 /*
 delete objects
 */

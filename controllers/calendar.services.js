@@ -39,7 +39,7 @@ function calendarService(options) {
       _id: cal._id,
       'drawings._id': drawId
     },
-    { $set: { 'drawings.$.used': true } })
+    { $set: { 'drawings.$.used': true } });
 
   }
 

@@ -6,6 +6,7 @@ $(document).ready(function() {
     // allow any non-whitespace characters as the host part
     return /^[a-zA-Z_]*$/.test(value);
   }, 'Please enter alphabetical characters only.');
+
   jQuery.validator.addMethod("uniqueEmail", function (value, element) {
     // allow any non-whitespace characters as the host part
     const foundUser = users.find(function(user) {
@@ -13,6 +14,25 @@ $(document).ready(function() {
     });
     return !foundUser;
   }, 'Please enter a unique email.');
+
+  jQuery.validator.addMethod('integer', function(value, element) {
+    const n = Math.floor(Number(value));
+    return n !== Infinity && String(n) === value && n > 0;
+  }, 'Please enter an integer greater than 0.')
+
+  $('#adminForm').validate({
+    rules: {
+      duration: {
+        required: true,
+        integer: true
+      },
+      startAmount: {
+        required: true,
+        integer: true
+      },
+    }
+  });
+
   $('#venueForm').validate({
     rules: {
       name: {
@@ -128,19 +148,16 @@ $(document).ready(function() {
         return;
       }
     }
-    console.log(JSON.stringify(formData));
     $.ajax({
       url: '/api/'+type+'/save',
       data: JSON.stringify(formData),
       type: reqType,
       contentType: 'application/json',
       success: function(data) {
-        console.log(data);
         if (reqType === 'POST') {
           let newRow;
           if (type === 'venue') {
             delete data.__v;
-            console.log(JSON.stringify(data));
             venues.push(data);
             newRow = "<tr class='edit-row' data-section='venue' data-id="+data._id+"><td>"+data.name+"</td><td>"+data.keyword+"</td><td>0</td></tr>";
           } else if (type === 'user') {
@@ -164,7 +181,6 @@ $(document).ready(function() {
             users[findUser] = data;
           }
         }
-        console.log($(this).closest('.modal'));
         $('#' + type + 'Modal').modal('toggle');
       },
       error: function(error) {
@@ -172,42 +188,64 @@ $(document).ready(function() {
       } 
     });
   });
-$(function () {
-  $(document).on('click', '.edit-row', (function() {
-    $('.btn-danger').show();
-    console.log('hi');
-    const type = $(this).data('section');
-    const objId = $(this).data('id');
-    if (type === 'venue') {
-      const obj = venues.find(function(venue) {
-        return venue._id === objId
-      });
-      console.log(obj);
-      $('#venueId').val(obj._id);
-      $('#venueName').val(obj.name);
-      $('#venueCity').val(obj.city);
-      $('#venueKeyword').val(obj.keyword);
-      $('#venueState').val(obj.state);
-      venueIndex = $('#venueTable tr').index(this);
-    } else if (type === 'user') {
-      const obj = users.find(function(user) {
-        return user._id === objId
-      });
-      console.log(obj);
-      $('#email').val(obj.email);
-      $('#userId').val(obj._id);
-      $('#email').attr('readonly', 'readonly');
-      $(obj.perms).each(function(x, y) {
-        $('#perm'+y).prop('checked', true);
-      });
-      $('#email').rules('remove', 'uniqueEmail');
-      $('#password').rules('remove', 'required');
-      userIndex = $('#userTable tr').index(this);
+  $(function() {
+    $(document).on('click', '.edit-row', (function() {
+      $('.btn-danger').show();
+      const type = $(this).data('section');
+      const objId = $(this).data('id');
+      if (type === 'venue') {
+        const obj = venues.find(function(venue) {
+          return venue._id === objId
+        });
+        $('#venueId').val(obj._id);
+        $('#venueName').val(obj.name);
+        $('#venueCity').val(obj.city);
+        $('#venueKeyword').val(obj.keyword);
+        $('#venueState').val(obj.state);
+        venueIndex = $('#venueTable tr').index(this);
+      } else if (type === 'user') {
+        const obj = users.find(function(user) {
+          return user._id === objId
+        });
+        $('#email').val(obj.email);
+        $('#userId').val(obj._id);
+        $('#email').attr('readonly', 'readonly');
+        $(obj.perms).each(function(x, y) {
+          $('#perm'+y).prop('checked', true);
+        });
+        $('#email').rules('remove', 'uniqueEmail');
+        $('#password').rules('remove', 'required');
+        userIndex = $('#userTable tr').index(this);
 
+      }
+      $('#'+type+'Modal').modal('toggle');
+    }))
+  })
+
+  $('#adminSave').click(function() {
+    if ($(this).closest('form').valid() === false) {
+      return;
     }
-    console.log('hello');
-    console.log('#' + type + 'Modal');
-    $('#'+type+'Modal').modal('toggle');
-  }))
-})
+
+    const startAmount = $('#startAmount').val();
+    const duration = $('#duration').val();
+    const adminData = JSON.stringify({ 
+      startAmount: startAmount,
+      duration: duration 
+    });
+    $.ajax({
+      url: '/api/admin/save',
+      data: adminData,
+      type: 'PATCH',
+      contentType: 'application/json',
+      success: function (data) {
+        alert('Raffle data successfully updated.');
+        console.log(data);
+      },
+      error: function(err) {
+        alert('There has been an error processing the update. Please contact an administrator.');
+        console.log(err);
+      }
+    })
+  });
 });

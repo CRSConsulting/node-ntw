@@ -58,10 +58,13 @@ function mobilesService(options) {
     const startAmount = 5; // amount to trigger timer creation
     const test = calendarService.getAllofToday()
       .then((times) => {
+        console.log(times);
         const calendar = times.find(cal => cal.venue.keyword === baseKey);
+        if (!calendar) return { message: 'No drawings for keyword today' };
         const timeIndex = calendar.drawings.findIndex(drawing => moment(drawing).isBefore(new Date()) && drawing.used === false);
+        if (!timeIndex) return { message: 'Not within timeframe window' };
+
         const time = calendar.drawings[timeIndex];
-        if (!time) return { message: 'Not within timeframe window' };
         if (time.endTime) return { message: 'Endtime already set' };
         const newTimer = time;
         const dataAfterStart = jsonData.filter(mobile => new Date(mobile.transaction_date).getTime() > new Date(time.time).getTime());
@@ -157,9 +160,7 @@ function mobilesService(options) {
             if (multiEntriesEmail.length === unpaidDupeMax) {
               chances = 0;
             }
-            console.log(a);
             const address = zipcode.zipcode(a.zipcode);
-            console.log(address);
             if (!address.state || address.state === 'FL' || address.state === 'NY') {
               chances = 0;
             }

@@ -24,7 +24,7 @@ exports.index = (req, res) => {
   const states = venueService.getStates();
   Promise.all([adminData, venues, users, states])
     .then((alldata) => {
-      console.log(alldata);
+      console.log(alldata[0]);
       res.render('pages/admin', {
         title: 'Admin',
         user: req.user,
@@ -35,5 +35,19 @@ exports.index = (req, res) => {
         venueFrontend: JSON.stringify(alldata[1]),
         states: alldata[3]
       });
+    });
+};
+
+exports.updateDrawingData = (req, res) => {
+  console.log('hi');
+  const adminData = req.body;
+  if (!adminData.startAmount || !adminData.duration) {
+    return res.send({ msg: 'Information missing from update' });
+  }
+  adminService.update(adminData)
+    .then(update => res.send(update))
+    .catch((err) => {
+      console.log(err);
+      res.send(err);
     });
 };
